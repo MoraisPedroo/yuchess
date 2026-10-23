@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chess-Oh! Uno-Head</title>
+  <meta name="description" content="Xadrez + Uno + Yu-Gi-Oh! num desenho animado de 1930 gerado só com código.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rye&family=Alegreya:wght@400;700;800&family=Special+Elite&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/cards.css">
+  <link rel="stylesheet" href="styles/screens.css">
+</head>
+<body>
+  <div id="app">
+    <header id="topbar">
+      <div class="brand">CHESS-OH! <span>UNO-HEAD</span></div>
+      <div id="turn-pill"></div>
+      <nav class="top-actions" aria-label="Definições">
+        <button id="btn-rules" class="chip">Regras</button>
+        <button id="btn-music" class="chip toggle" title="Música swing">♪ Música</button>
+        <button id="btn-sfx" class="chip toggle" title="Efeitos sonoros">🔔 Efeitos</button>
+        <button id="btn-film" class="chip toggle" title="Película 1930 (WebGL)">🎞 Película</button>
+        <button id="btn-boil" class="chip toggle" title="Linha fervente">〰 Traço</button>
+        <button id="btn-speed" class="chip toggle" title="Animações rápidas">⏩ Rápido</button>
+        <button id="btn-resign" class="chip danger" hidden>🏳 Desistir</button>
+        <button id="btn-menu" class="chip">Menu</button>
+      </nav>
+    </header>
+
+    <main id="arena">
+      <section id="table">
+        <div id="opp-strip" class="strip">
+          <div class="who"><div class="avatar"></div><div><b class="name"></b><small class="sub"></small></div></div>
+          <div class="opp-hand"></div>
+          <div class="zone-label">Suporte</div>
+          <div class="support-zone"></div>
+          <div class="grave" title="Peças perdidas"></div>
+        </div>
+
+        <div id="board-frame">
+          <div class="bulbs"></div>
+          <div class="coords ranks"><span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span></div>
+          <div class="coords files"><span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span></div>
+          <div id="board"></div>
+        </div>
+
+      </section>
+
+      <aside id="side">
+        <div id="phase-box" class="panel"><div class="phase-title"></div><div class="phase-hint"></div></div>
+        <div id="pile-box" class="panel">
+          <div class="deck"></div>
+          <div class="discard"></div>
+          <div class="perm"></div>
+        </div>
+        <div id="action-box" class="panel">
+          <button id="btn-fallback" class="btn">🚨 Compra de emergência</button>
+          <button id="btn-sovereign" class="btn gold">👑 Soberania da Dama</button>
+          <button id="btn-skip" class="btn">Saltar passo</button>
+          <button id="btn-cancel" class="btn ghost">Cancelar</button>
+          <button id="btn-forfeit" class="btn gold" hidden>🏆 Reclamar vitória (abandono)</button>
+          <button id="btn-end" class="btn red">Terminar turno ▶</button>
+        </div>
+        <div id="chain-box" class="panel"><h3>Chain <small>LIFO</small></h3><ol class="chain-list"></ol></div>
+        <div id="log-box" class="panel"><h3>Registo</h3><ol id="log"></ol></div>
+      </aside>
+    </main>
+
+    <footer id="hand-area">
+      <div id="me-strip" class="strip">
+        <div class="who"><div class="avatar"></div><div><b class="name"></b><small class="sub"></small></div></div>
+        <div class="zone-label">Suporte</div>
+        <div class="support-zone"></div>
+        <div class="grave" title="Peças perdidas"></div>
+      </div>
+      <div id="hand"></div>
+      <div id="card-menu" hidden></div>
+    </footer>
+  </div>
+
+  <div id="inspector" role="tooltip"></div>
+  <div id="toast" role="status"></div>
+  <div id="screen-root"></div>
+  <div id="modal-root"></div>
+
+  <script src="src/core/EventBus.js"></script>
+  <script src="src/data/CardDatabase.js"></script>
+  <script src="src/engine/BoardEngine.js"></script>
+  <script src="src/engine/CombatRPG.js"></script>
+  <script src="src/engine/UnoEconomy.js"></script>
+  <script src="src/engine/EffectInterpreter.js"></script>
+  <script src="src/engine/ChainResolver.js"></script>
+  <script src="src/engine/GameController.js"></script>
+  <script src="src/ai/KingDiceAI.js"></script>
+  <script src="src/net/LockstepSession.js"></script>
+  <script src="src/net/firebase-config.js"></script>
+  <script src="src/net/FirebaseClient.js"></script>
+  <script src="src/net/Ranking.js"></script>
+  <script src="src/net/OnlineService.js"></script>
+  <script src="src/net/OnlineGame.js"></script>
+  <script src="src/view/PieceFactory.js"></script>
+  <script src="src/view/VFXPostProcessor.js"></script>
+  <script src="src/view/CupheadSVGRenderer.js"></script>
+  <script src="src/audio/VintageAudioSynth.js"></script>
+  <script src="src/ui/CardView.js"></script>
+  <script src="src/ui/Screens.js"></script>
+  <script src="src/ui/UIManager.js"></script>
+  <script src="src/ui/OnlineLobby.js"></script>
+  <script src="src/main.js"></script>
+</body>
+</html>

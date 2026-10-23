@@ -1,0 +1,5 @@
+# Quebras de linha iguais em Windows, macOS e Linux
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary

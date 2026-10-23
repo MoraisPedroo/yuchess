@@ -1,0 +1,12 @@
+# Gerado por tools/build.js
+dist/
+
+# Ferramentas locais
+.vercel/
+.firebase/
+node_modules/
+__pycache__/
+*.log
+.DS_Store
+Thumbs.db
+.claude/settings.local.json

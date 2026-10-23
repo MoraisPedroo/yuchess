@@ -1,0 +1,184 @@
+rules_version = '2';
+
+// Regras do Chess-Oh! Uno-Head.
+// players/{uid}                  perfil + rating (leitura pública, escrita só do próprio, validada)
+// players/{uid}/history/{match}  caução da ranqueada: pending → won | draw | lost
+// matches/{code}                 sala (waiting → playing → finished)
+// matches/{code}/actions/{seq}   ações do lockstep (só os dois jogadores, só criar)
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Utilitários ──
+    function signedIn() { return request.auth != null; }
+    function isGoogle() { return signedIn() && request.auth.token.firebase.sign_in_provider != 'anonymous'; }
+    function profilePath(uid) { return /databases/$(database)/documents/players/$(uid); }
+    function matchPath(id) { return /databases/$(database)/documents/matches/$(id); }
+    function histPath(uid, id) { return /databases/$(database)/documents/players/$(uid)/history/$(id); }
+    function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
+    function validName(n) { return n is string && n.size() >= 2 && n.size() <= 20; }
+    function teamOf(m, uid) { return m.white.uid == uid ? 'WHITE' : 'BLACK'; }
+    function otherTeamOf(m, uid) { return m.white.uid == uid ? 'BLACK' : 'WHITE'; }
+    function oppOf(m, uid) { return m.white.uid == uid ? m.black.uid : m.white.uid; }
+
+    // Lugar numa sala: numa ranqueada o rating tem de ser o do perfil (não dá para mentir no Elo).
+    function seatOk(seat, uid, ranked) {
+      return seat.keys().hasOnly(['uid', 'name', 'rating']) && seat.uid == uid && validName(seat.name)
+        && seat.rating is int && (!ranked || seat.rating == get(profilePath(uid)).data.rating);
+    }
+
+    // ── Perfis ──
+    function renameOnly() {
+      return changed().hasOnly(['name', 'updatedAt']) && validName(request.resource.data.name);
+    }
+
+    // Início da ranqueada: desconta já a derrota (lossDelta) no mesmo lote que cria history "pending".
+    function escrowUpdate(uid) {
+      let d = request.resource.data;
+      let o = resource.data;
+      let hp = histPath(uid, d.lastMatch);
+      return changed().hasOnly(['rating', 'games', 'losses', 'lastMatch', 'updatedAt'])
+        && !exists(hp) && existsAfter(hp)
+        && getAfter(hp).data.state == 'pending'
+        && d.games == o.games + 1 && d.losses == o.losses + 1
+        && d.rating == o.rating - getAfter(hp).data.lossDelta;
+    }
+
+    // Fim da ranqueada: devolve a caução + ganho (vitória) ou + delta de empate.
+    function settleUpdate(uid) {
+      let d = request.resource.data;
+      let o = resource.data;
+      let hp = histPath(uid, d.lastMatch);
+      let after = getAfter(hp).data;
+      return get(hp).data.state == 'pending' && d.losses == o.losses - 1 && (
+        (after.state == 'won' && changed().hasOnly(['rating', 'wins', 'losses', 'lastMatch', 'updatedAt'])
+          && d.wins == o.wins + 1 && d.rating == o.rating + after.lossDelta + after.winDelta)
+        || (after.state == 'draw' && changed().hasOnly(['rating', 'draws', 'losses', 'lastMatch', 'updatedAt'])
+          && d.draws == o.draws + 1 && d.rating == o.rating + after.lossDelta + after.drawDelta));
+    }
+
+    function validEscrow(uid, matchId) {
+      let m = get(matchPath(matchId)).data;
+      let d = request.resource.data;
+      return m.ranked == true && m.status == 'playing' && uid in m.players
+        && d.keys().hasOnly(['state', 'lossDelta', 'team', 'at'])
+        && d.state == 'pending' && d.lossDelta is int && d.lossDelta >= 0 && d.lossDelta <= 40
+        && d.team == teamOf(m, uid)
+        && getAfter(profilePath(uid)).data.lastMatch == matchId;
+    }
+
+    // Só se ganha se as duas "claims" coincidirem, ou por abandono confirmado (forfeit).
+    function validSettle(uid, matchId) {
+      let m = get(matchPath(matchId)).data;
+      let o = resource.data;
+      let d = request.resource.data;
+      let team = teamOf(m, uid);
+      let mine = m.claims.get(uid, '');
+      let theirs = m.claims.get(oppOf(m, uid), '');
+      let forfeitMine = m.get('forfeit', {}).get('by', '') == uid;
+      return o.state == 'pending' && m.status == 'finished'
+        && d.lossDelta == o.lossDelta && d.team == o.team && (
+          (d.state == 'won' && d.keys().hasOnly(['state', 'lossDelta', 'team', 'at', 'winDelta'])
+            && mine == team && (theirs == team || forfeitMine)
+            && d.winDelta is int && d.winDelta >= 0 && d.winDelta <= 40)
+          || (d.state == 'draw' && d.keys().hasOnly(['state', 'lossDelta', 'team', 'at', 'drawDelta'])
+            && mine == 'DRAW' && theirs == 'DRAW'
+            && d.drawDelta is int && d.drawDelta >= -40 && d.drawDelta <= 40)
+          || (d.state == 'lost' && d.keys().hasOnly(['state', 'lossDelta', 'team', 'at'])));
+    }
+
+    match /players/{uid} {
+      allow read: if true;
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['name', 'rating', 'games', 'wins', 'losses', 'draws', 'guest', 'createdAt', 'updatedAt'])
+        && validName(request.resource.data.name)
+        && request.resource.data.rating == 1000 && request.resource.data.games == 0
+        && request.resource.data.wins == 0 && request.resource.data.losses == 0 && request.resource.data.draws == 0
+        && request.resource.data.guest == (request.auth.token.firebase.sign_in_provider == 'anonymous');
+      allow update: if signedIn() && request.auth.uid == uid && (renameOnly() || escrowUpdate(uid) || settleUpdate(uid));
+      allow delete: if false;
+
+      match /history/{matchId} {
+        allow read: if true;
+        allow create: if signedIn() && request.auth.uid == uid && validEscrow(uid, matchId);
+        allow update: if signedIn() && request.auth.uid == uid && validSettle(uid, matchId);
+        allow delete: if false;
+      }
+    }
+
+    // ── Salas ──
+    function validCreate(matchId) {
+      let d = request.resource.data;
+      let me = request.auth.uid;
+      return d.keys().hasOnly(['code', 'ranked', 'status', 'seed', 'white', 'black', 'players', 'claims', 'lastAction', 'lastSeen', 'createdAt'])
+        && d.code == matchId && matchId.matches('^[A-Z0-9]{5}$')
+        && d.status == 'waiting' && d.ranked is bool && d.seed is int
+        && d.black == null && d.players == [me]
+        && d.claims.size() == 0 && d.lastAction.size() == 0 && d.lastSeen.keys().hasOnly([me])
+        && seatOk(d.white, me, d.ranked)
+        && (!d.ranked || isGoogle());
+    }
+
+    function validJoin() {
+      let d = request.resource.data;
+      let o = resource.data;
+      let me = request.auth.uid;
+      return o.status == 'waiting' && o.white.uid != me
+        && changed().hasOnly(['status', 'black', 'players', 'startedAt', 'lastSeen'])
+        && d.status == 'playing' && d.players == [o.white.uid, me]
+        && d.lastSeen.diff(o.lastSeen).affectedKeys().hasOnly([me])
+        && seatOk(d.black, me, o.ranked)
+        && (!o.ranked || isGoogle());
+    }
+
+    // Abandono: é a vez do adversário e ele não joga há mais de 150 s (relógio do servidor).
+    function validForfeit(o, d, me) {
+      let opp = oppOf(o, me);
+      let start = o.startedAt;
+      let mine = o.lastAction.get(me, start);
+      let theirs = o.lastAction.get(opp, start);
+      let waitingOnThem = mine > theirs || (theirs == start && o.white.uid == opp);
+      return o.status == 'playing' && d.forfeit.keys().hasOnly(['by', 'at']) && d.forfeit.by == me
+        && waitingOnThem && request.time > theirs + duration.value(150, 's')
+        && d.claims[me] == teamOf(o, me);
+    }
+
+    function validPlayerUpdate() {
+      let d = request.resource.data;
+      let o = resource.data;
+      let me = request.auth.uid;
+      let ch = changed();
+      return me in o.players
+        && ch.hasOnly(['lastAction', 'lastSeen', 'claims', 'forfeit', 'resign', 'status', 'finishedAt'])
+        && (o.status != 'waiting' || ch.hasOnly(['lastSeen']))
+        && (!('lastAction' in ch) || d.lastAction.diff(o.lastAction).affectedKeys().hasOnly([me]))
+        && (!('lastSeen' in ch) || d.lastSeen.diff(o.lastSeen).affectedKeys().hasOnly([me]))
+        && (!('claims' in ch) || (d.claims.diff(o.claims).affectedKeys().hasOnly([me])
+              && !(me in o.claims) && d.claims[me] in ['WHITE', 'BLACK', 'DRAW']))
+        && (!('resign' in ch) || (d.resign == me && o.status == 'playing' && d.claims[me] == otherTeamOf(o, me)))
+        && (!('forfeit' in ch) || validForfeit(o, d, me))
+        && (!('status' in ch) || (o.status == 'playing' && d.status == 'finished'));
+    }
+
+    function validAction(matchId, seq) {
+      let m = get(matchPath(matchId)).data;
+      let d = request.resource.data;
+      return request.auth.uid in m.players && m.status == 'playing'
+        && d.keys().hasOnly(['seq', 'by', 'kind', 'payload', 'at'])
+        && d.by == request.auth.uid && d.seq is int && string(d.seq) == seq
+        && d.kind in ['ACTION', 'CHAIN'] && d.payload is string && d.payload.size() < 4000;
+    }
+
+    match /matches/{matchId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && validCreate(matchId);
+      allow update: if signedIn() && (validJoin() || validPlayerUpdate());
+      allow delete: if signedIn() && resource.data.status == 'waiting' && resource.data.white.uid == request.auth.uid;
+
+      match /actions/{seq} {
+        allow read: if signedIn() && request.auth.uid in get(matchPath(matchId)).data.players;
+        allow create: if signedIn() && validAction(matchId, seq);
+        allow update, delete: if false;
+      }
+    }
+  }
+}
