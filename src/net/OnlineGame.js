@@ -24,10 +24,15 @@
     get opp() { return this.team === 'WHITE' ? this.match.black : this.match.white; }
     get ranked() { return !!this.match.ranked; }
 
+    get isDuel() { return this.match.mode !== 'CHESS'; }
+
     async start() {
       const m = this.match, ui = this.ui;
       const names = { WHITE: m.white.name, BLACK: m.black.name };
-      const game = new YC.GameController({ bus: this.bus, seed: m.seed, mode: 'ONLINE', names });
+      const deckOf = (seat) => (YC.Online.validDeck(seat.deck) ? seat.deck : YC.DuelCards.STARTER_DECK);
+      const game = this.isDuel
+        ? new YC.DuelController({ bus: this.bus, seed: m.seed, mode: 'ONLINE', names, decks: { WHITE: deckOf(m.white), BLACK: deckOf(m.black) } })
+        : new YC.GameController({ bus: this.bus, seed: m.seed, mode: 'ONLINE', names });
       this.game = game;
       game.online = this;
       this.transport = new YC.Online.FirestoreTransport(m.id, this.uid, this.team);
@@ -70,8 +75,8 @@
       if (!s || s.winner || this.closed) return;
       const key = `${s.turnCount}:${s.active}`;
       if (key !== this.turnKey) { this.turnKey = key; this.deadline = s.active === this.team ? Date.now() + TURN_MS : 0; }
-      if (s.active === this.team && this.deadline && Date.now() > this.deadline && !g.busy &&
-        ['UNO_CARD_PHASE', 'BOARD_ACTION_PHASE', 'BONUS_STEP'].includes(s.phase)) {
+      const phases = this.isDuel ? ['MAIN', 'BATTLE'] : ['UNO_CARD_PHASE', 'BOARD_ACTION_PHASE', 'BONUS_STEP'];
+      if (s.active === this.team && this.deadline && Date.now() > this.deadline && !g.busy && phases.includes(s.phase)) {
         this.ui.cancelMode();
         this.ui.toast('Tempo esgotado: o turno passou.');
         this.ui.dispatch({ type: 'END_TURN' });

@@ -137,3 +137,4 @@
   .leaderboard li { grid-template-columns: 28px minmax(0, 1fr) auto; }
   .leaderboard li small { display: none; }
 }
+.coin-line { text-align: center; font-family: var(--font-display); font-size: 22px; color: #8a5a00; margin-top: 6px; }

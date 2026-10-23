@@ -1,6 +1,18 @@
 # Chess-Oh! Uno-Head
 
-Xadrez + Uno + Yu-Gi-Oh! num desenho animado de 1930, feito só com código: peças em SVG "rubber hose", linha fervente a 12 fps, película WebGL e jazz swing sintetizado ao vivo. Sem imagens, sem ficheiros de som, sem dependências.
+Speed Duel estilo Duel Links com peças de xadrez e pilha Uno, num desenho animado de 1930 feito só com código: peças em SVG "rubber hose", linha fervente a 12 fps, película WebGL e jazz swing sintetizado ao vivo. Sem imagens, sem ficheiros de som, sem dependências. Jogo no ar: <https://yuchess.vercel.app/>.
+
+## Speed Duel (modo principal)
+
+- **Arena:** 4000 LP, 3 Zonas de Peças e 3 de Suporte por lado, baralho de **12 cartas**, 4 na mão e 1 por turno.
+- **Pilha Uno:** cada carta jogada muda a cor/símbolo. Jogar uma carta que combine dá **Sintonia** (+300 ATK, ou custo grátis nas counters).
+- **Invocação:** 1 por turno; Nível 5–6 pede 1 Tributo, Nível 7+ pede 2. Posição de Ataque ou Defesa.
+- **Batalha:** ATK vs ATK (a mais fraca cai, o dono perde a diferença), ATK vs DEF (destrói sem dano, ou BOING! e o atacante perde DEF − ATK), ataque direto sem peças.
+- **Chain:** SS1 inicia, SS2 responde, SS3 só aceita SS3; resolve do último elo para o primeiro.
+- **40 cartas** em 4 raridades: Normal (máx. 3), Épico (2), Lendário (2), Ultra-Raro (1). Lendárias e Ultra-Raras disparam um **Cut-In** do duelista.
+- **Loja de pacotinhos:** 600 Moedas de Tinta iniciais, 100 por pacote de 3 cartas (N 60% · E 25% · L 11% · UR 4%), pity de 1 UR a cada 10 pacotes. Vitória +150, derrota +40.
+- **Montar Deck:** coleção à esquerda, deck de 12 à direita, "Auto-Completar Deck Mais Forte"; tudo guardado no navegador.
+- **Rei Dado (IA):** o deck dele fica mais forte à medida que ganhas.
 
 ## Jogar
 
@@ -25,6 +37,8 @@ Xadrez + Uno + Yu-Gi-Oh! num desenho animado de 1930, feito só com código: pe�
 |---|---|
 | `node tools/simulate.js 80` | Põe a IA contra si própria em 80 partidas sem ecrã e verifica invariantes (cartas não se perdem nem duplicam, tabuleiro consistente, Chain fechada no fim do turno). |
 | `node tools/simulate-online.js 10` | Testa o protocolo online: dois motores com a mesma semente, ligados só por mensagens, têm de acabar com o estado idêntico. |
+| `node tools/simulate-duel.js 100` | 100 duelos IA vs IA no Speed Duel + pares online sincronizados. |
+| `node tools/test-duel-cards.js` | Testes de cenário dos efeitos das cartas do duelo. |
 | `node tools/build.js` | Gera `dist/chess-oh.html` (documento completo) e `dist/artifact.html` (fragmento para publicar como Artifact). |
 | `tools/gallery.html` | Galeria das 12 peças e de todas as cartas, para rever a arte. |
 

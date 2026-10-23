@@ -21,9 +21,11 @@ service cloud.firestore {
     function oppOf(m, uid) { return m.white.uid == uid ? m.black.uid : m.white.uid; }
 
     // Lugar numa sala: numa ranqueada o rating tem de ser o do perfil (não dá para mentir no Elo).
+    // No Speed Duel o lugar leva o baralho (12 ids de carta).
     function seatOk(seat, uid, ranked) {
-      return seat.keys().hasOnly(['uid', 'name', 'rating']) && seat.uid == uid && validName(seat.name)
-        && seat.rating is int && (!ranked || seat.rating == get(profilePath(uid)).data.rating);
+      return seat.keys().hasOnly(['uid', 'name', 'rating', 'deck']) && seat.uid == uid && validName(seat.name)
+        && seat.rating is int && (!ranked || seat.rating == get(profilePath(uid)).data.rating)
+        && (!('deck' in seat) || (seat.deck is list && seat.deck.size() == 12));
     }
 
     // ── Perfis ──
@@ -109,8 +111,9 @@ service cloud.firestore {
     function validCreate(matchId) {
       let d = request.resource.data;
       let me = request.auth.uid;
-      return d.keys().hasOnly(['code', 'ranked', 'status', 'seed', 'white', 'black', 'players', 'claims', 'lastAction', 'lastSeen', 'createdAt'])
+      return d.keys().hasOnly(['code', 'ranked', 'mode', 'status', 'seed', 'white', 'black', 'players', 'claims', 'lastAction', 'lastSeen', 'createdAt'])
         && d.code == matchId && matchId.matches('^[A-Z0-9]{5}$')
+        && d.mode in ['DUEL', 'CHESS'] && (d.mode == 'CHESS' || 'deck' in d.white)
         && d.status == 'waiting' && d.ranked is bool && d.seed is int
         && d.black == null && d.players == [me]
         && d.claims.size() == 0 && d.lastAction.size() == 0 && d.lastSeen.keys().hasOnly([me])

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Galeria do Speed Duel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rye&family=Alegreya:wght@400;700;800&family=Special+Elite&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles/main.css">
+  <link rel="stylesheet" href="../styles/cards.css">
+  <link rel="stylesheet" href="../styles/dcards.css">
+  <style>
+    html, body { overflow: auto; background: #3b2a1e; }
+    .grid { display: flex; flex-wrap: wrap; gap: 14px; padding: 14px; }
+    .grid .dcard { zoom: 1.35; }
+    h2 { font-family: Rye, serif; color: #E5A93C; margin: 10px 14px 0; }
+  </style>
+</head>
+<body>
+  <h2>Normais</h2><div class="grid" id="N"></div>
+  <h2>Épicas</h2><div class="grid" id="E"></div>
+  <h2>Lendárias</h2><div class="grid" id="L"></div>
+  <h2>Ultra-Raras</h2><div class="grid" id="UR"></div>
+  <script src="../src/core/EventBus.js"></script>
+  <script src="../src/data/CardDatabase.js"></script>
+  <script src="../src/duel/DuelCards.js"></script>
+  <script src="../src/view/PieceFactory.js"></script>
+  <script src="../src/view/DuelArt.js"></script>
+  <script src="../src/ui/DuelCardView.js"></script>
+  <script>
+    for (const c of YC.DuelCards.CARDS) document.getElementById(c.rarity).appendChild(YC.DuelCardView.create(c));
+    document.getElementById('UR').appendChild(YC.DuelCardView.createBack());
+  </script>
+</body>
+</html>

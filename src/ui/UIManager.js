@@ -251,7 +251,7 @@
     }
 
     render() {
-      if (!this.game || !this.game.state) return;
+      if (!this.game || !this.game.state || document.getElementById('app').hidden) return;
       this.renderTop(); this.renderStrips(); this.renderPile(); this.renderActions(); this.renderChain(); this.renderBoard(); this.renderHand();
     }
 

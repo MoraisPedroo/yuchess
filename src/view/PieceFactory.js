@@ -119,14 +119,31 @@
       for (const [x, y] of [[41, 36], [79, 36], [41, 72], [79, 72]]) el('circle', { cx: x, cy: y, r: 3, fill: C.D }, g);
       el('path', { d: 'M47,82 L60,89 L73,82 L73,96 L60,89 L47,96 Z', fill: C.A, ...stroke(3) }, g);
       return { face: [60, 50, 0.85, 'grin'], sh: [[41, 94], [79, 94]], rest: [[22, 114], [98, 114]], ctl: [[28, 94], [92, 94]] };
+    },
+    DRAGON(g, C) { // Dragão de Xadrez de Três Cabeças (Speed Duel)
+      el('path', { d: 'M38,102 C8,94 0,62 12,38 C22,56 30,62 46,72 Z', fill: C.A, ...stroke(3.5) }, g);
+      el('path', { d: 'M82,102 C112,94 120,62 108,38 C98,56 90,62 74,72 Z', fill: C.A, ...stroke(3.5) }, g);
+      el('path', { d: 'M34,130 C30,104 42,84 60,82 C78,84 90,104 86,130 Z', fill: C.F, ...stroke() }, g);
+      el('path', { d: 'M48,112 Q60,105 72,112 M50,122 Q60,115 70,122', fill: 'none', stroke: C.A, 'stroke-width': 3, 'stroke-linecap': 'round' }, g);
+      const eyes = [];
+      [[-30, 22, 0.5, true], [30, 22, 0.5, false], [0, 6, 0.62, false]].forEach(([dx, dy, k, flip]) => {
+        const h = el('g', { transform: `translate(${60 + dx} ${dy}) scale(${flip ? -k : k} ${k}) translate(-60 0)` }, g);
+        BODIES.KNIGHT(h, C);
+        eyes.push(eye(h, 49, 50, 0.72, false), eye(h, 65, 49, 0.72, false));
+      });
+      return { eyes, sh: [[40, 102], [80, 102]], rest: [[20, 118], [100, 118]], ctl: [[24, 98], [96, 98]] };
     }
   };
 
   /** Cria o SVG de uma peça e devolve o "rig" usado pelo animador. */
-  function createPieceSVG(type, team) {
-    const C = TEAM_COLORS[team];
+  /**
+   * Cria o SVG de uma peça e devolve o "rig" usado pelo animador.
+   * opts.palette substitui as cores da equipa (cartas do Speed Duel); opts.boil=false tira a linha fervente.
+   */
+  function createPieceSVG(type, team, opts = {}) {
+    const C = opts.palette || TEAM_COLORS[team];
     const svg = el('svg', { viewBox: '0 -4 120 164', class: `piece-svg team-${team.toLowerCase()} type-${type.toLowerCase()}` });
-    const root = el('g', { class: 'pc-root', filter: 'url(#cuphead-boiling-line)' }, svg);
+    const root = el('g', opts.boil === false ? { class: 'pc-root' } : { class: 'pc-root', filter: 'url(#cuphead-boiling-line)' }, svg);
     el('ellipse', { cx: 60, cy: 154, rx: 30, ry: 5.5, fill: 'rgba(20,18,16,0.35)' }, root);
     // pernas rubber hose + sapatos
     el('path', { d: 'M51,126 Q46,140 43,149', fill: 'none', ...stroke(6.5) }, root);
@@ -139,7 +156,7 @@
     const mirror = type === 'KNIGHT' && team === 'BLACK';
     const inner = el('g', mirror ? { transform: 'translate(120 0) scale(-1 1)' } : {}, body);
     const cfg = BODIES[type](inner, C);
-    const eyes = cfg.face[3] === 'none'
+    const eyes = cfg.eyes ? cfg.eyes : cfg.face[3] === 'none'
       ? [eye(inner, cfg.face[0] - 7, cfg.face[1], cfg.face[2], false), eye(inner, cfg.face[0] + 9, cfg.face[1] - 1, cfg.face[2], false)]
       : face(inner, cfg.face[0], cfg.face[1], cfg.face[2], cfg.face[3], C);
     const arms = [0, 1].map((i) => {

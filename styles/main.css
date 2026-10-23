@@ -17,14 +17,17 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
 button { font: inherit; }
 :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 
-#app {
-  height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+#shell {
+  height: 100%; display: flex; flex-direction: column;
   padding-block: 10px 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   background:
     radial-gradient(ellipse 60% 55% at 42% 42%, rgba(255, 214, 140, 0.16), transparent 70%),
     repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.12) 0 2px, transparent 2px 60px),
     radial-gradient(ellipse at 45% 40%, #3b2a1e 0%, var(--bg) 72%);
 }
+#topbar { flex: none; }
+#app { flex: 1; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+#app[hidden], #duel[hidden] { display: none !important; }
 
 /* ── Barra de topo ── */
 #topbar { display: flex; align-items: center; gap: 14px; padding: 6px 14px; border: 3px solid var(--ink); border-radius: 12px; background: linear-gradient(#2f2018, #1d1410); }
@@ -250,7 +253,7 @@ button { font: inherit; }
 @keyframes flash { 0% { opacity: 0; } 8% { opacity: 1; } 22% { opacity: 0.9; } 100% { opacity: 0; } }
 #film-overlay { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
 .no-webgl #film-overlay { display: none; }
-.slowmo #app { filter: sepia(0.5) contrast(1.15); transition: filter 0.8s; }
+.slowmo #shell { filter: sepia(0.5) contrast(1.15); transition: filter 0.8s; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pulse { from { filter: brightness(1); } to { filter: brightness(1.35); } }
 
@@ -262,7 +265,8 @@ button { font: inherit; }
 }
 @media (max-width: 820px) {
   html, body { overflow: auto; }
-  #app { height: auto; min-height: 100%; }
+  #shell { height: auto; min-height: 100%; }
+  #app { flex: none; }
   #arena { grid-template-columns: 1fr; }
   #side { overflow: visible; }
   #log-box { max-height: 200px; }

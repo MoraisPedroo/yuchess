@@ -54,11 +54,11 @@
         <div class="title-card">
           <div class="marquee-bulbs"></div>
           ${TITLE_ARC}
-          <p class="title-tag">Xadrez · Uno · Cartas-armadilha — um desenho animado de 1930 feito só com código</p>
+          <p class="title-tag">Speed Duel com peças de xadrez, pilha Uno e Chain — um desenho animado de 1930 feito só com código</p>
           <div class="title-buttons">
-            <button class="btn-big" data-mode="AI">INSERT COIN · 1 JOGADOR vs KING DICE</button>
+            <button class="btn-big" data-mode="DUEL">INSERT COIN · SPEED DUEL</button>
             <button class="btn-big gold" data-mode="ONLINE">ONLINE · RANQUEADA E SALAS</button>
-            <button class="btn-big alt" data-mode="HOTSEAT">2 JOGADORES · PASSA O ECRÃ</button>
+            <div class="title-classic"><span>Xadrez clássico 8×8:</span><button class="btn-link" data-mode="AI">vs King Dice</button><button class="btn-link" data-mode="HOTSEAT">2 jogadores</button></div>
             <button class="btn-link" data-rules>Como jogar</button>
           </div>
           <p class="title-foot">Som e música são gerados ao vivo · clica para começar</p>
@@ -120,7 +120,7 @@
     },
 
     /** Janela de resposta da Chain com temporizador visual de 8 s (pausa com o rato por cima). */
-    chainWindow({ game, team, options, stack, top, seconds = 8, audio }) {
+    chainWindow({ game, team, options, stack, top, seconds = 8, audio, renderCard, optionLabel }) {
       return new Promise((resolve) => {
         const label = (l) => `<li class="cl owner-${l.owner.toLowerCase()}"><b>CL${l.index}</b> ${esc(l.label)} <i>SS${l.ss}</i></li>`;
         const m = make('modal chain-modal', `<div class="modal-card">
@@ -134,11 +134,11 @@
         options.forEach((o) => {
           const wrap = document.createElement('div');
           wrap.className = 'chain-option';
-          wrap.appendChild(YC.CardView.create(o.card));
+          wrap.appendChild(renderCard ? renderCard(o) : YC.CardView.create(o.card));
           const b = document.createElement('button');
           b.className = 'btn-big';
-          b.textContent = `Ativar (${o.from === 'HAND' ? 'da mão' : 'do Suporte'})`;
-          b.addEventListener('click', () => done(o.card.uid));
+          b.textContent = optionLabel ? optionLabel(o) : `Ativar (${o.from === 'HAND' ? 'da mão' : 'do Suporte'})`;
+          b.addEventListener('click', () => done(o.id || o.card.uid));
           wrap.appendChild(b);
           box.appendChild(wrap);
         });
@@ -183,31 +183,36 @@
       setTimeout(() => b.remove(), 350);
     },
 
-    knockout({ winner, viewerWon, stats, game, rating }) {
+    /** Ecrã final. `rows`/`rank`/`coins` permitem ao Speed Duel mostrar as suas próprias estatísticas. */
+    knockout({ winner, viewerWon, stats, game, rating, rows, rank: givenRank, coins }) {
       return new Promise((resolve) => {
         const s = stats.WHITE, o = stats.BLACK;
         const draw = winner === 'DRAW';
         const mine = game.localTeam || (game.mode === 'AI' ? 'WHITE' : winner === 'DRAW' ? 'WHITE' : winner);
-        const ms = stats[mine];
-        const king = game.board.king(mine);
-        const kingPct = king ? king.hp / king.maxHp : 0;
-        const score = (viewerWon ? 50 : 0) + ms.kills * 4 + ms.trapsActivated * 5 + ms.parries * 6 + Math.round(kingPct * 20) - Math.max(0, game.state.turnCount - 40) * 0.4;
-        const rank = draw ? 'C' : score >= 95 ? 'S' : score >= 75 ? 'A' : score >= 55 ? 'B' : score >= 35 ? 'C' : 'D';
+        let rank = givenRank;
+        if (!rank) {
+          const ms = stats[mine];
+          const king = game.board.king(mine);
+          const kingPct = king ? king.hp / king.maxHp : 0;
+          const score = (viewerWon ? 50 : 0) + ms.kills * 4 + ms.trapsActivated * 5 + ms.parries * 6 + Math.round(kingPct * 20) - Math.max(0, game.state.turnCount - 40) * 0.4;
+          rank = draw ? 'C' : score >= 95 ? 'S' : score >= 75 ? 'A' : score >= 55 ? 'B' : score >= 35 ? 'C' : 'D';
+        }
         const head = draw ? 'EMPATE!' : 'A KNOCKOUT!';
         const sub = draw ? 'O projecionista adormeceu…'
-          : game.mode === 'AI' ? (viewerWon ? 'Venceste o King Dice!' : 'O King Dice levou a melhor…')
+          : game.mode === 'AI' ? (viewerWon ? `Venceste o ${game.teamName('BLACK')}!` : `O ${game.teamName('BLACK')} levou a melhor…`)
           : game.mode === 'ONLINE' ? (viewerWon ? `Venceste ${game.teamName(YC.other(mine))}!` : `${game.teamName(winner)} levou a melhor…`)
           : `Vitória das ${game.teamName(winner)}!`;
         const row = (k, a, b) => `<tr><td>${k}</td><td>${a}</td><td>${b}</td></tr>`;
         const m = make('screen knockout', `<div class="ko-word">${head}</div>
           <div class="ko-card"><h2>${esc(sub)}</h2>
             <table><thead><tr><th></th><th>${esc(game.teamName('WHITE'))}</th><th>${esc(game.teamName('BLACK'))}</th></tr></thead><tbody>
-            ${row('Turnos jogados', game.state.turnCount, '')}
+            ${rows ? rows.map((r) => row(...r)).join('') : `${row('Turnos jogados', game.state.turnCount, '')}
             ${row('Peças derrubadas', s.kills, o.kills)}
             ${row('Armadilhas ativadas', s.trapsActivated, o.trapsActivated)}
             ${row('Parries / anulações (SS3)', s.parries, o.parries)}
-            ${row('Dano total', s.damage, o.damage)}
+            ${row('Dano total', s.damage, o.damage)}`}
             </tbody></table>
+            ${coins ? `<div class="coin-line">+${coins} 🪙 Moedas de Tinta</div>` : ''}
             <div class="rank">Nota final: <b class="rank-${rank}">${rank}-RANK</b></div>
             ${rating ? '<div class="rating-line">A acertar o rating…</div>' : ''}
             <div class="modal-actions"><button class="btn-big" data-again>Jogar de novo</button><button class="btn-big alt" data-menu>Menu</button></div>

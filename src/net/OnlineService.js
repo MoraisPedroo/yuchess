@@ -20,9 +20,18 @@
   const Online = {
     FORFEIT_MS,
     matchRef(id) { return FB().doc('matches', id); },
-    seat(profile) { return { uid: profile.uid, name: profile.name, rating: profile.rating }; },
+    /** Lugar na sala; no Speed Duel leva o baralho de 12 cartas do jogador. */
+    seat(profile, deck) {
+      const s = { uid: profile.uid, name: profile.name, rating: profile.rating };
+      if (deck) s.deck = deck.slice(0, 12);
+      return s;
+    },
 
-    async createRoom(profile, ranked) {
+    validDeck(deck) { return Array.isArray(deck) && YC.DuelCards.validateDeck(deck).ok; },
+
+    async createRoom(profile, ranked, opts = {}) {
+      const mode = opts.mode === 'CHESS' ? 'CHESS' : 'DUEL';
+      if (mode === 'DUEL' && !Online.validDeck(opts.deck)) throw new Error('O teu deck de 12 cartas não é válido. Monta-o no Speed Duel → Montar Deck.');
       const fb = FB(), F = fb.F;
       for (let attempt = 0; attempt < 6; attempt++) {
         const id = randomCode();
@@ -31,8 +40,8 @@
           await F.runTransaction(fb.db, async (tx) => {
             if ((await tx.get(ref)).exists()) throw Object.assign(new Error('exists'), { code: 'exists' });
             tx.set(ref, {
-              code: id, ranked: !!ranked, status: 'waiting', seed: Math.floor(Math.random() * 2147483647),
-              white: Online.seat(profile), black: null, players: [profile.uid],
+              code: id, ranked: !!ranked, mode, status: 'waiting', seed: Math.floor(Math.random() * 2147483647),
+              white: Online.seat(profile, mode === 'DUEL' ? opts.deck : null), black: null, players: [profile.uid],
               claims: {}, lastAction: {}, lastSeen: { [profile.uid]: fb.now() },
               createdAt: fb.now()
             });
@@ -46,7 +55,7 @@
     },
 
     /** Entra numa sala em espera (transação: dois jogadores não podem ocupar a mesma cadeira). */
-    async joinRoom(id, profile, { rankedOnly = false } = {}) {
+    async joinRoom(id, profile, { rankedOnly = false, deck = null } = {}) {
       const fb = FB(), F = fb.F, ref = Online.matchRef(String(id).toUpperCase().trim());
       await F.runTransaction(fb.db, async (tx) => {
         const snap = await tx.get(ref);
@@ -56,8 +65,10 @@
         if (m.white.uid === profile.uid) throw new Error('Esta sala é tua: espera que alguém entre.');
         if (rankedOnly && !m.ranked) throw new Error('Não é uma sala ranqueada.');
         if (m.ranked && profile.guest) throw new Error('Partidas ranqueadas precisam de conta Google.');
+        const duel = m.mode !== 'CHESS';
+        if (duel && !Online.validDeck(deck)) throw new Error('Esta sala é de Speed Duel: monta primeiro um deck válido de 12 cartas.');
         tx.update(ref, {
-          status: 'playing', black: Online.seat(profile), players: [m.white.uid, profile.uid],
+          status: 'playing', black: Online.seat(profile, duel ? deck : null), players: [m.white.uid, profile.uid],
           startedAt: fb.now(), [`lastSeen.${profile.uid}`]: fb.now()
         });
       });
@@ -65,9 +76,9 @@
     },
 
     /** Procura uma ranqueada em espera de outra pessoa; se não houver, devolve null. */
-    async findRanked(profile, olderThan) {
+    async findRanked(profile, olderThan, deck) {
       const fb = FB(), F = fb.F;
-      const q = F.query(fb.col('matches'), F.where('ranked', '==', true), F.where('status', '==', 'waiting'), F.limit(15));
+      const q = F.query(fb.col('matches'), F.where('ranked', '==', true), F.where('status', '==', 'waiting'), F.where('mode', '==', 'DUEL'), F.limit(15));
       const res = await F.getDocs(q);
       const now = Date.now();
       const list = res.docs.map((d) => ({ id: d.id, ...d.data() }))
@@ -76,7 +87,7 @@
         .filter((m) => !olderThan || fb.millis(m.createdAt) < olderThan)
         .sort((a, b) => fb.millis(a.createdAt) - fb.millis(b.createdAt));
       for (const m of list) {
-        try { return await Online.joinRoom(m.id, profile, { rankedOnly: true }); } catch (err) { /* alguém foi mais rápido */ }
+        try { return await Online.joinRoom(m.id, profile, { rankedOnly: true, deck }); } catch (err) { /* alguém foi mais rápido */ }
       }
       return null;
     },

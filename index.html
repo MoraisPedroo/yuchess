@@ -4,16 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Chess-Oh! Uno-Head</title>
-  <meta name="description" content="Xadrez + Uno + Yu-Gi-Oh! num desenho animado de 1930 gerado só com código.">
+  <meta name="description" content="Speed Duel com peças de xadrez, pilha Uno e Chain estilo Duel Links, num desenho animado de 1930 gerado só com código.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rye&family=Alegreya:wght@400;700;800&family=Special+Elite&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="styles/cards.css">
   <link rel="stylesheet" href="styles/screens.css">
+  <link rel="stylesheet" href="styles/dcards.css">
+  <link rel="stylesheet" href="styles/duel.css">
 </head>
 <body>
-  <div id="app">
+  <div id="shell">
     <header id="topbar">
       <div class="brand">CHESS-OH! <span>UNO-HEAD</span></div>
       <div id="turn-pill"></div>
@@ -28,6 +30,7 @@
         <button id="btn-menu" class="chip">Menu</button>
       </nav>
     </header>
+    <div id="app">
 
     <main id="arena">
       <section id="table">
@@ -78,6 +81,8 @@
       <div id="hand"></div>
       <div id="card-menu" hidden></div>
     </footer>
+    </div>
+    <div id="duel" hidden></div>
   </div>
 
   <div id="inspector" role="tooltip"></div>
@@ -94,6 +99,13 @@
   <script src="src/engine/ChainResolver.js"></script>
   <script src="src/engine/GameController.js"></script>
   <script src="src/ai/KingDiceAI.js"></script>
+  <script src="src/duel/DuelCards.js"></script>
+  <script src="src/duel/DuelState.js"></script>
+  <script src="src/duel/DuelEffects.js"></script>
+  <script src="src/duel/DuelChain.js"></script>
+  <script src="src/duel/DuelController.js"></script>
+  <script src="src/duel/Collection.js"></script>
+  <script src="src/duel/DuelAI.js"></script>
   <script src="src/net/LockstepSession.js"></script>
   <script src="src/net/firebase-config.js"></script>
   <script src="src/net/FirebaseClient.js"></script>
@@ -103,11 +115,19 @@
   <script src="src/view/PieceFactory.js"></script>
   <script src="src/view/VFXPostProcessor.js"></script>
   <script src="src/view/CupheadSVGRenderer.js"></script>
+  <script src="src/view/DuelArt.js"></script>
   <script src="src/audio/VintageAudioSynth.js"></script>
   <script src="src/ui/CardView.js"></script>
   <script src="src/ui/Screens.js"></script>
   <script src="src/ui/UIManager.js"></script>
   <script src="src/ui/OnlineLobby.js"></script>
+  <script src="src/ui/DuelCardView.js"></script>
+  <script src="src/ui/CutIn.js"></script>
+  <script src="src/ui/DuelArena.js"></script>
+  <script src="src/ui/DuelUI.js"></script>
+  <script src="src/ui/GachaShop.js"></script>
+  <script src="src/ui/DeckBuilder.js"></script>
+  <script src="src/ui/DuelHub.js"></script>
   <script src="src/main.js"></script>
 </body>
 </html>

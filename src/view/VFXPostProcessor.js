@@ -171,7 +171,7 @@ void main() {
 
     // ── Efeitos públicos ──
     triggerScreenShake(intensity = 8, duration = 320) {
-      const app = document.getElementById('app');
+      const app = document.getElementById('shell') || document.getElementById('app');
       if (!app || !app.animate) return;
       const frames = [];
       for (let i = 0; i < 7; i++) {

@@ -1,0 +1,76 @@
+/* dcards.css — cartas do Speed Duel. Moldura por raridade: N pergaminho, E roxo/cobre com brilho,
+   L dourado com estrelas, UR holográfico (gradiente animado + ruído SVG). */
+.dcard { --dw: 120px; --dh: 174px; --face: #f6e7c1; --rframe: #E6DEC8;
+  width: var(--dw); height: var(--dh); position: relative; flex: none; border-radius: 9px; border: 3px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink); background: var(--rframe); color: var(--ink); user-select: none; overflow: hidden; font-family: var(--font-body); }
+.dcard.small { --dw: 96px; --dh: 139px; }
+.dcard.tiny { --dw: 62px; --dh: 90px; border-width: 2px; box-shadow: 2px 2px 0 var(--ink); }
+.dcard.cat-spell, .dcard.cat-quick-spell { --face: #dcefd8; }
+.dcard.cat-trap, .dcard.cat-counter-trap { --face: #f0d7e6; }
+.dcard-frame { position: absolute; inset: 5px; display: flex; flex-direction: column; background: var(--face); border: 2px solid var(--ink); border-radius: 5px; overflow: hidden; }
+.dcard.small .dcard-frame { inset: 4px; }
+.dcard.tiny .dcard-frame { inset: 3px; border-width: 1.5px; }
+.dcard-head { display: flex; align-items: center; gap: 3px; padding: 2px 4px; background: var(--cc); color: var(--cream); border-bottom: 2px solid var(--ink); min-height: 22px; }
+.c-W .dcard-head { background: linear-gradient(90deg, #C83E3B, #2F5D8A 35%, #3E7D4A 65%, #C88A1E); }
+.dcard-name { flex: 1; font-family: var(--font-display); font-size: 10px; line-height: 1.02; text-shadow: 1px 1px 0 var(--ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.dcard-uno { flex: none; min-width: 19px; height: 19px; padding: 0 2px; border-radius: 50%; background: var(--cream); color: var(--cc); border: 2px solid var(--ink); display: grid; place-items: center; font-family: var(--font-display); font-size: 10px; }
+.c-W .dcard-uno { color: #8a5a00; }
+.dcard-sub { display: flex; justify-content: space-between; gap: 4px; padding: 1px 4px; font-family: var(--font-type); font-size: 7.5px; background: rgba(20, 18, 16, 0.07); white-space: nowrap; overflow: hidden; }
+.dcard-sub .lv { color: #c0392b; letter-spacing: -1.5px; }
+.dcard-art { height: 64px; flex: none; position: relative; overflow: hidden; border-bottom: 2px solid var(--ink);
+  background: radial-gradient(circle at 50% 70%, var(--cc-light) 0 36%, transparent 37%), repeating-conic-gradient(from 0deg at 50% 70%, var(--cc-light) 0 10deg, var(--face) 10deg 20deg); }
+.dcard-art .piece-svg { position: absolute; left: 50%; bottom: -3px; transform: translateX(-50%); height: 102%; width: auto; }
+.dcard-art .dart { position: absolute; inset: 4% 6%; width: 88%; height: 92%; }
+.dcard-text { flex: 1; padding: 2px 4px; font-size: 8.4px; line-height: 1.13; overflow: hidden; }
+.dcard-stats { display: flex; justify-content: space-between; padding: 1px 4px; font-family: var(--font-type); font-size: 8.5px; font-weight: bold; border-top: 2px solid var(--ink); background: var(--cream); }
+.dcard-stats .up, .mon-plate .up { color: #2f7a3a; }
+.dcard-stats .down, .mon-plate .down { color: #b02a26; }
+.dcard-rarity { position: absolute; top: 52px; right: 8px; z-index: 3; font-family: var(--font-display); font-size: 9px; padding: 0 4px; border-radius: 4px; border: 1.5px solid var(--ink); background: #E6DEC8; }
+.dcard.r-E .dcard-rarity { background: #9B59B6; color: #fff; }
+.dcard.r-L .dcard-rarity { background: #F1C40F; }
+.dcard.r-UR .dcard-rarity { background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bff95, #6bcbff, #c56bff); }
+.dcard-count { position: absolute; top: 52px; left: 8px; z-index: 3; font-family: var(--font-display); font-size: 11px; padding: 0 5px; border-radius: 6px; background: var(--ink); color: var(--gold); }
+.dcard.small .dcard-art { height: 46px; }
+.dcard.small .dcard-name { font-size: 8.5px; }
+.dcard.small .dcard-text { font-size: 7px; }
+.dcard.small .dcard-rarity, .dcard.small .dcard-count { top: 36px; }
+.dcard.tiny .dcard-head { min-height: 14px; padding: 1px 2px; }
+.dcard.tiny .dcard-name { font-size: 6.5px; }
+.dcard.tiny .dcard-uno { min-width: 13px; height: 13px; font-size: 7px; border-width: 1.5px; }
+.dcard.tiny .dcard-sub, .dcard.tiny .dcard-text, .dcard.tiny .dcard-stats { display: none; }
+.dcard.tiny .dcard-art { height: auto; flex: 1; border-bottom: none; }
+.dcard.tiny .dcard-rarity { top: auto; bottom: 3px; right: 3px; font-size: 7px; }
+
+/* Raridades */
+.dcard.r-E { --rframe: linear-gradient(135deg, #9B59B6 0%, #c58b5a 35%, #7d3f97 62%, #b87333 100%); }
+.dcard.r-E::after { content: ''; position: absolute; inset: -60%; z-index: 2; pointer-events: none;
+  background: linear-gradient(115deg, transparent 42%, rgba(255, 255, 255, 0.55) 50%, transparent 58%); animation: shine 3.4s linear infinite; }
+.dcard.r-L { --rframe: linear-gradient(135deg, #F1C40F, #fff1a6 30%, #c9972a 62%, #F1C40F); box-shadow: 3px 3px 0 var(--ink), 0 0 12px rgba(241, 196, 15, 0.55); }
+.dcard-stars, .dcard-holo { padding: 5px; -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+.dcard.small .dcard-stars, .dcard.small .dcard-holo { padding: 4px; }
+.dcard.tiny .dcard-stars, .dcard.tiny .dcard-holo { padding: 3px; }
+.dcard.r-UR .dcard-art::after { content: ''; position: absolute; inset: 0; pointer-events: none; mix-blend-mode: overlay;
+  background: linear-gradient(115deg, rgba(255, 107, 107, 0.45), rgba(255, 217, 61, 0.45), rgba(107, 255, 149, 0.45), rgba(107, 203, 255, 0.45), rgba(197, 107, 255, 0.45));
+  background-size: 300% 300%; animation: holo 3s linear infinite; }
+.dcard-stars { position: absolute; inset: 0; z-index: 2; pointer-events: none; mix-blend-mode: screen;
+  background-image: radial-gradient(circle, #fff 0 1.3px, transparent 1.7px), radial-gradient(circle, #fff6b0 0 1px, transparent 1.4px);
+  background-size: 37px 41px, 23px 29px; background-position: 0 0, 11px 7px; animation: twinkle 1.4s steps(2) infinite; }
+.dcard.r-UR { --rframe: linear-gradient(115deg, #ff6b6b, #ffd93d, #6bff95, #6bcbff, #c56bff, #ff6b6b); background-size: 300% 300%; animation: holo 4s linear infinite;
+  box-shadow: 3px 3px 0 var(--ink), 0 0 16px rgba(197, 107, 255, 0.6); }
+.dcard-holo { position: absolute; inset: 0; z-index: 2; pointer-events: none; filter: url(#holo-noise); mix-blend-mode: overlay; opacity: 0.65;
+  background: linear-gradient(115deg, rgba(255, 0, 150, 0.3), rgba(0, 255, 255, 0.3), rgba(255, 255, 0, 0.3), rgba(255, 0, 150, 0.3)); background-size: 300% 300%; animation: holo 3s linear infinite; }
+@keyframes shine { from { transform: translateX(-35%); } to { transform: translateX(35%); } }
+@keyframes twinkle { 50% { opacity: 0.35; background-position: 4px 3px, 15px 10px; } }
+@keyframes holo { to { background-position: 300% 50%; } }
+.dcard.locked { filter: grayscale(1) brightness(0.55); }
+.dcard.locked .dcard-art > * { opacity: 0.3; }
+
+/* Verso */
+.dcard.back { --rframe: #8f2a24; }
+.dcard.back .dcard-frame { background: var(--crimson); }
+.dcard.back .back-oval span { font-size: 12px; }
+.dcard.back .back-oval b { font-size: 18px; }
+.dcard.back.tiny .back-oval span { font-size: 7px; }
+.dcard.back.tiny .back-oval b { font-size: 10px; }
+@media (prefers-reduced-motion: reduce) { .dcard.r-E::after, .dcard-stars, .dcard.r-UR, .dcard-holo { animation: none; } }

@@ -240,6 +240,18 @@
     playUnoCall() { this.tone({ type: 'square', f0: midi(67), dur: 0.15, gain: 0.1 }); this.tone({ type: 'square', f0: midi(72), dur: 0.3, gain: 0.1, at: 0.15 }); }
     playClick() { this.tone({ type: 'square', f0: 900, f1: 600, dur: 0.04, gain: 0.05 }); }
     playTick() { this.tone({ type: 'sine', f0: 1500, dur: 0.03, gain: 0.05 }); }
+    /** Rasgar o pacotinho: ruído com filtro a varrer de grave para agudo. */
+    playPackRip() {
+      if (!this.ready) return;
+      const c = this.ctx, t = c.currentTime, src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+      src.buffer = this.noiseBuf;
+      f.type = 'bandpass'; f.Q.value = 2;
+      f.frequency.setValueAtTime(600, t); f.frequency.exponentialRampToValueAtTime(5000, t + 0.35);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.5, t + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
+      src.connect(f).connect(g).connect(this.sfx);
+      src.start(t, 0, 0.45);
+    }
+
     playCoin() { this.tone({ type: 'square', f0: midi(83), dur: 0.08, gain: 0.08 }); this.tone({ type: 'square', f0: midi(88), dur: 0.35, gain: 0.08, at: 0.08 }); }
   }
 
