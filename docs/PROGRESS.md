@@ -5,7 +5,7 @@
 
 ## Estado atual (2026-10-26)
 
-**Branch `pedro/chess-gi-oh` (por juntar a `main`):** o jogo foi refeito do zero seguindo o relatório "Chess-Gi-Oh! Cartoon Edition" do Pedro. Substitui o protótipo "Chess-Oh! Uno-Head" (xadrez + Uno, estilo 1930) e o modo "Speed Duel" (só cartas) — os dois continuam no histórico do git (`main` cb44011 e branch `pedro/duel-links`).
+**No ar (`main`, juntada a 2026-10-26):** <https://yuchess.vercel.app/>. O jogo foi refeito do zero seguindo o relatório "Chess-Gi-Oh! Cartoon Edition" do Pedro. Substitui o protótipo "Chess-Oh! Uno-Head" (xadrez + Uno, estilo 1930) e o modo "Speed Duel" (só cartas) — os dois continuam no histórico do git (`main` cb44011 e branch `pedro/duel-links`).
 
 **Funciona e está testado**
 - Xadrez completo (`src/game/ChessRules.js`): lances legais, xeque, xeque-mate, afogamento, roque, en passant, promoção, 50 lances, repetição tripla, material insuficiente. Contagens *perft* de referência certas (início, Kiwipete, posições 3–5).
@@ -27,7 +27,8 @@
 
 ## Em curso / a meio
 
-- Juntar `pedro/chess-gi-oh` a `main` (a Vercel publica automaticamente). Falta a decisão do Pedro.
+- Nada a meio no código. O Pedro está a testar a versão publicada e vai enviar os erros que encontrar.
+- Falta publicar o `firestore.rules` no Firebase (ver "Configuração pendente") para o online funcionar.
 
 ## Próximos passos (por prioridade)
 
@@ -51,7 +52,7 @@
 - **Decisões**: sem Next.js/React/chess.js (o projeto continua sem build, para o Diego e o Codex); GSAP e canvas-confetti por CDN com alternativa; Reativas e Counter-Traps viram-se na Zona e respondem a partir do turno seguinte; 12 s para responder; a Mola não dá xeque por salto; capturar peça com escudo não tira de xeque; efeitos que exporiam o próprio Rei congelam em vez de destruir/mover; Armadilhas de Casa só nas filas 3–6; limite de 300 turnos. Lista completa no README ("Onde me afastei do relatório").
 - **Correções encontradas pelas simulações**: a Bomba de Fumo e o Íman podiam deixar quem jogou em xeque (esquiva que abria uma linha; Cetro roubado a meio do lance do adversário) — agora simulam o resultado completo antes de serem permitidos. As simulações usam limite de nós no bot (`cfg.maxNodes`) para serem reprodutíveis: `node tools/simulate.js 1 --from=85` repete a partida 85.
 - **Como testar**: `node tools/test-chess-rules.js`, `node tools/test-cards.js`, `node tools/simulate.js 30`, `node tools/simulate-online.js 8`; no navegador "Jogar contra o bot", Loja → abrir pacote, Baralhos → auto-completar.
-- **Ficou por fazer**: publicar as regras, teste online real com duas pessoas, juntar a `main`.
+- **Ficou por fazer**: publicar as regras, teste online real com duas pessoas. A branch foi juntada a `main` (fast-forward) a pedido do Pedro.
 
 ### 2026-10-23 (tarde) · Pedro + Claude Code · branch `pedro/duel-links`
 - Modo "Speed Duel" (Duel Links só com cartas). **Abandonado** a pedido do Pedro: ele quer xadrez a sério misturado com cartas. Fica na branch para consulta.
