@@ -20,6 +20,7 @@
 
 ## Configuração pendente (fazer uma vez, na consola)
 
+- [ ] **Firebase → Authentication → «Começar» (Get started)**. Hoje a autenticação nunca foi ligada: o Firebase responde `CONFIGURATION_NOT_FOUND` e por isso nem o convidado nem o Google conseguem entrar. Depois disso, em **Sign-in method**, ativar **Anónimo** e **Google**.
 - [ ] **Firebase → Firestore → Regras**: colar o `firestore.rules` **desta branch** e publicar. Hoje as regras do projeto ainda estão abertas (leitura sem login funciona) e as novas são necessárias para `users/{uid}` e para as salas com baralho.
 - [ ] **Firebase → Authentication → Sign-in method**: Google e Anónimo ativos (confirmar).
 - [ ] **Firebase → Authentication → Settings → Authorized domains**: `yuchess.vercel.app` (confirmar).
@@ -46,6 +47,12 @@
 - Num separador escondido o navegador quase para as animações (requestAnimationFrame); o motor espera no máximo 4 s por animação, por isso o jogo nunca bloqueia, só fica lento.
 
 ## Registo de sessões
+
+### 2026-10-26 (noite) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Pedido do Pedro** (com imagens de referência: "Yu-Gi-Oh! Chess Links" e Hearthstone): login não funciona, cartas ilegíveis, animações demasiado rápidas, mão estilo Hearthstone com zoom, histórico escondido, tabuleiro maior, cartão da peça ao passar o rato, relógios e contagem de peças capturadas como na foto.
+- **Mudou**: nova arena da partida (`src/ui/MatchUI.js` reescrito + `MatchHUD.js`, `MatchChain.js`, `CardZoom.js`, `PieceInspector.js`; `styles/arena.css` novo; `board.css` e `match.css` reescritos). Tabuleiro neon em 3D com peças em pé sobre bases a brilhar (azul = tuas, rosa = adversário), Zonas de Armadilhas à esquerda, baralho/cemitério à direita (clicar no cemitério mostra as cartas), botões grandes à direita (vez/histórico/desistir/velocidade/som/sair), topo com retrato, MATERIAL, relógio e peças capturadas, as 2 últimas jogadas em destaque e o resto numa gaveta. Mão em leque que aumenta ao passar o rato; zoom grande das cartas da Zona/Chain/cemitério; casas de destino com o nome (ex.: "D5"). Relógio contra o bot (5 min, 10 min ou sem limite — perde quem chegar a zero; só conta na própria preparação); no online mostra os 2 min do turno. Animações a 60 % da velocidade (o "Rápido" fica a 110 %). Cartas com ilustração mais baixa para o texto caber inteiro. Motor: `players[t].lostTypes` (tipos de peças perdidas, para o contador).
+- **Login**: não era bug do código. A Autenticação do projeto Firebase nunca foi ligada (`CONFIGURATION_NOT_FOUND`); acrescentada mensagem de erro clara para esse caso.
+- **Como testar**: os 4 comandos de teste; no navegador "Jogar contra o bot", passar o rato por cartas e peças, abrir o histórico, ver o relógio a contar.
 
 ### 2026-10-26 · Pedro + Claude Code · branch `pedro/chess-gi-oh`
 - **Mudou**: refeito o jogo inteiro segundo o relatório "Chess-Gi-Oh! Cartoon Edition". Apagados `src/engine`, `src/data`, `src/ai`, `src/ui`, `src/view`, `src/audio`, `styles` antigos. Novos: `src/game/*` (motor), `src/view/*` (arte e animações), `src/ui/*` (ecrãs), `src/audio/SoundEngine.js`, `src/net/ProfileStore.js`, `tools/test-chess-rules.js`, `tools/test-cards.js`, `tools/load-engine.js`, novo `tools/simulate*.js` e `tools/gallery.html`. `firestore.rules`: `users/{uid}` + baralho nas salas (`v: 2`). Equipas no motor passam a `'w'`/`'b'` (no Firestore continuam `WHITE`/`BLACK`, ver `YC.TEAM_NAME`). `LockstepSession` envia `resp` (carta + alvo) nas respostas da Chain.

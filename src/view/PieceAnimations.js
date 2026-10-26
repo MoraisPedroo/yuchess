@@ -108,7 +108,7 @@
     async anvil(x, y) {
       const a = document.createElement('div');
       a.className = 'fx-abs';
-      a.style.cssText = `left:${x}%;top:${y}%;width:13%;z-index:30`;
+      a.style.cssText = `left:${x}%;top:${y}%;width:${YC.FX.size(this.board.fx) * 0.13}px;z-index:30`;
       a.innerHTML = YC.CardArt.svg(YC.Cards.get('gt_guilhotina_bigorna'));
       this.board.fx.appendChild(a);
       FX().set(a, { xPercent: -50, yPercent: -260, rotation: -10 });

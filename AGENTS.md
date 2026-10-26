@@ -49,7 +49,8 @@ Escreve como se o próximo leitor não tivesse visto nada do que fizeste.
 - **Cartas novas**: dados em `src/game/Cards.js` (lista `RAW`); condições e efeito em `src/game/CardEffects.js` (`canRespondToEvent`, `canRespondToLink`, `canActivate`, `resolve*`); ícone em `src/view/CardArt.js` (`ICONS`, pelo `theme.icon`); um teste em `tools/test-cards.js`.
 - **Equipamentos que mudam lances** vão em `src/game/ChessRules.js` (`pieceMoves`/`attacks`) e precisam de teste em `tools/test-chess-rules.js`.
 - **Nenhum efeito pode deixar o próprio Rei em xeque**: usa `match.removeOrFreeze`, `match.relocate`/`canRelocate` (em `MatchEffects.js`), que convertem em congelar quando seria ilegal.
-- O ecrã ouve o `EventBus`; o motor emite eventos e espera pelas animações com `emitAsync`. As animações usam `YC.FX` (GSAP via CDN, com alternativa instantânea se o CDN falhar). Cada animação termina com `sync()` do tabuleiro, por isso o desenho nunca fica errado.
+- O ecrã ouve o `EventBus`; o motor emite eventos e espera pelas animações com `emitAsync`.
+- O tabuleiro é um plano 3D (CSS `perspective` + `rotateX(var(--tilt))`) com as peças em pé (`.stand` roda ao contrário). Nada de `filter`, `opacity` ou `overflow: hidden` nos elementos entre `.plane` e `.piece` (achatam o 3D). Os efeitos desenham-se na camada plana `.arena-fx`, na posição projetada das casas (`BoardView.center`). As animações usam `YC.FX` (GSAP via CDN, com alternativa instantânea se o CDN falhar). Cada animação termina com `sync()` do tabuleiro, por isso o desenho nunca fica errado.
 - Ficheiros pequenos (até ~350 linhas). Se crescer, divide (ver `MatchEffects.js` e `PieceAnimations.js`, que acrescentam métodos a classes existentes).
 - Texto da interface em **português de Portugal**. Comentários curtos, em português.
 
@@ -60,9 +61,9 @@ Mapa rápido:
 | `src/game/` | **Motor**: `ChessRules` (xadrez completo + equipamentos), `Cards` (31 cartas), `CardEffects` (condições/efeitos), `ChainResolver` (Chain SS1–3, janelas de resposta), `MoveResolver` (lance com captura declarada, escudos, armadilhas, xeque), `MatchController` (turnos, ações, fim), `MatchEffects` (comprar, destruir, congelar, mover, escudos), `BotAI` (minimax + cartas), `Economy` (perfil, gacha, pity, criação, validação de baralhos). |
 | `src/net/` | `LockstepSession` (protocolo), `FirebaseClient`, `ProfileStore` (coleção no localStorage + Firestore), `OnlineService` (salas/fila), `Ranking` (Elo), `OnlineGame` (cola com a UI). |
 | `src/view/` | `PieceArt` (peças SVG com expressões), `CardArt` (31 ícones), `FX` (efeitos GSAP), `BoardView` (tabuleiro), `MatchAnimator` + `PieceAnimations` (animações dos eventos). |
-| `src/ui/` | `HoloCard` (cartas 3D), `MatchUI` + `MatchInput` (partida), `Hub` (topo + Arena), `GachaView` (loja), `DeckBuilderView`, `OnlineLobby`, `UIKit`. |
+| `src/ui/` | `HoloCard` (cartas 3D). Partida: `MatchUI` (layout da arena), `MatchHUD` (retratos, material, relógios, capturas, histórico), `MatchChain` (Chain e fim), `MatchInput` (cliques e respostas), `CardZoom` (zoom das cartas), `PieceInspector` (cartão da peça ao passar o rato). Resto: `Hub` (topo + Arena), `GachaView` (loja), `DeckBuilderView`, `OnlineLobby`, `UIKit`. |
 | `src/audio/SoundEngine.js` | Efeitos sonoros sintetizados (Web Audio). |
-| `styles/` | `base` (paleta e botões), `board`, `cards`, `match`, `hub`. |
+| `styles/` | `base` (paleta e botões), `board` (tabuleiro 3D neon e peças), `cards`, `arena` (layout da partida), `match` (componentes da partida), `hub`. |
 
 ## 5. Firebase (projeto `yuchess`)
 

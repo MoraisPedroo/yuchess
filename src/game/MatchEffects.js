@@ -33,6 +33,7 @@
     async afterDeath(piece, sq, cause) {
       const owner = this.players[piece.color];
       owner.stats.lost++;
+      owner.lostTypes.push(this.realType(piece));
       for (const id of piece.equips) owner.gy.push(id);
       piece.equips = [];
       const covered = this.trapAt(sq, piece.color);

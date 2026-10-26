@@ -20,7 +20,8 @@ Jogo no ar: <https://yuchess.vercel.app/> (a partir da branch `main`).
 
 ## Modos
 
-- **Contra o bot**: Fácil, Médio ou Difícil (minimax de 1 a 3 lances com quiescência + heurísticas de cartas).
+- **Contra o bot**: Fácil, Médio ou Difícil (minimax de 1 a 3 lances com quiescência + heurísticas de cartas), com relógio de 5 min, 10 min ou sem limite.
+- **Arena**: tabuleiro neon em 3D com as peças em pé, retratos com material, relógio e peças capturadas, mão em leque com zoom ao estilo Hearthstone e cartão de cada peça ao passar o rato (estado e equipamentos).
 - **Online** (Firebase): ranqueada com rating Elo (conta Google) ou sala privada por código/link (também como convidado). 2 minutos por turno.
 - **Loja**: pacotinho de 5 cartas por 100 de ouro (cartas 1–4: 65/25/8/2 %; carta 5: Rara 78 %, Épica 18 %, Lendária 4 %), Épica garantida a cada 5 pacotes, Lendária com pity suave a partir do 15.º e garantida no 20.º. Cópias a mais viram Poeira Estelar.
 - **Baralhos**: coleção + baralho de 12 (máx. 2 cópias, 1 se Lendária, máx. 2 Lendárias), auto-completar e oficina para criar cartas com Poeira Estelar.
@@ -42,7 +43,7 @@ Jogo no ar: <https://yuchess.vercel.app/> (a partir da branch `main`).
 
 ## Pôr o online a funcionar
 
-1. **Firebase → Authentication → Sign-in method**: ativa **Google** e **Anónimo**.
+1. **Firebase → Authentication → «Começar» (Get started)** (sem isto o login dá `configuration-not-found`) e depois **Sign-in method**: ativa **Google** e **Anónimo**.
 2. **Firebase → Authentication → Settings → Authorized domains**: `yuchess.vercel.app` (e o domínio das pré-visualizações, se quiseres testar nelas).
 3. **Firebase → Firestore → Regras**: cola `firestore.rules` e publica (ou `npx firebase-tools deploy --only firestore:rules`). **Obrigatório**: as regras novas acrescentam `users/{uid}` (coleção) e o baralho nas salas.
 4. Abre o site em dois navegadores e testa uma sala privada e uma ranqueada.

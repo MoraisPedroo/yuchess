@@ -21,7 +21,7 @@
       this.uidSeq = 0;
       this.players = {};
       for (const t of TEAMS) {
-        this.players[t] = { team: t, name: names[t] || LABEL[t], deck: (decks[t] || []).map((id) => this.newInst(id, t)), hand: [], gy: [], zone: [], stats: { captures: 0, cards: 0, lost: 0 } };
+        this.players[t] = { team: t, name: names[t] || LABEL[t], deck: (decks[t] || []).map((id) => this.newInst(id, t)), hand: [], gy: [], zone: [], lostTypes: [], stats: { captures: 0, cards: 0, lost: 0 } };
       }
       this.traps = [];
       this.state = { active: 'w', turnCount: 0, phase: 'SETUP', actionsLeft: 0, winner: null, reason: '', mustPass: false, movedThisTurn: false, shieldLock: { w: 0, b: 0 }, ownTurns: { w: 0, b: 0 } };

@@ -8,6 +8,9 @@
 
   const ERRORS = {
     'auth/operation-not-allowed': 'Este tipo de login não está ativo. No Firebase: Authentication → Sign-in method → ativa Google e Anónimo.',
+    'auth/configuration-not-found': 'A Autenticação ainda não foi ligada no Firebase. Na consola: Authentication → «Começar» (Get started) → Sign-in method → ativa Anónimo e Google.',
+    'auth/admin-restricted-operation': 'O login de convidado está desligado. No Firebase: Authentication → Sign-in method → ativa Anónimo.',
+    'auth/internal-error': 'O Firebase recusou o login. Confirma em Authentication que o serviço está ligado e que Google e Anónimo estão ativos.',
     'auth/unauthorized-domain': 'Este domínio não está autorizado. No Firebase: Authentication → Settings → Authorized domains → adiciona o domínio da Vercel.',
     'auth/popup-closed-by-user': 'Fechaste a janela de login antes de terminar.',
     'auth/popup-blocked': 'O navegador bloqueou a janela de login. Permite pop-ups para este site.',

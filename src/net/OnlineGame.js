@@ -1,6 +1,7 @@
 /* OnlineGame.js — liga uma sala do Firestore a um Match: sessão lockstep, batimento, relógio de 2 min
    por turno (ao esgotar joga-se um lance automático), vitória por abandono, "claims" e acerto do rating.
-   A interface (MatchUI) fornece: bus, toast(), cancelMode(), renderOnline(), createHumanAgent(team). */
+   A interface (MatchUI) fornece: bus, toast(), cancelMode(), renderOnline(), createHumanAgent(team).
+   O relógio que aparece no topo da arena vem de `turnLeft()`. */
 (function (YC) {
   'use strict';
 
@@ -62,6 +63,9 @@
       return `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
     }
 
+    /** Tempo que falta no turno de quem está a jogar (os dois lados contam desde que viram o turno começar). */
+    turnLeft() { return this.turnStart ? Math.max(0, TURN_MS - (Date.now() - this.turnStart)) : TURN_MS; }
+
     canClaimForfeit() {
       const s = this.game && this.game.state;
       return !!s && !s.winner && s.active === this.oppTeam && YC.Online.stallMs(this.match, this.uid) > YC.Online.FORFEIT_MS + 3000;
@@ -71,7 +75,7 @@
       const g = this.game, s = g && g.state;
       if (!s || s.winner || this.closed) return;
       const key = `${s.turnCount}:${s.active}`;
-      if (key !== this.turnKey) { this.turnKey = key; this.deadline = s.active === this.team ? Date.now() + TURN_MS : 0; }
+      if (key !== this.turnKey) { this.turnKey = key; this.turnStart = Date.now(); this.deadline = s.active === this.team ? Date.now() + TURN_MS : 0; }
       if (s.active === this.team && this.deadline && Date.now() > this.deadline && !g.busy && s.phase === 'PREP') {
         this.ui.cancelMode();
         this.ui.toast('Tempo esgotado: foi jogado um lance automático.');

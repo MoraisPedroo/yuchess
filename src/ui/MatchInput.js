@@ -42,9 +42,7 @@
     },
 
     cancelMode() {
-      this.mode = null; this.selSq = -1; this.selCard = null; this.stealFrom = -1;
-      const a = this.q && this.q('.insp-actions');
-      if (a) a.innerHTML = '';
+      this.mode = null; this.selSq = -1; this.selCard = null; this.stealFrom = -1; this.cardActs = null;
       if (this.stage) this.renderSoft();
     },
 
@@ -63,7 +61,6 @@
       if (this.selCard && this.selCard.uid === inst.uid) return this.cancelMode();
       this.cancelMode();
       this.selCard = inst;
-      this.inspect(inst.id);
       const def = YC.Cards.get(inst.id), p = this.match.players[this.viewer];
       const acts = [];
       if (def.kind === 'EQUIP') { this.mode = 'equip'; if (!this.cardUsable(inst)) this.toast('Nenhuma peça tua pode usar este equipamento.'); }
@@ -78,22 +75,9 @@
       this.renderSoft();
     },
 
+    /** Botões da carta escolhida (aparecem na barra por cima da mão). */
     cardActions(acts, inst) {
-      const box = this.q('.insp-actions');
-      box.innerHTML = '';
-      for (const [label, act] of acts) {
-        const b = document.createElement('button');
-        b.className = `btn small ${act === 'set' ? 'violet' : 'pink'}`;
-        b.textContent = label;
-        b.onclick = () => this.cardAct(act, inst);
-        box.appendChild(b);
-      }
-      if (this.mode && this.mode !== 'piece') {
-        const c = document.createElement('button');
-        c.className = 'btn small ghost'; c.textContent = 'Cancelar';
-        c.onclick = () => this.cancelMode();
-        box.appendChild(c);
-      }
+      this.cardActs = acts.map(([label, act]) => [label, act, inst]);
     },
 
     cardAct(act, inst) {
@@ -181,9 +165,25 @@
       const m = this.match;
       if (act === 'pass') return this.send({ type: 'PASS' });
       if (act === 'cancel') return this.cancelMode();
-      if (act === 'speed') { YC.FX.speed = YC.FX.speed > 1 ? 1 : 1.8; try { localStorage.setItem('chessgioh.fast', YC.FX.speed > 1 ? '1' : '0'); } catch (e) { /* */ } return this.renderSoft(); }
+      if (act === 'speed') {
+        YC.FX.speed = YC.FX.speed > YC.FX.NORMAL ? YC.FX.NORMAL : YC.FX.FAST;
+        try { localStorage.setItem('chessgioh.speed', YC.FX.speed > YC.FX.NORMAL ? 'fast' : 'normal'); } catch (e) { /* */ }
+        this.toast(YC.FX.speed > YC.FX.NORMAL ? 'Animações rápidas.' : 'Animações normais.');
+        return this.renderSoft();
+      }
+      if (act === 'mute') { YC.Sound.setMuted(!YC.Sound.muted); return this.renderSoft(); }
+      if (act === 'log') return this.toggleLog();
       if (act === 'forfeit' && this.online) return this.online.claimForfeit();
-      if (act === 'exit') return this.onExit();
+      if (act === 'exit') {
+        if (m.over) return this.onExit();
+        return YC.UI.confirm('Sair da partida?', 'Se saíres agora, desistes e perdes a partida.', 'Sair e desistir').then((ok) => {
+          if (!ok) return;
+          if (!m.over) { if (this.online) this.online.resign(); else m.resign(this.viewer); }
+          if (this.pendingResolve) this.finishResponse(null);
+          document.querySelectorAll('.end-back').forEach((e) => e.remove());
+          this.onExit();
+        });
+      }
       if (act === 'resign') {
         return YC.UI.confirm('Desistir?', 'Vais perder esta partida.', 'Desistir').then((ok) => {
           if (!ok || m.over) return;
@@ -220,7 +220,7 @@
         const c = YC.HoloCard.create(o.id, { size: 'sm' });
         c.classList.add('respond');
         c.onclick = () => this.pickResponse(o.uid);
-        c.onmouseenter = () => this.inspect(o.id);
+        YC.CardZoom.attach(c, o.id);
         cards.appendChild(c);
       }
       bar.querySelector('[data-a="pass"]').onclick = () => this.finishResponse(null);
@@ -260,6 +260,7 @@
 
     finishResponse(resp) {
       clearInterval(this.respondTimer);
+      YC.CardZoom.hide();
       const resolve = this.pendingResolve;
       this.respondCtx = null; this.pendingResolve = null; this.respondPick = null;
       const bar = this.q('.respond-bar');

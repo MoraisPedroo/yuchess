@@ -3,15 +3,21 @@
   'use strict';
 
   const esc = (s) => YC.HoloCard.esc(s);
+  const CLOCKS = [[5, '5 min'], [10, '10 min'], [0, 'Sem limite']];
   const LEVELS = [['easy', 'Fácil', 'Joga ao calhas de vez em quando.'], ['medium', 'Médio', 'Pensa 2 lances à frente.'], ['hard', 'Difícil', 'Pensa 3 lances e usa bem as cartas.']];
 
   const Hub = {
     tab: 'arena',
     level: 'medium',
+    clock: 10,
 
     init(app) {
       Hub.app = app;
-      try { Hub.level = localStorage.getItem('chessgioh.level') || 'medium'; } catch (e) { /* */ }
+      try {
+        Hub.level = localStorage.getItem('chessgioh.level') || 'medium';
+        const c = localStorage.getItem('chessgioh.clock');
+        if (c != null) Hub.clock = Number(c) || 0;
+      } catch (e) { /* */ }
       document.querySelectorAll('#topnav .tab').forEach((b) => b.addEventListener('click', () => Hub.go(b.dataset.tab)));
       document.querySelector('#topnav .logo').addEventListener('click', () => Hub.go('arena'));
       const mute = document.getElementById('btn-mute');
@@ -79,6 +85,7 @@
             <h2>🤖 Contra o bot</h2>
             <div class="levels">${LEVELS.map(([id, label, tip]) => `<button class="chip ${Hub.level === id ? 'on' : ''}" data-level="${id}" title="${tip}">${label}</button>`).join('')}</div>
             <p class="muted">${LEVELS.find((l) => l[0] === Hub.level)[2]} Vitória: +120 ouro e +25 poeira.</p>
+            <div class="levels"><span class="muted">⏱ Relógio:</span>${CLOCKS.map(([v, label]) => `<button class="chip ${Hub.clock === v ? 'on' : 'dark'}" data-clock="${v}">${label}</button>`).join('')}</div>
             <button class="btn" data-a="bot">Jogar!</button>
           </div>
           <div class="panel mode-card">
@@ -108,7 +115,8 @@
       const hc = YC.HoloCard.create('rt_espelho_magico', { size: 'lg' });
       root.querySelector('.hero-card').appendChild(hc);
       root.querySelectorAll('[data-level]').forEach((b) => b.onclick = () => { Hub.level = b.dataset.level; try { localStorage.setItem('chessgioh.level', Hub.level); } catch (e) { /* */ } Hub.renderArena(); });
-      root.querySelectorAll('[data-a="bot"]').forEach((b) => b.onclick = () => Hub.app.startBot(Hub.level));
+      root.querySelectorAll('[data-clock]').forEach((b) => b.onclick = () => { Hub.clock = Number(b.dataset.clock); try { localStorage.setItem('chessgioh.clock', Hub.clock); } catch (e) { /* */ } Hub.renderArena(); });
+      root.querySelectorAll('[data-a="bot"]').forEach((b) => b.onclick = () => Hub.app.startBot(Hub.level, Hub.clock));
       root.querySelectorAll('[data-a="online"]').forEach((b) => b.onclick = () => Hub.go('online'));
       root.querySelectorAll('[data-a="decks"]').forEach((b) => b.onclick = () => Hub.go('decks'));
       if (window.gsap) {

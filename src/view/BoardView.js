@@ -1,23 +1,27 @@
-/* BoardView.js — desenha o tabuleiro (64 casas), as peças (elementos com SVG) e as marcações.
+/* BoardView.js — tabuleiro 3D (plano inclinado em perspetiva) com peças em pé, como figuras numa arena.
    `sync(match)` reconcilia o DOM com o estado do motor: posições, tipo, equipamentos, escudo, gelo, xeque.
-   As animações (MatchAnimator) mexem nos mesmos elementos e no fim chamam `sync` para acertar tudo. */
+   As animações (MatchAnimator) mexem nos mesmos elementos e no fim chamam `sync` para acertar tudo.
+   Os efeitos (POW!, partículas) desenham-se numa camada plana por cima (`fx`), na posição projetada das casas. */
 (function (YC) {
   'use strict';
 
   const C = () => YC.Chess;
+  const FILES = 'ABCDEFGH';
 
   class BoardView {
-    constructor(host, { onSquare } = {}) {
+    constructor(host, { onSquare, onPieceHover, fxLayer } = {}) {
       this.host = host;
       this.flipped = false;
       this.onSquare = onSquare || (() => {});
+      this.onPieceHover = onPieceHover || (() => {});
       this.pieceEls = new Map();
       this.busy = new Set();
-      host.innerHTML = '<div class="board-wrap"><div class="board"></div><div class="pieces"></div><div class="fx-layer"></div></div>';
+      host.innerHTML = '<div class="board-wrap"><div class="board"><div class="pieces"></div></div></div>';
       this.wrap = host.firstChild;
       this.board = this.wrap.querySelector('.board');
-      this.piecesLayer = this.wrap.querySelector('.pieces');
-      this.fx = this.wrap.querySelector('.fx-layer');
+      this.piecesLayer = this.board.querySelector('.pieces');
+      this.fx = fxLayer || Object.assign(document.createElement('div'), { className: 'fx-layer' });
+      if (!fxLayer) host.appendChild(this.fx);
       this.squares = [];
       for (let i = 0; i < 64; i++) {
         const s = document.createElement('div');
@@ -26,13 +30,15 @@
         this.board.appendChild(s);
         this.squares.push(s);
       }
+      // as peças em pé tapam parte da casa de trás: o clique numa peça conta como clique na casa dela
+      const pieceOf = (e) => e.target.closest && e.target.closest('.piece');
+      this.piecesLayer.addEventListener('click', (e) => { const p = pieceOf(e); if (p) this.onSquare(Number(p.dataset.sq)); });
+      this.piecesLayer.addEventListener('mouseover', (e) => { const p = pieceOf(e); if (p && p !== this.hovered) { this.hovered = p; this.onPieceHover(Number(p.dataset.sq), p); } });
+      this.piecesLayer.addEventListener('mouseout', (e) => { const p = pieceOf(e); if (p && !p.contains(e.relatedTarget)) { this.hovered = null; this.onPieceHover(-1, null); } });
       this.layout();
     }
 
-    /** Posiciona as camadas por cima do tabuleiro (as peças ocupam a mesma área das casas). */
     layout() {
-      const inset = 'calc(16px + 3.5px)';
-      for (const l of [this.piecesLayer, this.fx]) { l.style.position = 'absolute'; l.style.inset = inset; }
       this.squares.forEach((s, i) => {
         const sq = this.flipped ? 63 - i : i;
         s.dataset.sq = sq;
@@ -43,20 +49,30 @@
       });
     }
 
-    setFlipped(f) { if (this.flipped !== f) { this.flipped = f; this.layout(); this.pieceEls.forEach((el, id) => this.place(el, Number(el.dataset.sq))); } }
+    setFlipped(f) { if (this.flipped !== f) { this.flipped = f; this.layout(); this.pieceEls.forEach((el) => this.place(el, Number(el.dataset.sq))); } }
     rc(sq) { const r = sq >> 3, c = sq & 7; return this.flipped ? [7 - r, 7 - c] : [r, c]; }
-    center(sq) { const [r, c] = this.rc(sq); return { x: (c + 0.5) * 12.5, y: (r + 0.5) * 12.5 }; }
     sqEl(sq) { return this.squares[this.flipped ? 63 - sq : sq]; }
     rect(sq) { return this.sqEl(sq).getBoundingClientRect(); }
     place(el, sq) { const [r, c] = this.rc(sq); el.style.left = `${c * 12.5}%`; el.style.top = `${r * 12.5}%`; el.dataset.sq = sq; }
     pctPos(sq) { const [r, c] = this.rc(sq); return { left: `${c * 12.5}%`, top: `${r * 12.5}%` }; }
+
+    /** Centro projetado da casa, em % da camada de efeitos (que é plana). */
+    center(sq) {
+      const r = this.rect(sq), f = this.fx.getBoundingClientRect();
+      if (!f.width) return { x: 50, y: 50 };
+      return { x: ((r.left + r.width / 2 - f.left) / f.width) * 100, y: ((r.top + r.height * 0.42 - f.top) / f.height) * 100 };
+    }
+
+    /** Tamanho de referência dos efeitos (largura projetada do tabuleiro). */
+    unit() { return this.board.getBoundingClientRect().width || 400; }
 
     makePiece(p) {
       const el = document.createElement('div');
       el.className = `piece ${p.color}`;
       el.dataset.id = p.id;
       el.style.setProperty('--blink', `${(Math.random() * 3.5).toFixed(2)}s`);
-      el.innerHTML = '<div class="aura"></div><div class="hop"><div class="squash"></div></div><div class="shield-dome"></div><div class="ice-block"></div><div class="freeze-badge"></div><div class="medals"></div>';
+      el.innerHTML = '<div class="base-disc"></div><div class="stand"><div class="aura"></div><div class="hop"><div class="squash"></div></div>'
+        + '<div class="shield-dome"></div><div class="ice-block"></div><div class="freeze-badge"></div><div class="medals"></div></div>';
       this.piecesLayer.appendChild(el);
       this.pieceEls.set(p.id, el);
       this.renderType(el, p);
@@ -71,8 +87,8 @@
 
     el(id) { return this.pieceEls.get(id) || null; }
 
-    /** Acerta o DOM com o estado. `skip`: ids de peças a meio de uma animação. */
     sync(m, { viewer } = {}) {
+      this.fx._unit = this.unit();
       const seen = new Set(), turn = m.state.turnCount;
       const checked = !m.state.winner && C().inCheck(m.pos, m.state.active) ? C().kingSquare(m.pos, m.state.active) : -1;
       m.pos.board.forEach((p, sq) => {
@@ -83,6 +99,7 @@
         if (this.busy.has(p.id)) return;
         this.renderType(el, p);
         if (Number(el.dataset.sq) !== sq || !el.style.left) this.place(el, sq);
+        el.classList.toggle('mine', p.color === viewer);
         const frozen = p.frozenUntil > turn;
         el.classList.toggle('equipped', p.equips.length > 0);
         el.classList.toggle('shielded', !!p.shield);
@@ -96,7 +113,7 @@
           el.dataset.equips = key;
           el.querySelector('.medals').innerHTML = p.equips.map((id) => {
             const c = YC.Cards.get(id);
-            return `<span class="medal" title="${c.name}" style="--c1:${c.theme.primary};--c2:${c.theme.secondary}">${YC.CardArt.svg(c, 'medal-icon')}</span>`;
+            return `<span class="medal" style="--c1:${c.theme.primary};--c2:${c.theme.secondary}">${YC.CardArt.svg(c, 'medal-icon')}</span>`;
           }).join('');
           const first = p.equips[0] && YC.Cards.get(p.equips[0]);
           el.style.setProperty('--aura', first ? `${first.theme.primary}aa` : 'transparent');
@@ -118,17 +135,17 @@
         const mark = document.createElement('div');
         mark.className = `trap-mark${mine ? '' : ' enemy'}`;
         mark.style.setProperty('--c', c.theme.primary);
-        mark.title = mine ? `A tua armadilha: ${c.name}` : `Armadilha inimiga revelada: ${c.name}`;
+        mark.dataset.card = t.id;
         mark.innerHTML = YC.CardArt.svg(c);
         this.sqEl(t.sq).appendChild(mark);
       }
     }
 
-    /** Marcações: seleção, lances possíveis, último lance, alvos de cartas. */
+    /** Marcações: seleção, lances possíveis (com o nome da casa, ex.: "D5"), último lance, alvos de cartas. */
     mark({ sel = -1, moves = [], last = null, equip = [], trap = [], pick = [] } = {}) {
       for (const s of this.squares) {
         s.classList.remove('sel', 'last', 'target', 'equip-ok', 'trap-ok');
-        s.querySelectorAll('.dot,.ring').forEach((d) => d.remove());
+        s.querySelectorAll('.dot,.ring,.sq-label').forEach((d) => d.remove());
       }
       if (last) { this.sqEl(last.from).classList.add('last'); this.sqEl(last.to).classList.add('last'); }
       if (sel >= 0) this.sqEl(sel).classList.add('sel');
@@ -139,6 +156,10 @@
         const d = document.createElement('div');
         d.className = m.captured ? `ring${m.flag === 'r' ? ' lance' : ''}` : 'dot';
         s.appendChild(d);
+        const lab = document.createElement('span');
+        lab.className = 'sq-label';
+        lab.textContent = `${FILES[m.to & 7]}${8 - (m.to >> 3)}`;
+        s.appendChild(lab);
       }
       for (const sq of equip) this.sqEl(sq).classList.add('equip-ok', 'target');
       for (const sq of trap) this.sqEl(sq).classList.add('trap-ok', 'target');

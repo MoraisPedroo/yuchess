@@ -11,7 +11,7 @@
     boot() {
       document.body.insertAdjacentHTML('afterbegin', YC.PieceArt.defs());
       YC.ProfileStore.load();
-      try { if (localStorage.getItem('chessgioh.fast') === '1') YC.FX.speed = 1.8; } catch (e) { /* */ }
+      try { YC.FX.speed = localStorage.getItem('chessgioh.speed') === 'fast' ? YC.FX.FAST : YC.FX.NORMAL; } catch (e) { /* */ }
       window.addEventListener('pointerdown', () => YC.Sound.init(), { passive: true });
       YC.Hub.init(App);
       const code = new URLSearchParams(location.search).get('sala');
@@ -41,7 +41,7 @@
     },
 
     /** Partida contra o bot com o baralho ativo. */
-    startBot(level = 'medium') {
+    startBot(level = 'medium', clockMin = 10) {
       const p = YC.ProfileStore.profile, deck = YC.Economy.activeDeck(p);
       const v = YC.Economy.validateDeck(p, deck.cards);
       if (!v.ok) { YC.UI.toast(`Baralho inválido: ${v.errors[0]}`, true); YC.Hub.show('decks'); return; }
@@ -54,11 +54,11 @@
       const match = new YC.Match({ bus, seed: Math.floor(rng() * 2 ** 31), decks, names, mode: 'BOT' });
       const ui = App.newUI();
       App.match = match;
-      ui.mount({ match, viewer: me, labels: { [me]: 'Tu', [bot]: `Bot · ${YC.BotAI.LEVELS[level].label}` } });
+      ui.mount({ match, viewer: me, clockMs: clockMin * 60000, labels: { [me]: 'Tu', [bot]: `Bot · ${YC.BotAI.LEVELS[level].label}` } });
       match.agents[me] = ui.createHumanAgent(me);
-      match.agents[bot] = YC.BotAI.create({ team: bot, level, delay: 650, seed: Math.floor(rng() * 1e6) });
+      match.agents[bot] = YC.BotAI.create({ team: bot, level, delay: 1100, seed: Math.floor(rng() * 1e6) });
       ui.onGameOver = ({ winner }) => App.reward(winner, me, match);
-      ui.onRematch = () => App.startBot(level);
+      ui.onRematch = () => App.startBot(level, clockMin);
       YC.Hub.show('match');
       YC.UI.toast(me === 'w' ? 'Jogas com as Brancas: começas tu!' : 'Jogas com as Pretas: o bot começa.');
       match.start().catch((err) => console.error('[partida]', err));

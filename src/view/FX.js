@@ -25,7 +25,10 @@
   }
 
   const FX = {
-    speed: 1,
+    // 1 = durações tal como escritas; o jogo usa 0,6 (mais calmo) e o modo "Rápido" 1,1
+    NORMAL: 0.6,
+    FAST: 1.1,
+    speed: 0.6,
     COLORS,
     starPath,
 
@@ -69,12 +72,13 @@
       return fake;
     },
 
-    size(layer) { return layer ? layer.clientWidth || 400 : 400; },
+    /** Tamanho de referência: a largura projetada do tabuleiro (definida pelo BoardView) ou a da camada. */
+    size(layer) { return layer ? layer._unit || layer.clientWidth || 400 : 400; },
 
     burst(layer, x, y, text, { fill = '#FCC934', size = 1, textColor = '#fff', hold = 0.45 } = {}) {
       const b = el('burst', layer, `<svg viewBox="-50 -50 100 100"><path d="${starPath(16, 49, 31)}" fill="${fill}" stroke="#111" stroke-width="3.5" stroke-linejoin="round"/>`
         + `<path d="${starPath(16, 34, 22)}" fill="#fff" opacity=".35"/></svg><b style="color:${textColor}">${text}</b>`);
-      b.style.left = `${x}%`; b.style.top = `${y}%`; b.style.width = `${26 * size}%`;
+      b.style.left = `${x}%`; b.style.top = `${y}%`; b.style.width = `${FX.size(layer) * 0.26 * size}px`;
       FX.set(b, { xPercent: -50, yPercent: -50, scale: 0, rotation: -40 });
       const tl = FX.timeline();
       tl.to(b, { scale: 1, rotation: 0, duration: 0.32, ease: 'back.out(3)' })
