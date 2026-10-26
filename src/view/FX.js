@@ -25,10 +25,10 @@
   }
 
   const FX = {
-    // 1 = durações tal como escritas; o jogo usa 0,6 (mais calmo) e o modo "Rápido" 1,1
-    NORMAL: 0.6,
-    FAST: 1.1,
-    speed: 0.6,
+    // 1 = durações tal como escritas; o jogo usa 0,5 (calmo) e o modo "Rápido" 0,9
+    NORMAL: 0.5,
+    FAST: 0.9,
+    speed: 0.5,
     COLORS,
     starPath,
 

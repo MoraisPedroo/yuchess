@@ -154,7 +154,7 @@
       return new Promise((resolve) => {
         const back = document.createElement('div');
         back.className = 'modal-back';
-        back.innerHTML = `<div class="modal promo"><h2>Promoção!</h2><p>Em que peça se transforma o Peão?</p><div class="promo-row">${['q', 'r', 'b', 'n'].map((t) => `<button class="promo-btn" data-t="${t}">${YC.PieceArt.svg(t, this.viewer)}<span>${YC.PIECE_NAME[t]}</span></button>`).join('')}</div></div>`;
+        back.innerHTML = `<div class="modal promo"><h2>Promoção!</h2><p>Em que peça se transforma o Peão?</p><div class="promo-row">${['q', 'r', 'b', 'n'].map((t) => `<button class="promo-btn" data-t="${t}">${YC.pieceHTML(t, this.viewer)}<span>${YC.PIECE_NAME[t]}</span></button>`).join('')}</div></div>`;
         document.body.appendChild(back);
         back.querySelectorAll('.promo-btn').forEach((b) => b.onclick = () => { back.remove(); resolve(b.dataset.t); });
         back.onclick = (e) => { if (e.target === back) { back.remove(); resolve(null); } };

@@ -38,6 +38,14 @@
       this.composer.addPass(this.bloom);
       this.composer.addPass(new A.OutputPass());
 
+      // reflexos das peças envernizadas (só os materiais "gloss" usam este mapa)
+      if (A.RoomEnvironment) {
+        const pm = new THREE.PMREMGenerator(r);
+        this.envTex = pm.fromScene(new A.RoomEnvironment(), 0.04).texture;
+        pm.dispose();
+        YC.T3.setEnv(this.envTex);
+      }
+
       // luzes baixas + exposição alta: as peças ficam claras sem passar o limiar do bloom
       this.scene.add(new THREE.AmbientLight(0x8090c8, 0.7));
       const key = new THREE.DirectionalLight(0xf2f6ff, 1.35);
@@ -50,6 +58,7 @@
       this.pointer = new THREE.Vector2();
       this.buildArena();
       this.layout();
+      if (YC.Portraits3D) YC.Portraits3D.attach(r);
 
       this.tick = this.tick.bind(this);
       this.clock = new THREE.Clock();
@@ -95,7 +104,9 @@
     }
 
     tick() {
-      const t = this.clock.getElapsedTime();
+      const t = this.clock.getElapsedTime(), dt = Math.min(0.05, t - (this.lastT || t));
+      this.lastT = t;
+      if (this.fxStep) this.fxStep(dt);
       if (this.crest) this.crest.material.uniforms.uTime.value = t;
       if (this.hoverDirty) { this.hoverDirty = false; this.pick(this.lastPointer); }
       this.animateIdle(t);
@@ -160,20 +171,21 @@
       if (same) return;
       this.canvas.style.cursor = t ? 'pointer' : '';
       if (prev && prev.kind === 'piece') this.cb.onPieceHover(-1, null);
-      if (prev && (prev.kind === 'zone' || prev.kind === 'pile')) this.cb.onZoneHover(null);
+      if (prev && (prev.kind === 'zone' || prev.kind === 'pile' || prev.kind === 'trap')) this.cb.onZoneHover(null);
       if (t && t.kind === 'piece') {
         const g = this.pieceAtSq(t.sq);
         const states = g ? g.userData.states || [] : [];
         this.cb.onPieceHover(t.sq, { getBoundingClientRect: () => this.pieceRect(t.sq), classList: { contains: (k) => states.includes(k) } });
       }
       if (t && (t.kind === 'zone' || t.kind === 'pile')) this.cb.onZoneHover(t, this.objRect(t));
+      if (t && t.kind === 'trap') { const p = this.sqWorld(t.sq); this.cb.onZoneHover(t, this.areaRect(p.x, p.z, 0.6, 0.6, 0.4)); }
       this.updateArrow();
     }
 
     onClick(e) {
       const t = this.target(e);
       if (!t) return;
-      if (t.kind === 'piece' || t.kind === 'square') this.cb.onSquare(t.sq);
+      if (t.kind === 'piece' || t.kind === 'square' || t.kind === 'trap') this.cb.onSquare(t.sq);
       else if (t.kind === 'zone') this.cb.onZoneClick(t);
       else if (t.kind === 'pile') this.cb.onPileClick(t);
     }
@@ -186,6 +198,8 @@
       if (window.gsap) window.gsap.ticker.remove(this.tick); else cancelAnimationFrame(this.raf);
       window.removeEventListener('resize', this.onResize);
       if (this.ro) this.ro.disconnect();
+      if (this.envTex) this.envTex.dispose();
+      if (YC.Portraits3D) YC.Portraits3D.detach(this.renderer);
       this.renderer.dispose();
       this.composer.dispose && this.composer.dispose();
       this.host.innerHTML = '';

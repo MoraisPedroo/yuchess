@@ -56,7 +56,7 @@
       App.match = match;
       ui.mount({ match, viewer: me, clockMs: clockMin * 60000, labels: { [me]: 'Tu', [bot]: `Bot · ${YC.BotAI.LEVELS[level].label}` } });
       match.agents[me] = ui.createHumanAgent(me);
-      match.agents[bot] = YC.BotAI.create({ team: bot, level, delay: 1100, seed: Math.floor(rng() * 1e6) });
+      match.agents[bot] = YC.BotAI.create({ team: bot, level, delay: 1500, seed: Math.floor(rng() * 1e6) });
       ui.onGameOver = ({ winner }) => App.reward(winner, me, match);
       ui.onRematch = () => App.startBot(level, clockMin);
       YC.Hub.show('match');

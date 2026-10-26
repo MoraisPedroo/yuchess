@@ -21,7 +21,7 @@ Jogo no ar: <https://yuchess.vercel.app/> (a partir da branch `main`).
 ## Modos
 
 - **Contra o bot**: Fácil, Médio ou Difícil (minimax de 1 a 3 lances com quiescência + heurísticas de cartas), com relógio de 5 min, 10 min ou sem limite.
-- **Arena 3D** (Three.js + bloom): tabuleiro de vidro com moldura néon e círculo mágico, peças chibi 3D em pedestais holográficos, Zonas de Armadilhas e baralho/cemitério na mesa, HUD com retratos, MATERIAL, relógios e peças capturadas, painel lateral para ler as cartas e cartão de cada peça ao passar o rato. Sem WebGL usa-se um tabuleiro em CSS.
+- **Arena 3D** (Three.js + bloom): tabuleiro de vidro com moldura néon e círculo mágico, peças chibi 3D em pedestais holográficos, Zonas de Armadilhas e baralho/cemitério na mesa, peças de vinil envernizado com detalhes (bandeira na Torre, capa no Rei, pérolas na Dama…), animações com antecipação, rastos, faíscas e estilhaços, HUD com retratos 3D, MATERIAL, relógios e peças capturadas, cartas que crescem no próprio sítio ao passar o rato (estilo Hearthstone), arrastar cartas para a peça/casa/Zona e detalhes das armadilhas ao passar o rato. Sem WebGL usa-se um tabuleiro em CSS.
 - **Online** (Firebase): ranqueada com rating Elo (conta Google) ou sala privada por código/link (também como convidado). 2 minutos por turno.
 - **Loja**: pacotinho de 5 cartas por 100 de ouro (cartas 1–4: 65/25/8/2 %; carta 5: Rara 78 %, Épica 18 %, Lendária 4 %), Épica garantida a cada 5 pacotes, Lendária com pity suave a partir do 15.º e garantida no 20.º. Cópias a mais viram Poeira Estelar.
 - **Baralhos**: coleção + baralho de 12 (máx. 2 cópias, 1 se Lendária, máx. 2 Lendárias), auto-completar e oficina para criar cartas com Poeira Estelar.

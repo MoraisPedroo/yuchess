@@ -27,7 +27,7 @@
       for (const box of this.stage.querySelectorAll('.hud-p')) {
         const team = box.dataset.team, p = m.players[team], me = team === this.viewer;
         if (!box.firstChild) {
-          box.innerHTML = `<div class="hud-col"><div class="hud-ava ${team}">${YC.PieceArt.svg('k', team)}</div><div class="hud-caps"></div></div>
+          box.innerHTML = `<div class="hud-col"><div class="hud-ava ${team}">${YC.pieceHTML('k', team, 'bust')}</div><div class="hud-caps"></div></div>
             <div class="hud-stats"><b class="hud-name"></b><span class="hud-sub"></span><div class="hud-mat"></div><div class="hud-clock ${me ? 'mine' : 'theirs'}"></div></div>
             <div class="hud-hand" title="Cartas na mão"></div>`;
         }
@@ -43,7 +43,7 @@
         const caps = box.querySelector('.hud-caps');
         if (caps.dataset.key !== capKey) {
           caps.dataset.key = capKey;
-          caps.innerHTML = lost.length ? lost.map((t) => `<i title="${YC.PIECE_NAME[t]}">${YC.PieceArt.svg(t, YC.other(team))}</i>`).join('') : '<small>—</small>';
+          caps.innerHTML = lost.length ? lost.map((t) => `<i title="${YC.PIECE_NAME[t]}">${YC.pieceHTML(t, YC.other(team))}</i>`).join('') : '<small>—</small>';
           caps.title = lost.length ? `Capturou ${lost.length} peça(s)` : 'Ainda não capturou peças';
         }
       }

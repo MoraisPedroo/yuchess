@@ -49,7 +49,7 @@
       const states = ['equipped', 'shielded', 'frozen', 'checked'].filter((k) => anchor.classList.contains(k)).join(' ');
       const el = document.createElement('div');
       el.className = `piece-insp ${p.color}`;
-      el.innerHTML = `<div class="pi-stage"><div class="pi-disc"></div><div class="pi-figure piece ${p.color} ${states}"><div class="squash">${YC.PieceArt.svg(p.type, p.color)}</div><div class="shield-dome"></div></div></div>
+      el.innerHTML = `<div class="pi-stage"><div class="pi-disc"></div><div class="pi-figure piece ${p.color} ${states}"><div class="squash">${YC.pieceHTML(p.type, p.color)}</div><div class="shield-dome"></div></div></div>
         <div class="pi-body"><div class="pi-title"><b>${YC.PIECE_NAME[real]}</b><span>${TEAM[p.color]}${p.color === ui.viewer ? ' · tua' : ''} · ${YC.Chess.sqName(sq).toUpperCase()}</span></div>
         ${chips.length ? `<div class="pi-chips">${chips.map(([k, t]) => `<span class="chip-${k}">${esc(t)}</span>`).join('')}</div>` : ''}
         <div class="pi-eq-title">Equipamentos (${p.equips.length}/2)</div>

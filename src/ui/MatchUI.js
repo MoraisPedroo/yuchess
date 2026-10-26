@@ -12,6 +12,7 @@
       this.root = root;
       this.onExit = onExit || (() => {});
       this.hideHand = new Set();
+      this.dropRects = new Map();
       this.handEls = new Map();
       this.chainEls = new Map();
       this.mode = null;
@@ -38,7 +39,6 @@
             <div class="hud-mid"><div class="jumbo left"></div><div class="hud-logo"><b>CHESS-GI-OH!</b><small>CARTOON EDITION</small></div><div class="jumbo right"></div></div>
             <section class="hud-p me" data-team="${viewer}"></section></header>
           <div class="feed"></div>
-          <aside class="card-inspector" hidden><div class="ci-card"></div><div class="ci-desc"></div></aside>
           <div class="opp-hand"></div>
           <aside class="arena-btns"></aside>
           <div class="m-chain" hidden><h3>Chain</h3><div class="chain-list"></div></div>
@@ -56,8 +56,8 @@
         this.board = new YC.Board3D(this.q('.stage3d-host'), {
           fxLayer: this.q('.arena-fx'),
           onSquare: (sq) => this.onSquare(sq),
-          onPieceHover: (sq, anchor) => (sq >= 0 ? YC.PieceInspector.show(this, sq, anchor) : YC.PieceInspector.hide()),
-          onZoneHover: (t) => this.onTableHover(t),
+          onPieceHover: (sq, anchor) => (sq >= 0 && !this.dragging ? YC.PieceInspector.show(this, sq, anchor) : YC.PieceInspector.hide()),
+          onZoneHover: (t, rect) => this.onTableHover(t, rect),
           onZoneClick: (t) => { if (t.rel === 'me' && t.card) this.onZoneCard({ inst: t.card, setTurn: t.setTurn }); },
           onPileClick: (t) => { if (t.pile === 'gy') this.showGraveyard(t.team); }
         });
@@ -69,6 +69,7 @@
         });
       }
       this.board.setFlipped(viewer === 'b');
+      if (this.use3D) this.q('.mascot .squash').innerHTML = YC.pieceHTML('k', viewer);
       this.animator = new YC.MatchAnimator({ bus: this.bus, board: this.board, ui: this });
       this.q('[data-a="close-log"]').onclick = () => this.toggleLog(false);
       this.offs = [
@@ -173,8 +174,9 @@
         if (!el) {
           el = H().create(inst.id, { size: 'md', uid: inst.uid });
           el.classList.add('in-hand', 'enter');
-          el.addEventListener('click', () => this.onHandCard(inst));
-          this.attachInspect(el, inst.id);
+          el.insertAdjacentHTML('beforeend', this.handTip(inst.id));
+          el.addEventListener('click', () => { if (!this.dragJustEnded) this.onHandCard(inst); });
+          if (this.attachDrag) this.attachDrag(el, inst);
           this.handEls.set(inst.uid, el);
           setTimeout(() => el.classList.remove('enter'), 500);
         }
@@ -182,6 +184,7 @@
         const k = i - (p.hand.length - 1) / 2;
         el.style.setProperty('--rot', `${k * 5}deg`);
         el.style.setProperty('--lift', `${Math.abs(k) * 9}px`);
+        el.classList.toggle('tip-left', k > 0);
         el.style.visibility = this.hideHand.has(inst.uid) ? 'hidden' : '';
         const ok = this.myTurn() && this.match.state.actionsLeft > 0 && this.cardUsable(inst);
         el.classList.toggle('playable', ok);
@@ -231,6 +234,7 @@
     }
 
     modeHint() {
+      if (this.dragging && this.dragHint) return this.dragHint();
       switch (this.mode) {
         case 'equip': return 'Clica numa peça brilhante para a equipar.';
         case 'trap': return 'Escolhe uma casa vazia (filas 3–6) para esconder a armadilha.';
@@ -251,39 +255,29 @@
       m.el.querySelector('[data-a="ok"]').onclick = () => m.close();
     }
 
-    // ───────────── painel lateral da carta (nunca tapa o tabuleiro) ─────────────
+    // ───────────── informação das cartas (estilo Hearthstone) ─────────────
+    /** Fora da mão: a carta grande aparece ao lado do elemento (Zona, Cemitério, Chain, respostas). */
     attachInspect(el, id) {
-      el.addEventListener('mouseenter', () => this.inspectCard(typeof id === 'function' ? id() : id));
-      el.addEventListener('mouseleave', () => this.hideCard());
+      el.addEventListener('mouseenter', () => YC.CardZoom.show(el, typeof id === 'function' ? id() : id));
+      el.addEventListener('mouseleave', () => YC.CardZoom.hide());
+      el.addEventListener('pointerdown', () => YC.CardZoom.hide());
     }
 
-    inspectCard(id) {
-      const box = this.q && this.q('.card-inspector');
-      if (!box || !id) return;
-      clearTimeout(this.hideCardTimer);
-      if (box.dataset.id !== id) {
-        const c = YC.Cards.get(id), R = YC.Cards.RARITY[c.rarity];
-        box.dataset.id = id;
-        const slot = box.querySelector('.ci-card');
-        slot.innerHTML = '';
-        slot.appendChild(H().create(id, { size: 'lg' }));
-        box.querySelector('.ci-desc').innerHTML = `<b>${YC.HoloCard.esc(c.name)}</b><span class="ci-meta">${YC.Cards.KIND_LABEL[c.kind]} · Velocidade ${c.ss} · <em style="color:${R.color}">${R.label}</em></span><p>${YC.HoloCard.esc(c.text)}</p>`;
-      }
-      if (box.hidden) {
-        box.hidden = false;
-        if (window.gsap) window.gsap.fromTo(box, { x: -24, opacity: 0 }, { x: 0, opacity: 1, duration: 0.2, ease: 'power2.out' });
-      }
+    /** Etiqueta ao lado da carta ampliada na mão: tipo, raridade, velocidade e como se joga. */
+    handTip(id) {
+      const c = YC.Cards.get(id), R = YC.Cards.RARITY[c.rarity], esc = YC.HoloCard.esc;
+      const how = { EQUIP: 'Arrasta para uma peça tua que brilhe.', GRID: 'Arrasta para uma casa vazia (filas 3 a 6). Fica escondida do adversário.',
+        REACTIVE: 'Arrasta para a tua Zona: dispara quando acontece o que diz o texto.', COUNTER: 'Arrasta para a tua Zona: responde às cartas do adversário.',
+        QUICK: 'Arrasta para o tabuleiro para ativar já, ou para a Zona para guardar.' }[c.kind];
+      const speed = { 1: 'não pode responder', 2: 'responde a VEL 1 e 2', 3: 'responde a qualquer carta' }[c.ss] || '';
+      return `<div class="hc-tip"><b>${esc(YC.Cards.KIND_LABEL[c.kind])}</b><span class="tip-meta"><em style="color:${R.color}">${R.label}</em> · VEL ${c.ss}: ${speed}</span><p>${how}</p><small>Ou clica na carta para ver as opções.</small></div>`;
     }
 
-    hideCard() {
-      clearTimeout(this.hideCardTimer);
-      this.hideCardTimer = setTimeout(() => { const box = this.q && this.q('.card-inspector'); if (box) box.hidden = true; }, 120);
-    }
-
-    onTableHover(t) {
-      if (t && t.kind === 'zone' && t.rel === 'me' && t.card) return this.inspectCard(t.card.id);
-      if (t && t.kind === 'pile' && t.pile === 'gy' && t.top) return this.inspectCard(t.top);
-      this.hideCard();
+    /** Passar o rato nas cartas da mesa 3D (Zona e Cemitério): zoom junto da carta. */
+    onTableHover(t, rect) {
+      const id = t && ((t.kind === 'zone' && t.rel === 'me' && t.card && t.card.id) || (t.kind === 'pile' && t.pile === 'gy' && t.top) || (t.kind === 'trap' && t.id));
+      if (!id || !rect || this.dragging) return YC.CardZoom.hide();
+      YC.CardZoom.show({ getBoundingClientRect: () => rect }, id, { delay: 60 });
     }
 
     // ───────────── posições para as animações ─────────────
@@ -301,6 +295,8 @@
       return free ? free.getBoundingClientRect() : null;
     }
     handCardRect(team, uid) {
+      const d = uid && this.dropRects.get(uid);
+      if (d && performance.now() - d.t < 5000) return d.rect;
       if (team === this.viewer) { const el = this.handEls.get(uid); return (el || this.q('.hand-row')).getBoundingClientRect(); }
       return this.q('.opp-hand').getBoundingClientRect();
     }

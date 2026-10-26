@@ -40,6 +40,11 @@
 .cutin-txt b { font-family: var(--font-head); font-size: clamp(28px, 5vw, 56px); color: #fff; -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); }
 
 /* zoom de carta (estilo Hearthstone) */
+/* carta a ser arrastada da mão (MatchDrag) */
+.drag-ghost { position: fixed; left: 0; top: 0; z-index: 96; pointer-events: none; will-change: transform; filter: drop-shadow(0 22px 26px rgba(0, 0, 0, .6)); }
+.drag-ghost .hc-face { transition: box-shadow .15s; }
+.drag-ghost.ok .hc-face { box-shadow: 0 0 0 3px #7CFF9B, 0 0 30px rgba(124, 255, 155, .95); }
+.drag-ghost.bad .hc-face { box-shadow: 0 0 0 3px #FF3355, 0 0 26px rgba(255, 51, 85, .9); }
 .card-zoom { position: fixed; z-index: 95; pointer-events: none; transform-origin: 50% 50%; filter: drop-shadow(0 18px 30px rgba(0, 0, 0, .55)); }
 
 /* inspetor de peça */
@@ -53,6 +58,7 @@
 .pi-figure { position: relative; width: 130px; height: 130px; }
 .pi-figure .squash { position: absolute; inset: 0; animation: insp-idle 1.6s ease-in-out infinite; transform-origin: 50% 95%; }
 .pi-figure .piece-svg { width: 100%; height: 100%; filter: drop-shadow(0 6px 0 rgba(0, 0, 0, .3)); }
+.pi-figure .p3d { transform: scale(1.22); transform-origin: 50% 88%; filter: drop-shadow(0 8px 10px rgba(0, 0, 0, .5)); }
 .pi-figure .shield-dome { inset: 0 4% 4%; }
 @keyframes insp-idle { 0%, 100% { transform: translateY(0) scale(1, 1); } 40% { transform: translateY(-10px) scale(.96, 1.05); } 55% { transform: translateY(0) scale(1.06, .94); } 70% { transform: translateY(0) scale(1, 1); } }
 .pi-body { padding: 10px 14px 14px; }

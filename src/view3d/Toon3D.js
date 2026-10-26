@@ -7,6 +7,7 @@
   const T = () => window.THREE;
   const mats = new Map();
   const texs = new Map();
+  const glossy = [];
 
   // Molduras por tipo de carta (relatório: Equip cobalto, Casa violeta, Reativa âmbar, Counter platina/vermelho)
   const KIND = {
@@ -40,6 +41,23 @@
       const key = `toon${hex}${JSON.stringify(extra)}`;
       if (!mats.has(key)) mats.set(key, new (T().MeshToonMaterial)({ color: hex, gradientMap: T3.gradientMap(), ...extra }));
       return mats.get(key);
+    },
+
+    /** Plástico envernizado (vinil de coleção): verniz + reflexos do mapa de ambiente (setEnv). */
+    gloss(hex, { emissive = 0, ei = 0, rough = 0.36, metal = 0, coat = 1, env = 0.55, side } = {}) {
+      const key = `gloss${hex}|${emissive}|${ei}|${rough}|${metal}|${coat}|${env}|${side || 0}`;
+      if (!mats.has(key)) {
+        const m = new (T().MeshPhysicalMaterial)({ color: hex, emissive, emissiveIntensity: ei, roughness: rough, metalness: metal, clearcoat: coat, clearcoatRoughness: 0.12, envMap: T3.env || null, envMapIntensity: env, side: side || T().FrontSide });
+        mats.set(key, m);
+        glossy.push(m);
+      }
+      return mats.get(key);
+    },
+
+    /** O mapa de ambiente pertence ao renderer: cada palco novo gera o seu e atualiza os materiais. */
+    setEnv(tex) {
+      T3.env = tex;
+      for (const m of glossy) { m.envMap = tex; m.needsUpdate = true; }
     },
 
     basic(hex, k = 1, extra = {}) {

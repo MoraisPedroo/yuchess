@@ -5,7 +5,7 @@
 
 ## Estado atual (2026-10-26)
 
-**No ar (`main`, juntada a 2026-10-26):** <https://yuchess.vercel.app/>. A partida usa agora um palco 3D em Three.js (ver o registo mais recente). O jogo foi refeito do zero seguindo o relatório "Chess-Gi-Oh! Cartoon Edition" do Pedro. Substitui o protótipo "Chess-Oh! Uno-Head" (xadrez + Uno, estilo 1930) e o modo "Speed Duel" (só cartas) — os dois continuam no histórico do git (`main` cb44011 e branch `pedro/duel-links`).
+**No ar (`main`, juntada a 2026-10-26):** <https://yuchess.vercel.app/>. A partida usa um palco 3D em Three.js com peças de vinil, partículas, mão estilo Hearthstone e arrastar cartas (ver o registo mais recente). O jogo foi refeito do zero seguindo o relatório "Chess-Gi-Oh! Cartoon Edition" do Pedro. Substitui o protótipo "Chess-Oh! Uno-Head" (xadrez + Uno, estilo 1930) e o modo "Speed Duel" (só cartas) — os dois continuam no histórico do git (`main` cb44011 e branch `pedro/duel-links`).
 
 **Funciona e está testado**
 - Xadrez completo (`src/game/ChessRules.js`): lances legais, xeque, xeque-mate, afogamento, roque, en passant, promoção, 50 lances, repetição tripla, material insuficiente. Contagens *perft* de referência certas (início, Kiwipete, posições 3–5).
@@ -28,13 +28,14 @@
 
 ## Em curso / a meio
 
-- Nada a meio no código. O Pedro está a testar a versão publicada e vai enviar os erros que encontrar.
+- Nada a meio no código. O Pedro está a testar a versão publicada e vai enviar os erros que encontrar (sobretudo: velocidade das animações, arrastar cartas no telemóvel, legibilidade do zoom).
 - Falta publicar o `firestore.rules` no Firebase (ver "Configuração pendente") para o online funcionar.
 
 ## Próximos passos (por prioridade)
 
 1. Teste real online + corrigir o que as regras recusarem.
-2. Visual 3D: trocar as peças por modelos GLB CC0 (Quaternius, Kenney) se o Pedro preferir; avatares/mascote e fundo de estádio gerados por IA (prompts no relatório do Gemini, secção 5); aplicar o mesmo estilo néon ao menu, loja e baralhos.
+2. Visual: aplicar o estilo néon/3D ao menu, loja e baralhos (os retratos 3D podem entrar lá com `YC.pieceHTML` se houver um renderer); fundo de estádio gerado por IA (prompts no relatório do Gemini, secção 5). Os modelos GLB deixaram de ser precisos: as peças de vinil feitas por código substituem-nos.
+2b. Arrastar: hoje só a mão arrasta. Falta arrastar uma carta da Zona (Magia Rápida virada) para o tabuleiro e um "seta de mira" do Íman entre as duas peças.
 3. Balanceamento: a Lança e a Mola são fortes; ver taxas de vitória por carta com `tools/simulate.js` (acrescentar estatística por carta).
 3. Tutorial interativo curto (primeira partida guiada: equipar, armadilha, resposta).
 4. Escolher alvos à mão nas cartas automáticas (Gerador de Bolhas, Bomba de Fumo, Boneco de Testes) — hoje o motor escolhe o melhor alvo.
@@ -48,6 +49,16 @@
 - Num separador escondido o navegador quase para as animações (requestAnimationFrame); o motor espera no máximo 4 s por animação, por isso o jogo nunca bloqueia, só fica lento.
 
 ## Registo de sessões
+
+### 2026-10-26 (tarde) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Pedido do Pedro**: as animações continuavam feias e rápidas; queria o estilo Hearthstone (passar o rato/clicar abre a carta no sítio, não num painel lateral), ver os detalhes da armadilha ao armá-la, arrastar a carta até à casa ou peça, e peças e "fotos" das peças mais bonitas.
+- **Animações** (`src/view3d/Anim3D.js` reescrito + `Anim3DCards.js` novo + `Particles3D.js` novo): lance = agachar → salto com rasto de luz e inclinação → aterrar com poeira, faíscas e onda + ressalto elástico; captura = recuo → investida → pausa de impacto de 0,14 s → "POW!/KAPOW!" em néon 3D, faíscas, clarão de luz, tremor de câmara e a peça vencida projetada a rodar até se partir em estilhaços. Texto néon 3D em vez dos balões 2D, bigorna a cair, gelo, teletransporte, feixes de luz nas cartas. Velocidade base 0,5 (o "Rápido" é 0,9) e o bot espera 1,5 s antes de jogar.
+- **Peças** (`PieceMeshes.js`): plástico envernizado com reflexos (`MeshPhysicalMaterial` + `RoomEnvironment`), ouro metálico, bochechas e sorrisos; Torre com porta e bandeira a ondular, Cavalo com orelhas, crina e narinas, Bispo com colar e medalha, Dama com colar de pérolas e gema, Rei com capa vermelha, gola de arminho e rubi. Olham à volta devagar.
+- **Fotos das peças** (`Portraits3D.js`): cada peça é desenhada uma vez para imagem com o renderer do palco (tom ACES aplicado no CPU) e usada no avatar do HUD (busto do Rei), peças capturadas, promoção, cartão da peça e mascote. Sem WebGL volta ao SVG.
+- **Cartas**: a carta da mão cresce no próprio sítio (×1,85, a área de clique fica igual para se passar às vizinhas) com etiqueta ao lado (tipo, raridade, velocidade e como se joga); o painel lateral foi removido; Zona, cemitério, Chain e respostas abrem o zoom junto da carta. **Arrastar** (`src/ui/MatchDrag.js`): a carta segue o rato, inclina, encolhe sobre o tabuleiro, brilha a verde/vermelho e há um marcador na casa; ao largar vira a ação normal (equipar, armar, virar na Zona, ativar; o Íman pede depois a tua peça); alvo inválido → volta à mão. Clicar continua a funcionar.
+- **Armadilhas**: ao armar aparece "ARMADA!" e a carta ao lado da casa durante 2,6 s; os cubos das tuas armadilhas (e das reveladas) mostram a carta ao passar o rato.
+- **Decisões**: os efeitos 3D vão para `board.fxLayer()` porque o `mark()` limpa `layers.marks`; o clarão do bloom e as luzes de impacto ficaram fracos de propósito (mais fortes lavam o ecrã de branco); no telemóvel o zoom da carta escolhida é ×1,55 e a barra de ação sobe para não a tapar.
+- **Como testar**: os 4 comandos (30/30, 8/8, 31/31, regras ok); no navegador jogar contra o bot, passar o rato pelas cartas da mão, arrastar um Equipamento para uma peça e uma Armadilha de Casa para uma casa das filas 3–6, passar o rato pelo cubo da armadilha, ver uma captura.
 
 ### 2026-10-26 (madrugada) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Pedido do Pedro**: a arena em CSS 3D "ficou feia"; enviou um relatório do Gemini Deep Research ("Relatório Técnico e de Direção de Arte") que pede uma cena WebGL a sério igual à imagem "Chess Links".

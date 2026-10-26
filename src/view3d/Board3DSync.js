@@ -43,6 +43,7 @@
       g.userData.type = p.type;
       g.userData.color = p.color;
       g.userData.eyes = body.getObjectByName('eyes');
+      g.userData.flag = body.getObjectByName('flag');
     },
 
     setPedestal(g, mine) {
@@ -146,6 +147,7 @@
       if (this.trapKey === key) return;
       this.trapKey = key;
       layer.clear();
+      this.pickables = this.pickables.filter((o) => !o.userData.pick || o.userData.pick.kind !== 'trap');
       for (const t of m.traps) {
         const mine = t.owner === viewer;
         if (!mine && !t.revealed) continue;
@@ -158,8 +160,10 @@
         grp.add(cube, icon);
         const p = this.sqWorld(t.sq);
         grp.position.set(p.x, 0.38, p.z);
-        grp.userData = { spin: cube, trapSq: t.sq };
+        grp.userData = { spin: cube, trapSq: t.sq, pick: { kind: 'trap', sq: t.sq, id: t.id, mine } };
+        icon.raycast = () => {};
         layer.add(grp);
+        this.pickables.push(grp);
       }
     },
 
@@ -241,7 +245,7 @@
     updateArrow() {
       const THREE = T();
       if (this.arrow) { this.layers.marks.remove(this.arrow); this.arrow.geometry.dispose(); this.arrow.material.dispose(); this.arrow = null; }
-      const h = this.hover, sq = h && (h.kind === 'square' || h.kind === 'piece') ? h.sq : -1;
+      const h = this.hover, sq = h && (h.kind === 'square' || h.kind === 'piece' || h.kind === 'trap') ? h.sq : -1;
       if (this.selSq == null || this.selSq < 0 || !this.targets || !this.targets.has(sq)) return;
       const a = this.sqWorld(this.selSq), b = this.sqWorld(sq);
       const dx = b.x - a.x, dz = b.z - a.z, len = Math.hypot(dx, dz);
@@ -265,6 +269,9 @@
         const frozen = u.states && u.states.includes('frozen');
         hold.position.y = (u.selected ? 0.16 : 0) + (frozen ? 0 : Math.sin(t * 2.4 + u.phase) * 0.035);
         hold.position.x = u.checked ? Math.sin(t * 60) * 0.015 : 0;
+        // olha à volta devagar; a bandeira da Torre ondula
+        if (!frozen) hold.rotation.y = Math.sin(t * 0.6 + u.phase * 1.7) * 0.22;
+        if (u.flag) u.flag.rotation.y = Math.sin(t * 3.2 + u.phase) * 0.4;
         if (u.eyes && !frozen) {
           const k = (t + u.phase) % 3.6;
           u.eyes.scale.y = k > 3.45 ? 0.12 : 1;

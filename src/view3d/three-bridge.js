@@ -7,7 +7,8 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 window.THREE = THREE;
-window.THREE_ADDONS = { EffectComposer, RenderPass, UnrealBloomPass, OutputPass, GLTFLoader };
+window.THREE_ADDONS = { EffectComposer, RenderPass, UnrealBloomPass, OutputPass, GLTFLoader, RoomEnvironment };
 window.dispatchEvent(new Event('yc-three-ready'));
