@@ -1,56 +1,43 @@
-/* Teste do protocolo online (lockstep) sem rede: dois GameControllers com a mesma semente,
-   cada um com uma IA local, ligados só por mensagens. No fim os dois estados têm de ser iguais.
-   Uso: node tools/simulate-online.js [jogos=20] [semente-inicial=1] [latência-ms=0] */
+#!/usr/bin/env node
+/* Testa o protocolo online (lockstep): dois Match com a mesma semente, cada um com o seu bot,
+   ligados só por mensagens (com latência). No fim os dois estados têm de ser idênticos.
+   Uso: node tools/simulate-online.js [N] */
 'use strict';
-const fs = require('fs');
 const path = require('path');
-const vm = require('vm');
+const { loadEngine } = require('./load-engine');
 
-const ROOT = path.join(__dirname, '..');
-const FILES = [
-  'src/core/EventBus.js', 'src/data/CardDatabase.js', 'src/engine/BoardEngine.js', 'src/engine/CombatRPG.js',
-  'src/engine/UnoEconomy.js', 'src/engine/EffectInterpreter.js', 'src/engine/ChainResolver.js',
-  'src/engine/GameController.js', 'src/ai/KingDiceAI.js', 'src/net/LockstepSession.js'
-];
-for (const f of FILES) vm.runInThisContext(fs.readFileSync(path.join(ROOT, f), 'utf8'), { filename: f });
-const YC = globalThis.YC;
+const YC = loadEngine(path.join(__dirname, '..'));
+const N = Number(process.argv[2]) || 8;
 
-const GAMES = Number(process.argv[2] || 20);
-const SEED0 = Number(process.argv[3] || 1);
-const LATENCY = Number(process.argv[4] || 0);
-
-async function playPair(seed) {
-  const [tA, tB] = YC.LockstepSession.memoryPair(LATENCY);
-  const make = (team, transport, randSeed) => {
-    const game = new YC.GameController({ seed, fast: true, mode: 'ONLINE' });
-    const ai = new YC.KingDiceAI(team, { delay: 0, rand: YC.mulberry32(randSeed) });
-    const issues = [];
-    const session = new YC.LockstepSession({ game, localTeam: team, transport, localAgent: ai, onDesync: (i) => issues.push(i) }).attach();
-    return { game, session, issues };
+async function pair(i) {
+  const rng = YC.mulberry32(300 + i);
+  const decks = { w: YC.Economy.randomDeck(rng), b: YC.Economy.randomDeck(rng) };
+  const [ta, tb] = YC.LockstepSession.memoryPair(i % 3);
+  const mk = (team, transport) => {
+    const game = new YC.Match({ seed: 900 + i, decks, mode: 'ONLINE' });
+    const bot = YC.BotAI.create({ team, level: 'easy', delay: 0, seed: team === 'w' ? 5 + i : 9 + i });
+    bot.cfg = { ...bot.cfg, ms: 40 };
+    const s = new YC.LockstepSession({ game, localTeam: team, transport, localAgent: bot, onDesync: (d) => { game.desync = d; } }).attach();
+    return { game, s };
   };
-  const W = make('WHITE', tA, seed * 31 + 1);
-  const B = make('BLACK', tB, seed * 17 + 5);
-  const resign = seed % 9 === 0; // de vez em quando, testar a desistência a meio
-  if (resign) setTimeout(() => B.session.resign(), 5);
-  const [wW, wB] = await Promise.all([W.game.start(), B.game.start()]);
-  const hW = W.game.stateHash(), hB = B.game.stateHash();
-  // Numa desistência cada lado pára num ponto diferente: aí só o vencedor tem de bater certo.
-  const ok = wW === wB && (resign || hW === hB) && !W.issues.length && !B.issues.length;
-  return { seed, ok, winner: wW, winnerB: wB, turns: W.game.state.turnCount, hashes: [hW, hB], issues: [...W.issues, ...B.issues], resign };
+  const A = mk('w', ta), B = mk('b', tb);
+  // a meio, um dos lados desiste (testa a mensagem RESIGN)
+  const resignAt = i % 4 === 3 ? 40 : -1;
+  if (resignAt > 0) A.game.bus.on('turn:start', ({ turnCount }) => { if (turnCount === resignAt) setTimeout(() => A.s.resign(), 0); });
+  await Promise.all([A.game.start(), B.game.start()]);
+  await new Promise((r) => setTimeout(r, 30));
+  const same = A.game.stateHash() === B.game.stateHash() && A.game.state.winner === B.game.state.winner;
+  return { same, A: A.game, B: B.game, desync: A.game.desync || B.game.desync, resigned: resignAt > 0 };
 }
 
 (async () => {
-  const t0 = Date.now();
-  let fails = 0, resigns = 0;
-  const wins = { WHITE: 0, BLACK: 0, DRAW: 0 };
-  for (let i = 0; i < GAMES; i++) {
-    const r = await playPair(SEED0 + i);
-    if (r.resign) resigns++;
-    wins[r.winner] = (wins[r.winner] || 0) + 1;
-    if (!r.ok) { fails++; console.log('FALHA', JSON.stringify(r).slice(0, 600)); }
+  let ok = 0;
+  for (let i = 0; i < N; i++) {
+    const r = await pair(i);
+    const good = (r.same || r.resigned) && !r.desync && r.A.state.winner === r.B.state.winner;
+    if (good) ok++;
+    console.log(`#${i} ${good ? '✔' : '✘'} ${r.A.state.winner} (${r.A.state.reason}) turnos ${r.A.state.turnCount}/${r.B.state.turnCount}${r.desync ? ' DESYNC ' + JSON.stringify(r.desync) : ''}`);
   }
-  console.log(`Pares de partidas: ${GAMES} em ${Date.now() - t0} ms · latência ${LATENCY} ms`);
-  console.log(`Sincronizadas: ${GAMES - fails}/${GAMES} · desistências testadas: ${resigns}`);
-  console.log('Vitórias:', wins);
-  if (fails) process.exitCode = 1;
+  console.log(`\nSincronizadas: ${ok}/${N}`);
+  process.exit(ok === N ? 0 : 1);
 })();

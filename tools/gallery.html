@@ -3,48 +3,51 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Galeria de peças e cartas</title>
-  <link href="https://fonts.googleapis.com/css2?family=Rye&family=Alegreya:wght@400;700;800&family=Special+Elite&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../styles/main.css">
+  <title>Galeria · Chess-Gi-Oh!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/board.css">
   <link rel="stylesheet" href="../styles/cards.css">
   <style>
-    html, body { overflow: auto; background: #3b2a1e; }
-    .row { display: flex; gap: 10px; padding: 10px; flex-wrap: wrap; }
-    .tile { width: 150px; height: 190px; background: #F4E7C5; border: 3px solid #141210; border-radius: 8px; position: relative; }
-    .tile.dark { background: repeating-linear-gradient(45deg, #6E4B33 0 5px, #5d3f2b 5px 7px); }
-    .tile svg { position: absolute; left: 5%; bottom: 4%; width: 90%; }
-    .cards { display: flex; gap: 10px; padding: 10px; flex-wrap: wrap; }
+    body { padding: 24px; overflow: auto; }
+    h2 { font-family: Fredoka, sans-serif; color: #fff; margin: 24px 0 12px; }
+    .row { display: flex; flex-wrap: wrap; gap: 14px; }
+    .cell { width: 96px; height: 96px; position: relative; background: #FDF1D6; border: 3px solid #111; border-radius: 14px; }
+    .cell.dark { background: #8C7BE0; }
+    .cell .piece { position: absolute; inset: 0; width: 100%; height: 100%; left: 0; top: 0; }
+    .cell small { position: absolute; bottom: -18px; left: 0; right: 0; text-align: center; color: #fff; font: 700 11px Nunito, sans-serif; }
+    .cards { display: flex; flex-wrap: wrap; gap: 18px; }
   </style>
 </head>
 <body>
-  <div class="row" id="white"></div>
-  <div class="row" id="black"></div>
+  <h2>Peças</h2>
+  <div class="row" id="pieces"></div>
+  <h2>Estados</h2>
+  <div class="row" id="states"></div>
+  <h2>Cartas</h2>
   <div class="cards" id="cards"></div>
   <script src="../src/core/EventBus.js"></script>
-  <script src="../src/data/CardDatabase.js"></script>
-  <script src="../src/view/PieceFactory.js"></script>
-  <script src="../src/view/VFXPostProcessor.js"></script>
-  <script src="../src/ui/CardView.js"></script>
+  <script src="../src/game/Cards.js"></script>
+  <script src="../src/view/PieceArt.js"></script>
+  <script src="../src/view/CardArt.js"></script>
+  <script src="../src/ui/HoloCard.js"></script>
   <script>
-    const vfx = new YC.VFXPostProcessor(); vfx.mount(); vfx.setFilm(false);
-    const anim = new YC.PieceFactory.IdleAnimator();
-    vfx.onTick(() => anim.tick());
-    for (const team of ['WHITE', 'BLACK']) {
-      ['PAWN', 'KNIGHT', 'BISHOP', 'ROOK', 'QUEEN', 'KING'].forEach((type, i) => {
-        const t = document.createElement('div');
-        t.className = 'tile' + ((i + (team === 'BLACK' ? 1 : 0)) % 2 ? ' dark' : '');
-        const rig = YC.PieceFactory.createPieceSVG(type, team);
-        t.appendChild(rig.svg); anim.add(rig);
-        document.getElementById(team.toLowerCase()).appendChild(t);
-      });
+    document.body.insertAdjacentHTML('afterbegin', YC.PieceArt.defs());
+    const mk = (type, color, cls = '', label = '') => {
+      const c = document.createElement('div');
+      c.className = 'cell' + (Math.random() < 0.5 ? ' dark' : '');
+      c.innerHTML = `<div class="piece ${color} ${cls}"><div class="hop"><div class="squash">${YC.PieceArt.svg(type, color)}</div></div>`
+        + `<div class="shield-dome"></div><div class="ice-block"></div></div><small>${label}</small>`;
+      return c;
+    };
+    for (const color of ['w', 'b']) for (const t of 'pnbrqk') document.getElementById('pieces').appendChild(mk(t, color, '', t + color));
+    const st = document.getElementById('states');
+    [['q', 'w', 'equipped', 'equipada'], ['n', 'b', 'frozen', 'congelada'], ['r', 'w', 'shielded', 'escudo'], ['k', 'b', 'checked', 'xeque'], ['b', 'w', 'scared', 'assustada'], ['p', 'b', 'equipped shielded', 'cetro']]
+      .forEach(([t, c, cls, l]) => st.appendChild(mk(t, c, cls, l)));
+    if (YC.HoloCard) {
+      const box = document.getElementById('cards');
+      for (const c of YC.Cards.LIST) box.appendChild(YC.HoloCard.create(c.id, { size: 'md' }));
     }
-    const seen = new Set();
-    for (const c of YC.CardDatabase.buildDeck()) {
-      if (seen.has(c.defId) || (c.basic && seen.size > 30)) continue;
-      seen.add(c.defId);
-      document.getElementById('cards').appendChild(YC.CardView.create(c));
-    }
-    document.getElementById('cards').appendChild(YC.CardView.createBack());
   </script>
 </body>
 </html>

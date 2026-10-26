@@ -1,65 +1,61 @@
-# Chess-Oh! Uno-Head
+# Chess-Gi-Oh! Cartoon Edition
 
-Xadrez + Uno + Yu-Gi-Oh! num desenho animado de 1930, feito só com código: peças em SVG "rubber hose", linha fervente a 12 fps, película WebGL e jazz swing sintetizado ao vivo. Sem imagens, sem ficheiros de som, sem dependências.
+Xadrez a sério com cartas ao estilo Yu-Gi-Oh!. Jogas com as regras normais do xadrez — xeque, xeque-mate, roque, en passant, promoção, afogamento — e antes de cada lance podes usar até 2 cartas: equipar uma peça, esconder uma armadilha numa casa do tabuleiro ou virar uma armadilha/counter-trap na tua Zona para responder ao adversário. Tudo em estilo cartoon moderno: peças com olhos que piscam e mudam de expressão, cartas holográficas que inclinam com o rato e animações "juicy" (saltos com squash & stretch, POW!, escudos a estilhaçar, carimbo NEGADO!).
 
-## Jogar
-
-- **Ficheiro único:** abre `dist/chess-oh.html` no navegador (funciona com duplo clique, sem servidor).
-- **Desenvolvimento:** `python tools/serve.py` e abre <http://localhost:8765>. O `index.html` também abre diretamente com duplo clique (os scripts são clássicos, não módulos).
-- **Modos:** 1 jogador contra o *King Dice* (IA), 2 jogadores no mesmo ecrã (com cortina entre turnos) e **online** com Firebase: salas privadas por código/link e partidas **ranqueadas** com rating Elo e classificação.
-- **Online em produção:** deploy estático na Vercel a partir deste repositório. Configuração necessária na secção "Pôr o online a funcionar".
+Jogo no ar: <https://yuchess.vercel.app/> (a partir da branch `main`).
 
 > A trabalhar no projeto (pessoas ou agentes de código)? Lê primeiro **[`AGENTS.md`](AGENTS.md)** e **[`docs/PROGRESS.md`](docs/PROGRESS.md)**.
+
+## Como se joga
+
+- **Baralho de 12 cartas**, 3 na mão inicial (máximo 5; a carta comprada com a mão cheia é queimada). Compras 1 carta nos teus turnos 3, 5, 7… e 1 carta sempre que perdes um Cavalo, Bispo, Torre ou Dama. Baralho vazio não faz perder.
+- **Turno**: até 2 ações de carta e depois 1 lance de xadrez.
+- **Equipamentos** (Velocidade 1): ficam na peça (máx. 2). Ex.: Espada da Ganância (compra ao capturar), Mola Canguru (salta 1 peça), Cetro (Peão anda como Rei + Escudo), Lança (captura a 2 casas sem sair do sítio).
+- **Armadilhas de Casa** (máx. 3, filas 3–6, escondidas do adversário): disparam quando uma peça inimiga acaba o lance nessa casa. Se armares onde o adversário já tem uma, as duas destroem-se (CLANG!).
+- **Armadilhas Reativas e Counter-Traps**: viram-se para baixo na Zona de Armadilhas (3 lugares) e só podem ser usadas a partir do turno seguinte. Reagem a captura, destruição ou xeque; as counter-traps anulam cartas do adversário.
+- **Magias Rápidas** (Velocidade 2): Íman, Pulso EMP e Britadeira — usam-se da mão no teu turno ou viradas na Zona.
+- **Chain**: cada carta ativada pode levar resposta; Velocidade(nova) ≥ max(2, Velocidade(topo)); resolve do último elo para o primeiro; máximo 8 elos; 12 s para responder.
+- **Escudo**: a próxima captura contra a peça falha (o escudo estilhaça e o atacante volta para trás).
+- **O Rei** nunca é congelado nem destruído por cartas, e nenhum efeito pode deixar o próprio Rei em xeque (nesse caso a peça fica congelada em vez de destruída/movida).
+
+## Modos
+
+- **Contra o bot**: Fácil, Médio ou Difícil (minimax de 1 a 3 lances com quiescência + heurísticas de cartas).
+- **Online** (Firebase): ranqueada com rating Elo (conta Google) ou sala privada por código/link (também como convidado). 2 minutos por turno.
+- **Loja**: pacotinho de 5 cartas por 100 de ouro (cartas 1–4: 65/25/8/2 %; carta 5: Rara 78 %, Épica 18 %, Lendária 4 %), Épica garantida a cada 5 pacotes, Lendária com pity suave a partir do 15.º e garantida no 20.º. Cópias a mais viram Poeira Estelar.
+- **Baralhos**: coleção + baralho de 12 (máx. 2 cópias, 1 se Lendária, máx. 2 Lendárias), auto-completar e oficina para criar cartas com Poeira Estelar.
+- **Recompensas**: vitória +120 ouro e +25 poeira; empate +60/+10; derrota +40 ouro se jogaste pelo menos 5 turnos. Começas com 500 de ouro, 200 de poeira e um baralho inicial.
+
+## Desenvolvimento
+
+- `python tools/serve.py` e abre <http://localhost:8765> (o `index.html` também abre com duplo clique).
+- Sem build e sem dependências instaladas: JavaScript em scripts clássicos com o namespace `YC`. GSAP 3.12.5 e canvas-confetti 1.9.3 vêm do CDN; se falharem, o jogo continua sem essas animações.
+
+| Comando | O que faz |
+|---|---|
+| `node tools/test-chess-rules.js` | Regras de xadrez com contagens *perft* de referência + equipamentos. |
+| `node tools/test-cards.js` | 31 testes de cenário das cartas e regras especiais. |
+| `node tools/simulate.js 30` | Bot contra bot em 30 partidas sem ecrã, com verificação de invariantes. |
+| `node tools/simulate-online.js 8` | Dois motores ligados só por mensagens têm de acabar idênticos (lockstep). |
+| `node tools/build.js` | Gera `dist/chess-gi-oh.html` (ficheiro único). |
+| `tools/gallery.html` | Galeria das peças e das 31 cartas. |
 
 ## Pôr o online a funcionar
 
 1. **Firebase → Authentication → Sign-in method**: ativa **Google** e **Anónimo**.
-2. **Firebase → Firestore → Regras**: cola o conteúdo de `firestore.rules` e publica (ou `npx firebase-tools deploy --only firestore:rules`).
-3. **Vercel**: *Add New → Project → Import* `MoraisPedroo/yuchess`. Preset "Other", sem comando de build, pasta raiz. Cada push em `main` publica.
-4. **Firebase → Authentication → Settings → Authorized domains**: acrescenta o domínio que a Vercel te deu (ex.: `yuchess.vercel.app`).
-5. Abre o site em dois navegadores e testa uma sala privada e uma ranqueada.
+2. **Firebase → Authentication → Settings → Authorized domains**: `yuchess.vercel.app` (e o domínio das pré-visualizações, se quiseres testar nelas).
+3. **Firebase → Firestore → Regras**: cola `firestore.rules` e publica (ou `npx firebase-tools deploy --only firestore:rules`). **Obrigatório**: as regras novas acrescentam `users/{uid}` (coleção) e o baralho nas salas.
+4. Abre o site em dois navegadores e testa uma sala privada e uma ranqueada.
 
-## Ferramentas
+## Onde me afastei do relatório
 
-| Comando | O que faz |
-|---|---|
-| `node tools/simulate.js 80` | Põe a IA contra si própria em 80 partidas sem ecrã e verifica invariantes (cartas não se perdem nem duplicam, tabuleiro consistente, Chain fechada no fim do turno). |
-| `node tools/simulate-online.js 10` | Testa o protocolo online: dois motores com a mesma semente, ligados só por mensagens, têm de acabar com o estado idêntico. |
-| `node tools/build.js` | Gera `dist/chess-oh.html` (documento completo) e `dist/artifact.html` (fragmento para publicar como Artifact). |
-| `tools/gallery.html` | Galeria das 12 peças e de todas as cartas, para rever a arte. |
-
-## Arquitetura
-
-Todos os módulos falam só pelo `EventBus`. O motor (`src/engine`, `src/ai`, `src/data`) não toca no DOM, por isso corre em Node para o simulador.
-
-| Ficheiro | Responsabilidade |
-|---|---|
-| `src/core/EventBus.js` | Pub/Sub síncrono e assíncrono (`emitAsync` espera pelas animações) + PRNG `mulberry32`. |
-| `src/data/CardDatabase.js` | Stats das peças e 28 cartas declarativas (primitivas `op`) + 40 cartas Uno básicas → baralho de 75. |
-| `src/engine/BoardEngine.js` | Matriz 8×8 própria (sem chess.js), raycasting casa a casa, armadilhas ocultas, roque, troca, promoção. |
-| `src/engine/CombatRPG.js` | Escudo antes do HP, contra-ataque de 50%, recuo elástico, perfuração, Falange. |
-| `src/engine/UnoEconomy.js` | Baralho, mãos, pilha central, predicado de correspondência e conversão carta → permissão. |
-| `src/engine/ChainResolver.js` | Pilha LIFO com Spell Speeds 1/2/3, Set Sickness, custos no anúncio, bloqueio na resolução, máximo de 8 elos. |
-| `src/engine/EffectInterpreter.js` | Executa as primitivas das cartas (dano, buffs, negação, recuo, explosão, ressurreição…). |
-| `src/engine/GameController.js` | Fases do turno, ações (`dispatch`), execução de movimentos com interceção por armadilhas. |
-| `src/ai/KingDiceAI.js` | IA heurística: escolhe a carta pela melhor jogada que desbloqueia, planta armadilhas nas rotas inimigas, responde na Chain. Não vê armadilhas nem mão do adversário. |
-| `src/view/PieceFactory.js` | Gerador procedural das peças (olhos pie-cut, braços Bézier, luvas) e animador "on twos". |
-| `src/view/CupheadSVGRenderer.js` | Tabuleiro, peças e animações (salto com squash & stretch, investida, BOING!, explosões). |
-| `src/view/VFXPostProcessor.js` | Filtros SVG, linha fervente, shader de película/CRT, screen shake, flash de Parry. |
-| `src/audio/VintageAudioSynth.js` | Gramofone, swing a 124 BPM e todos os efeitos sonoros com Web Audio. |
-| `src/ui/*` | Cartas, mão em leque, painéis, janela da Chain, ecrãs de título e K.O., salão online. |
-| `src/net/LockstepSession.js` | Multijogador determinístico: os dois clientes correm o mesmo motor e trocam só as ações numeradas, com hash do estado para detetar divergências. |
-| `src/net/FirebaseClient.js` · `OnlineService.js` | Carrega o Firebase a pedido; salas, fila ranqueada, ações no Firestore, desistência e abandono. |
-| `src/net/Ranking.js` · `OnlineGame.js` | Elo com caução anti-abandono; ligação de uma partida online à interface (relógio de turno, rating no fim). |
-| `firestore.rules` | Regras de segurança: validam cada escrita de sala, ação e rating. |
-
-## Onde me afastei do documento de design
-
-- **Sem GSAP:** as animações usam a Web Animations API nativa, para não haver dependências externas.
-- **Armadilhas espaciais:** podem ser postas em qualquer casa vazia exceto nas duas filas iniciais do adversário (filas 1–6 para as Brancas). Se puseres uma onde já há uma armadilha inimiga escondida, as duas destroem-se (CLANG!). Assim nunca se revela onde estão as armadilhas do outro.
-- **Compra no início do turno:** compra-se 1 carta se a mão tiver menos de 5 (o documento dizia 4). Com 4 havia demasiadas compras de emergência.
-- **+2:** compras 2 e o oponente perde 1 carta ao acaso (a "perda de 1 ponto de ação" não tinha sistema de pontos onde encaixar).
-- **Escudo:** é uma reserva que se gasta com os golpes. Os valores 1–3 dão escudo temporário que dura até ao teu turno seguinte; a perfuração faz o escudo bloquear só metade.
-- **Torre (Muralha de Ferro):** imune a efeitos de recuo de cartas (a Mola). O recuo de combate continua a aplicar-se, porque duas peças não podem ficar na mesma casa.
-- **Morte Súbita a partir do turno 60:** o Rei de quem joga perde HP crescente a cada turno, para as partidas terminarem. Sem ela, quase metade das partidas simuladas arrastava-se.
-- **Multijogador online:** usa Firebase (Firestore) em vez de PeerJS/PartyKit, com o mesmo princípio de lockstep por ações. Limitação: cada cliente tem o estado completo, por isso quem abrir as ferramentas do navegador pode ver a mão do adversário.
+- **Sem Next.js/React nem chess.js**: o projeto continua em JavaScript puro (sem build) para o Diego e o Codex trabalharem sem ferramentas extra; o motor de xadrez é próprio e validado com contagens *perft* conhecidas.
+- **Armadilhas Reativas e Counter-Traps viram-se na Zona** (3 lugares, como no Yu-Gi-Oh!) e só respondem a partir do turno seguinte ("enjoo"). Magias Rápidas usam-se da mão no próprio turno.
+- **12 s para responder** em vez de 8 s (8 s não chegava para ler a carta).
+- **A Mola Canguru não dá xeque por salto** (senão dava xeques impossíveis de tapar: xeque-mate ao 2.º lance).
+- **Capturar uma peça com Escudo não tira do xeque** (o atacante volta para trás), por isso não conta como lance para sair de xeque.
+- **Peças congeladas**: se só peças congeladas tinham lances, passa-se a vez (não é afogamento).
+- **Armadilhas de Casa só nas filas 3 a 6**, disparam só quando a peça acaba o lance numa casa vazia; uma armadilha tapada por peça própria fica inerte e é esmagada se essa peça for capturada.
+- **Limite de 300 turnos** (empate) para nenhuma partida ficar infinita.
+- **Economia no cliente**: ouro, cartas e pity são calculados no navegador e guardados no Firestore (`users/{uid}`); dá para fazer batota na coleção, mas o rating continua protegido pelas regras.
+- **Online por lockstep**: os dois clientes correm o mesmo motor e trocam só ações; quem abrir as ferramentas do navegador consegue ver a mão e as armadilhas do adversário.

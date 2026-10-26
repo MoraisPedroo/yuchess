@@ -1,212 +1,102 @@
-/* main.js — arranque: monta o palco, liga áudio/VFX ao EventBus, ecrã de título e ciclo de partidas.
-   Cada partida recebe um "bus" com portão: eventos de uma partida abandonada nunca chegam ao ecrã. */
+/* main.js — arranque: perfil, som, hub, partidas contra o bot e online, recompensas. */
 (function (YC) {
   'use strict';
 
-  const SETTINGS_KEY = 'chess-oh.settings.v1';
-  const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const defaults = { music: true, sfx: true, film: !reduced, boil: !reduced, fast: reduced };
-  function loadSettings() {
-    try { return { ...defaults, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}') }; } catch (e) { return { ...defaults }; }
-  }
-  function saveSettings(s) { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch (e) { /* armazenamento indisponível */ } }
+  const BOT_RARITY = { easy: 'RARE', medium: 'EPIC', hard: 'LEGENDARY' };
+  const BOT_NAMES = { easy: 'Bot Peãozinho', medium: 'Bot Cavaleiro', hard: 'Bot Grão-Mestre' };
 
-  const settings = loadSettings();
-  const front = new YC.EventBus();
-  const vfx = new YC.VFXPostProcessor();
-  vfx.mount();
-  const audio = new YC.VintageAudioSynth();
-  const animator = new YC.PieceFactory.IdleAnimator();
-  vfx.onTick(() => animator.tick());
-  const renderer = new YC.CupheadSVGRenderer({ bus: front, vfx, audio, animator });
-  renderer.mount(document.getElementById('board'));
-  const ui = new YC.UIManager({ bus: front, renderer, vfx, audio });
-  ui.mount();
+  const App = {
+    match: null, ui: null, online: null,
 
-  let current = null;
-  let currentMode = 'AI';
-  let titleNode = null;
+    boot() {
+      document.body.insertAdjacentHTML('afterbegin', YC.PieceArt.defs());
+      YC.ProfileStore.load();
+      try { if (localStorage.getItem('chessgioh.fast') === '1') YC.FX.speed = 1.8; } catch (e) { /* */ }
+      window.addEventListener('pointerdown', () => YC.Sound.init(), { passive: true });
+      YC.Hub.init(App);
+      const code = new URLSearchParams(location.search).get('sala');
+      YC.Hub.show(code ? 'online' : 'arena');
+      if (code) YC.OnlineLobby.pendingCode = code.toUpperCase();
+      YC.OnlineLobby.autoConnect();
+    },
 
-  function layout() {
-    const table = document.getElementById('table');
-    const opp = document.getElementById('opp-strip');
-    const frame = 52;
-    const h = table.clientHeight - opp.offsetHeight - frame - 10;
-    const w = table.clientWidth - frame - 8;
-    const sq = Math.max(34, Math.floor(Math.min(h, w) / 8));
-    renderer.setSquareSize(sq);
-    ui.scheduleRender();
-  }
-  window.addEventListener('resize', layout);
+    inMatch() { return !!(App.match && !App.match.over); },
 
-  // ── Definições ──
-  function applySettings() {
-    audio.setMusic(settings.music);
-    audio.setSfx(settings.sfx);
-    vfx.setFilm(settings.film);
-    vfx.setBoiling(settings.boil);
-    renderer.speed = settings.fast ? 0.55 : 1;
-    const map = { 'btn-music': 'music', 'btn-sfx': 'sfx', 'btn-film': 'film', 'btn-boil': 'boil', 'btn-speed': 'fast' };
-    for (const [id, key] of Object.entries(map)) document.getElementById(id).classList.toggle('on', !!settings[key]);
-  }
-  const toggles = { 'btn-music': 'music', 'btn-sfx': 'sfx', 'btn-film': 'film', 'btn-boil': 'boil', 'btn-speed': 'fast' };
-  for (const [id, key] of Object.entries(toggles)) {
-    document.getElementById(id).addEventListener('click', () => {
-      settings[key] = !settings[key];
-      saveSettings(settings);
-      applySettings();
-      audio.playClick();
-    });
-  }
-  document.getElementById('btn-rules').addEventListener('click', () => YC.Screens.rules());
-  document.getElementById('btn-menu').addEventListener('click', async () => {
-    if (current && !current.state.winner) {
-      const text = current.online ? 'Sair para o menu? Na partida online isso conta como desistência.' : 'Sair para o menu? A partida atual perde-se.';
-      if (!(await confirmBox(text))) return;
-      if (current.online) current.online.resign();
+    leaveMatch(resign) {
+      if (App.match && !App.match.over && resign) {
+        if (App.online) App.online.resign(); else App.match.resign(App.ui.viewer);
+      }
+      if (App.match) App.match.aborted = true;
+      if (App.online) { App.online.close(); App.online = null; }
+      if (App.ui) { App.ui.unmount(); App.ui = null; }
+      document.querySelectorAll('.end-back').forEach((e) => e.remove());
+      App.match = null;
+    },
+
+    newUI() {
+      App.leaveMatch(false);
+      const ui = new YC.MatchUI({ root: document.getElementById('screen-match'), onExit: () => { App.leaveMatch(false); YC.Hub.show('arena'); } });
+      App.ui = ui;
+      return ui;
+    },
+
+    /** Partida contra o bot com o baralho ativo. */
+    startBot(level = 'medium') {
+      const p = YC.ProfileStore.profile, deck = YC.Economy.activeDeck(p);
+      const v = YC.Economy.validateDeck(p, deck.cards);
+      if (!v.ok) { YC.UI.toast(`Baralho inválido: ${v.errors[0]}`, true); YC.Hub.show('decks'); return; }
+      const rng = YC.mulberry32((Date.now() ^ (Math.random() * 1e9)) >>> 0);
+      const me = rng() < 0.5 ? 'w' : 'b', bot = YC.other(me);
+      const botDeck = YC.Economy.randomDeck(rng, { maxRarity: BOT_RARITY[level] });
+      const bus = new YC.EventBus();
+      const decks = { [me]: deck.cards.slice(), [bot]: botDeck };
+      const names = { [me]: p.displayName, [bot]: BOT_NAMES[level] };
+      const match = new YC.Match({ bus, seed: Math.floor(rng() * 2 ** 31), decks, names, mode: 'BOT' });
+      const ui = App.newUI();
+      App.match = match;
+      ui.mount({ match, viewer: me, labels: { [me]: 'Tu', [bot]: `Bot · ${YC.BotAI.LEVELS[level].label}` } });
+      match.agents[me] = ui.createHumanAgent(me);
+      match.agents[bot] = YC.BotAI.create({ team: bot, level, delay: 650, seed: Math.floor(rng() * 1e6) });
+      ui.onGameOver = ({ winner }) => App.reward(winner, me, match);
+      ui.onRematch = () => App.startBot(level);
+      YC.Hub.show('match');
+      YC.UI.toast(me === 'w' ? 'Jogas com as Brancas: começas tu!' : 'Jogas com as Pretas: o bot começa.');
+      match.start().catch((err) => console.error('[partida]', err));
+    },
+
+    reward(winner, me, match) {
+      if (match.aborted) return null;
+      const outcome = winner === me ? 'WIN' : winner === 'DRAW' ? 'DRAW' : 'LOSS';
+      const r = YC.ProfileStore.update((p) => YC.Economy.reward(p, outcome, match.state.ownTurns[me]));
+      return r;
+    },
+
+    /** Partida online a partir de uma sala do Firestore (chamado pelo OnlineLobby). */
+    async startOnline(room, profile) {
+      const ui = App.newUI();
+      ui.bus = new YC.EventBus();
+      const og = new YC.OnlineGame({ match: room, profile, ui });
+      App.online = og;
+      const game = await og.start();
+      App.match = game;
+      const opp = og.opp;
+      ui.mount({ match: game, viewer: og.team, online: og, labels: { [og.team]: `${profile.rating} pts`, [og.oppTeam]: `${opp.rating} pts` } });
+      ui.onGameOver = async ({ winner }) => {
+        const base = App.reward(winner, og.team, game) || {};
+        const rr = await og.finish(winner);
+        let rating = '';
+        if (rr && rr.delta != null) rating = `Rating ${rr.before} → ${rr.before + rr.delta} (${rr.delta >= 0 ? '+' : ''}${rr.delta})`;
+        else if (rr && rr.pending) rating = 'Rating: à espera da confirmação do adversário…';
+        else if (rr && rr.conflict) rating = 'Rating: os resultados não coincidem (não contou).';
+        return { ...base, rating };
+      };
+      YC.Hub.show('match');
+      YC.UI.toast(og.team === 'w' ? 'Jogas com as Brancas: começas tu!' : 'Jogas com as Pretas.');
+      game.start().catch((err) => console.error('[online]', err));
     }
-    showTitle();
-  });
-  document.getElementById('btn-resign').addEventListener('click', async () => {
-    if (!current || !current.online || current.state.winner) return;
-    if (await confirmBox('Desistir desta partida? Contas como derrota.')) current.online.resign();
-  });
+  };
 
-  function confirmBox(text) {
-    return new Promise((resolve) => {
-      const m = document.createElement('div');
-      m.className = 'modal';
-      m.innerHTML = `<div class="modal-card"><h2>${YC.CardView.escape(text)}</h2><div class="modal-actions"><button class="btn-big" data-y>Sim</button><button class="btn-big alt" data-n>Não</button></div></div>`;
-      document.getElementById('modal-root').appendChild(m);
-      m.querySelector('[data-y]').addEventListener('click', () => { m.remove(); resolve(true); });
-      m.querySelector('[data-n]').addEventListener('click', () => { m.remove(); resolve(false); });
-    });
-  }
-
-  /** Bus com portão: só a partida atual fala com o ecrã. */
-  function gatedBus(token) {
-    return {
-      emit: (t, p) => { if (current === token.game) front.emit(t, p); },
-      emitAsync: (t, p) => (current === token.game ? front.emitAsync(t, p) : Promise.resolve()),
-      on: () => () => {}, off: () => {}
-    };
-  }
-
-  function stopCurrent() {
-    if (current) {
-      if (current.online) current.online.close();
-      current.abort();
-    }
-    current = null;
-    document.getElementById('modal-root').innerHTML = '';
-    document.getElementById('fx-layer').innerHTML = '';
-  }
-
-  function showTitle() {
-    stopCurrent();
-    if (lobby) lobby.close();
-    document.documentElement.classList.remove('slowmo');
-    if (titleNode) titleNode.remove();
-    titleNode = YC.Screens.title({ onStart: (mode) => (mode === 'ONLINE' ? openLobby() : startGame(mode)), onRules: () => YC.Screens.rules() });
-  }
-
-  async function startAudio() {
-    await audio.init();
-    applySettings();
-    audio.startGramophoneAmbience();
-    audio.startSwingLoop(124);
-  }
-  // Se a página abriu por um link de sala, o áudio arranca no primeiro clique.
-  document.addEventListener('pointerdown', () => { startAudio().catch(() => {}); }, { once: true });
-
-  async function closeTitle() {
-    if (!titleNode) return;
-    const ir = await YC.Screens.iris(true);
-    titleNode.remove(); titleNode = null;
-    ir.remove();
-  }
-
-  /** Prepara o palco para uma partida já criada e corre-a até ao fim. */
-  async function launch(game, intro = true) {
-    current = game;
-    game.wait = (ms) => new Promise((r) => setTimeout(r, ms * renderer.speed));
-    game.setup();
-    renderer.setFlip(game.localTeam === 'BLACK');
-    renderer.bindGame(game);
-    ui.bindGame(game);
-    layout();
-    if (intro) await YC.Screens.intro(audio);
-    if (current !== game) return;
-    game.log(game.mode === 'ONLINE'
-      ? `Partida online: jogas com as ${YC.TEAM_LABEL[game.localTeam]}. As Brancas começam.`
-      : 'O espetáculo começa! Joga uma carta que combine com a pilha para mexer as peças.', 'turn');
-    await game.start();
-  }
-
-  async function startGame(mode) {
-    currentMode = mode;
-    await startAudio();
-    audio.playCoin();
-    stopCurrent();
-    await closeTitle();
-    document.documentElement.classList.remove('slowmo');
-    const token = {};
-    const names = mode === 'AI' ? { WHITE: 'Brancas', BLACK: 'King Dice' } : { WHITE: 'Brancas', BLACK: 'Pretas' };
-    const game = new YC.GameController({ bus: gatedBus(token), mode, names });
-    token.game = game;
-    game.agents.WHITE = ui.createHumanAgent('WHITE');
-    game.agents.BLACK = mode === 'AI' ? new YC.KingDiceAI('BLACK', { delay: 750 }) : ui.createHumanAgent('BLACK');
-    await launch(game);
-  }
-
-  // ── Modo online (Firebase) ──
-  let lobby = null;
-  async function openLobby(code) {
-    currentMode = 'ONLINE';
-    startAudio().catch(() => {});
-    stopCurrent();
-    await closeTitle();
-    if (lobby) lobby.close();
-    lobby = new YC.OnlineLobby({ audio, onMatchStart: (match, profile) => startOnline(match, profile), onBack: () => showTitle() });
-    lobby.open(code);
-  }
-
-  async function startOnline(match, profile) {
-    stopCurrent();
-    document.documentElement.classList.remove('slowmo');
-    const token = {};
-    const online = new YC.OnlineGame({ match, profile, ui, bus: gatedBus(token) });
-    const game = await online.start();
-    token.game = game;
-    if (match.id && history.replaceState) history.replaceState(null, '', location.pathname);
-    await launch(game);
-  }
-
-  // Desistência/abandono do adversário: fecha a janela da Chain que estivesse aberta.
-  front.on('PHASE_CHANGED', ({ phase }) => {
-    if (phase === 'GAME_OVER') { YC.Screens.closeChainWindow(); ui.cancelMode(); }
-  });
-
-  front.on('GAME_OVER', async ({ winner, stats, game }) => {
-    if (game !== current) return;
-    document.documentElement.classList.add('slowmo');
-    const rating = game.online ? game.online.finish(winner) : null;
-    await YC.Screens.wait(1100);
-    const viewerWon = game.localTeam ? winner === game.localTeam : game.mode === 'AI' ? winner === 'WHITE' : winner !== 'DRAW';
-    if (viewerWon) audio.playVictory(); else audio.playDefeat();
-    document.documentElement.classList.remove('slowmo');
-    const choice = await YC.Screens.knockout({ winner, viewerWon, stats, game, rating });
-    if (game.online) {
-      if (choice === 'again') openLobby(); else showTitle();
-      return;
-    }
-    if (choice === 'again') startGame(currentMode); else showTitle();
-  });
-
-  applySettings();
-  layout();
-  showTitle();
-  const roomParam = new URLSearchParams(location.search).get('sala');
-  if (roomParam) openLobby(roomParam);
-  YC.app = { get game() { return current; }, settings, audio, vfx, renderer, ui, front };
-})(typeof window !== 'undefined' ? (window.YC = window.YC || {}) : (globalThis.YC = globalThis.YC || {}));
+  YC.App = App;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => App.boot());
+  else App.boot();
+})(window.YC = window.YC || {});

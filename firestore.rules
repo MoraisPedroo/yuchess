@@ -1,6 +1,7 @@
 rules_version = '2';
 
-// Regras do Chess-Oh! Uno-Head.
+// Regras do Chess-Gi-Oh! Cartoon Edition.
+// users/{uid}                    coleção, ouro, poeira, baralhos, pity (só o próprio lê e escreve)
 // players/{uid}                  perfil + rating (leitura pública, escrita só do próprio, validada)
 // players/{uid}/history/{match}  caução da ranqueada: pending → won | draw | lost
 // matches/{code}                 sala (waiting → playing → finished)
@@ -22,8 +23,26 @@ service cloud.firestore {
 
     // Lugar numa sala: numa ranqueada o rating tem de ser o do perfil (não dá para mentir no Elo).
     function seatOk(seat, uid, ranked) {
-      return seat.keys().hasOnly(['uid', 'name', 'rating']) && seat.uid == uid && validName(seat.name)
+      return seat.keys().hasOnly(['uid', 'name', 'rating', 'deck']) && seat.uid == uid && validName(seat.name)
+        && seat.deck is list && seat.deck.size() == 12
         && seat.rating is int && (!ranked || seat.rating == get(profilePath(uid)).data.rating);
+    }
+
+    // ── Coleção (economia do gacha; vive no cliente, por isso só se valida a forma) ──
+    function validUser() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['version', 'displayName', 'gold', 'stardust', 'inventory', 'decks', 'activeDeckId',
+          'pityEpic', 'pityLegendary', 'stats', 'updatedAt', 'isAnonymous', 'savedAt'])
+        && d.gold is int && d.gold >= 0 && d.stardust is int && d.stardust >= 0
+        && d.inventory is map && d.decks is list && d.decks.size() <= 20
+        && d.displayName is string && d.displayName.size() <= 30
+        && d.pityEpic is int && d.pityLegendary is int;
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create, update: if signedIn() && request.auth.uid == uid && validUser();
+      allow delete: if false;
     }
 
     // ── Perfis ──
@@ -109,8 +128,8 @@ service cloud.firestore {
     function validCreate(matchId) {
       let d = request.resource.data;
       let me = request.auth.uid;
-      return d.keys().hasOnly(['code', 'ranked', 'status', 'seed', 'white', 'black', 'players', 'claims', 'lastAction', 'lastSeen', 'createdAt'])
-        && d.code == matchId && matchId.matches('^[A-Z0-9]{5}$')
+      return d.keys().hasOnly(['code', 'v', 'ranked', 'status', 'seed', 'white', 'black', 'players', 'claims', 'lastAction', 'lastSeen', 'createdAt'])
+        && d.code == matchId && matchId.matches('^[A-Z0-9]{5}$') && d.v == 2
         && d.status == 'waiting' && d.ranked is bool && d.seed is int
         && d.black == null && d.players == [me]
         && d.claims.size() == 0 && d.lastAction.size() == 0 && d.lastSeen.keys().hasOnly([me])

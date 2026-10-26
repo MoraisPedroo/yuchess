@@ -1,6 +1,6 @@
-/* FirebaseClient.js — carrega o SDK modular do Firebase só quando o jogador abre o modo online
-   (import() dinâmico a partir do CDN da Google), e expõe login + atalhos do Firestore.
-   O jogo offline nunca depende disto. */
+/* FirebaseClient.js — carrega o SDK modular do Firebase a pedido (import() dinâmico a partir do CDN
+   da Google) e expõe login (Google, convidado, convidado → Google) + atalhos do Firestore.
+   O jogo contra o bot nunca depende disto: sem rede, o perfil fica só no navegador. */
 (function (YC) {
   'use strict';
 
@@ -12,6 +12,7 @@
     'auth/popup-closed-by-user': 'Fechaste a janela de login antes de terminar.',
     'auth/popup-blocked': 'O navegador bloqueou a janela de login. Permite pop-ups para este site.',
     'auth/network-request-failed': 'Sem ligação à internet.',
+    'auth/credential-already-in-use': 'Essa conta Google já tem perfil: entrámos nela (o progresso de convidado fica neste navegador).',
     'permission-denied': 'O Firestore recusou o pedido. Confirma que publicaste o ficheiro firestore.rules.',
     'unavailable': 'O Firestore não respondeu. Verifica a ligação.',
     'failed-precondition': 'O Firestore não está pronto. Cria a base de dados Firestore na consola do Firebase.',
@@ -43,6 +44,17 @@
     isGuest(user = FB.user) { return !!user && user.isAnonymous; },
     onUser(cb) { return FB.A.onAuthStateChanged(FB.auth, cb); },
     signInGoogle() { return FB.A.signInWithPopup(FB.auth, new FB.A.GoogleAuthProvider()); },
+    /** Convidado → conta Google sem perder o uid (e o progresso). Se a conta já existir, entra nela. */
+    async linkGoogle() {
+      const provider = new FB.A.GoogleAuthProvider();
+      if (!FB.user || !FB.user.isAnonymous) return FB.signInGoogle();
+      try { return await FB.A.linkWithPopup(FB.user, provider); }
+      catch (err) {
+        if (err.code !== 'auth/credential-already-in-use') throw err;
+        const cred = FB.A.GoogleAuthProvider.credentialFromError(err);
+        return cred ? FB.A.signInWithCredential(FB.auth, cred) : FB.signInGoogle();
+      }
+    },
     signInGuest() { return FB.A.signInAnonymously(FB.auth); },
     signOut() { return FB.A.signOut(FB.auth); },
 

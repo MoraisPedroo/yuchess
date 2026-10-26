@@ -1,5 +1,5 @@
 /* LockstepSession.js — multijogador determinístico ("Action-Dispatch Replication").
-   Os dois clientes correm o mesmo GameController com a mesma semente; só viajam as ações
+   Os dois clientes correm o mesmo Match com a mesma semente; só viajam as ações
    (DISPATCH_ACTION) e as respostas da Chain, numeradas por `seq`. Cada mensagem leva o hash
    do estado do remetente para detetar dessincronizações.
    Não depende do Firebase: o transporte é injetado (Firestore em produção, memória nos testes). */
@@ -17,8 +17,8 @@
   class LockstepSession {
     /**
      * @param {object} o
-     * @param {YC.GameController} o.game
-     * @param {'WHITE'|'BLACK'} o.localTeam
+     * @param {YC.Match} o.game
+     * @param {'w'|'b'} o.localTeam
      * @param {{send(msg):Promise|void, onMessage(cb):void, close?():void}} o.transport
      * @param {object} o.localAgent agente que decide localmente (UI humana ou IA nos testes)
      */
@@ -59,7 +59,7 @@
       return this.transport.send(msg);
     }
 
-    /** Chamado pelo GameController no início de cada dispatch local válido. */
+    /** Chamado pelo Match no início de cada dispatch local válido. */
     sendAction(action) {
       if (action._remote || this.game.state.active !== this.localTeam) return;
       const clean = { ...action };
@@ -108,9 +108,11 @@
         isHuman: !!agent.isHuman, isLocal: true, team: this.localTeam,
         playTurn: (g) => agent.playTurn(g),
         respondChain: async (ctx) => {
-          const uid = await agent.respondChain(ctx);
-          this.send({ kind: 'CHAIN', cardUid: uid || null });
-          return uid || null;
+          let resp = await agent.respondChain(ctx);
+          if (typeof resp === 'string') resp = { uid: resp };
+          resp = resp && resp.uid ? { uid: resp.uid, target: resp.target || null } : null;
+          this.send({ kind: 'CHAIN', resp });
+          return resp;
         }
       };
     }
@@ -132,7 +134,7 @@
         },
         respondChain: async () => {
           const msg = await this.nextRemote('CHAIN');
-          return msg && msg.kind === 'CHAIN' ? msg.cardUid : null;
+          return msg && msg.kind === 'CHAIN' ? msg.resp || null : null;
         }
       };
     }

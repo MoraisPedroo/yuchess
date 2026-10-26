@@ -1,5 +1,6 @@
-/* OnlineGame.js — liga uma partida do Firestore ao GameController: sessão lockstep, batimento,
-   relógio de 2 min por turno, vitória por abandono, "claims" no fim e acerto do rating. */
+/* OnlineGame.js — liga uma sala do Firestore a um Match: sessão lockstep, batimento, relógio de 2 min
+   por turno (ao esgotar joga-se um lance automático), vitória por abandono, "claims" e acerto do rating.
+   A interface (MatchUI) fornece: bus, toast(), cancelMode(), renderOnline(), createHumanAgent(team). */
 (function (YC) {
   'use strict';
 
@@ -7,13 +8,12 @@
   const FB = () => YC.Firebase;
 
   class OnlineGame {
-    constructor({ match, profile, ui, bus }) {
+    constructor({ match, profile, ui }) {
       this.match = match;
       this.profile = profile;
       this.ui = ui;
-      this.bus = bus;
       this.uid = profile.uid;
-      this.team = match.white.uid === profile.uid ? 'WHITE' : 'BLACK';
+      this.team = match.white.uid === profile.uid ? 'w' : 'b';
       this.oppTeam = YC.other(this.team);
       this.escrowed = false;
       this.turnKey = null;
@@ -21,17 +21,20 @@
       this.closed = false;
     }
 
-    get opp() { return this.team === 'WHITE' ? this.match.black : this.match.white; }
+    get opp() { return this.team === 'w' ? this.match.black : this.match.white; }
     get ranked() { return !!this.match.ranked; }
 
+    /** Cria o Match ligado à rede (quem chama faz `game.start()`). */
     async start() {
       const m = this.match, ui = this.ui;
-      const names = { WHITE: m.white.name, BLACK: m.black.name };
-      const game = new YC.GameController({ bus: this.bus, seed: m.seed, mode: 'ONLINE', names });
+      const game = new YC.Match({
+        bus: ui.bus, seed: m.seed, mode: 'ONLINE',
+        decks: { w: m.white.deck, b: m.black.deck }, names: { w: m.white.name, b: m.black.name }
+      });
       this.game = game;
       game.online = this;
-      this.transport = new YC.Online.FirestoreTransport(m.id, this.uid, this.team);
-      this.transport.onMatch = (mm) => { this.match = { ...this.match, ...mm, id: m.id }; ui.scheduleRender(); };
+      this.transport = new YC.Online.FirestoreTransport(m.id, this.uid, YC.TEAM_NAME[this.team]);
+      this.transport.onMatch = (mm) => { this.match = { ...this.match, ...mm, id: m.id }; ui.renderOnline(); };
       this.transport.onError = (err) => ui.toast(`Ligação: ${FB().explain(err)}`);
       this.session = new YC.LockstepSession({
         game, localTeam: this.team, transport: this.transport, localAgent: ui.createHumanAgent(this.team),
@@ -47,7 +50,6 @@
       return game;
     }
 
-    /** Informação para a faixa do adversário. */
     oppStatus() {
       const seen = FB().millis(this.match.lastSeen && this.match.lastSeen[this.opp.uid]);
       return { name: this.opp.name, rating: this.opp.rating, online: !seen || Date.now() - seen < 60000 };
@@ -57,7 +59,7 @@
       const s = this.game && this.game.state;
       if (!s || s.winner || s.active !== this.team || !this.deadline) return '';
       const left = Math.max(0, Math.ceil((this.deadline - Date.now()) / 1000));
-      return `⏱ ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+      return `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
     }
 
     canClaimForfeit() {
@@ -70,11 +72,10 @@
       if (!s || s.winner || this.closed) return;
       const key = `${s.turnCount}:${s.active}`;
       if (key !== this.turnKey) { this.turnKey = key; this.deadline = s.active === this.team ? Date.now() + TURN_MS : 0; }
-      if (s.active === this.team && this.deadline && Date.now() > this.deadline && !g.busy &&
-        ['UNO_CARD_PHASE', 'BOARD_ACTION_PHASE', 'BONUS_STEP'].includes(s.phase)) {
+      if (s.active === this.team && this.deadline && Date.now() > this.deadline && !g.busy && s.phase === 'PREP') {
         this.ui.cancelMode();
-        this.ui.toast('Tempo esgotado: o turno passou.');
-        this.ui.dispatch({ type: 'END_TURN' });
+        this.ui.toast('Tempo esgotado: foi jogado um lance automático.');
+        g.dispatch({ type: 'AUTO_MOVE', team: this.team });
       }
       this.ui.renderOnline();
     }
@@ -84,7 +85,7 @@
       try {
         await YC.Online.forfeit(this.match.id, this.uid, this.team);
         this.match.forfeit = { by: this.uid };
-        this.game.resign(this.oppTeam, 'abandonou');
+        this.game.resign(this.oppTeam, 'Abandono');
         this.session.inbox.interrupt();
         return true;
       } catch (err) {
@@ -95,12 +96,13 @@
 
     resign() { this.session.resign(); }
 
-    /** No fim: regista a "claim" e acerta o rating. Devolve { before, delta } ou null. */
+    /** No fim: regista a "claim" e acerta o rating. winner: 'w' | 'b' | 'DRAW'. */
     async finish(winner) {
       clearInterval(this.tick);
       const m = this.match, uid = this.uid;
+      const claim = winner === 'DRAW' ? 'DRAW' : YC.TEAM_NAME[winner];
       if (!(m.claims && m.claims[uid])) {
-        try { await YC.Online.claim(m.id, uid, winner); } catch (err) { console.warn('[online] claim', err); }
+        try { await YC.Online.claim(m.id, uid, claim); } catch (err) { console.warn('[online] claim', err); }
       }
       if (!this.ranked || !this.escrowed) return null;
       const before = YC.Ranking.sides(m, uid).me.rating;
@@ -111,8 +113,8 @@
         while (Date.now() < until && !this.closed) {
           const mm = this.match, theirs = mm.claims && mm.claims[this.opp.uid];
           const forfeitMine = mm.forfeit && mm.forfeit.by === uid;
-          if (theirs === winner || forfeitMine) return { before, delta: await YC.Ranking.settle(mm, uid, outcome) };
-          if (theirs && theirs !== winner) return { before, delta: null, conflict: true };
+          if (theirs === claim || forfeitMine) return { before, delta: await YC.Ranking.settle(mm, uid, outcome) };
+          if (theirs && theirs !== claim) return { before, delta: null, conflict: true };
           if (outcome === 'WIN' && YC.Online.stallMs(mm, uid) > YC.Online.FORFEIT_MS + 3000) {
             try { await YC.Online.forfeit(mm.id, uid, this.team); this.match.forfeit = { by: uid }; } catch (err) { /* ainda cedo */ }
           }

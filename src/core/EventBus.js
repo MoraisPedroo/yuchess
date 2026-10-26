@@ -1,5 +1,5 @@
 /* EventBus.js — Pub/Sub síncrono + assíncrono e PRNG determinístico (mulberry32).
-   Todos os módulos falam entre si exclusivamente por aqui. */
+   O motor emite eventos; o ecrã ouve-os e anima (emitAsync espera pelas animações). */
 (function (YC) {
   'use strict';
 
@@ -80,7 +80,11 @@
   YC.EventBus = EventBus;
   YC.mulberry32 = mulberry32;
   YC.deferred = deferred;
-  YC.TEAMS = ['WHITE', 'BLACK'];
-  YC.other = (team) => (team === 'WHITE' ? 'BLACK' : 'WHITE');
-  YC.TEAM_LABEL = { WHITE: 'Brancas', BLACK: 'Pretas' };
+  // Equipas: 'w' (Brancas) e 'b' (Pretas). No Firestore guardam-se como 'WHITE'/'BLACK' (TEAM_NAME).
+  const OTHER = { w: 'b', b: 'w', WHITE: 'BLACK', BLACK: 'WHITE' };
+  YC.TEAMS = ['w', 'b'];
+  YC.other = (team) => OTHER[team];
+  YC.TEAM_LABEL = { w: 'Brancas', b: 'Pretas', WHITE: 'Brancas', BLACK: 'Pretas' };
+  YC.TEAM_NAME = { w: 'WHITE', b: 'BLACK' };
+  YC.TEAM_CODE = { WHITE: 'w', BLACK: 'b' };
 })(typeof window !== 'undefined' ? (window.YC = window.YC || {}) : (globalThis.YC = globalThis.YC || {}));
