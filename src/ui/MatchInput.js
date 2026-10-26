@@ -220,7 +220,7 @@
         const c = YC.HoloCard.create(o.id, { size: 'sm' });
         c.classList.add('respond');
         c.onclick = () => this.pickResponse(o.uid);
-        YC.CardZoom.attach(c, o.id);
+        this.attachInspect(c, o.id);
         cards.appendChild(c);
       }
       bar.querySelector('[data-a="pass"]').onclick = () => this.finishResponse(null);

@@ -21,7 +21,7 @@ Jogo no ar: <https://yuchess.vercel.app/> (a partir da branch `main`).
 ## Modos
 
 - **Contra o bot**: Fácil, Médio ou Difícil (minimax de 1 a 3 lances com quiescência + heurísticas de cartas), com relógio de 5 min, 10 min ou sem limite.
-- **Arena**: tabuleiro neon em 3D com as peças em pé, retratos com material, relógio e peças capturadas, mão em leque com zoom ao estilo Hearthstone e cartão de cada peça ao passar o rato (estado e equipamentos).
+- **Arena 3D** (Three.js + bloom): tabuleiro de vidro com moldura néon e círculo mágico, peças chibi 3D em pedestais holográficos, Zonas de Armadilhas e baralho/cemitério na mesa, HUD com retratos, MATERIAL, relógios e peças capturadas, painel lateral para ler as cartas e cartão de cada peça ao passar o rato. Sem WebGL usa-se um tabuleiro em CSS.
 - **Online** (Firebase): ranqueada com rating Elo (conta Google) ou sala privada por código/link (também como convidado). 2 minutos por turno.
 - **Loja**: pacotinho de 5 cartas por 100 de ouro (cartas 1–4: 65/25/8/2 %; carta 5: Rara 78 %, Épica 18 %, Lendária 4 %), Épica garantida a cada 5 pacotes, Lendária com pity suave a partir do 15.º e garantida no 20.º. Cópias a mais viram Poeira Estelar.
 - **Baralhos**: coleção + baralho de 12 (máx. 2 cópias, 1 se Lendária, máx. 2 Lendárias), auto-completar e oficina para criar cartas com Poeira Estelar.
@@ -30,7 +30,7 @@ Jogo no ar: <https://yuchess.vercel.app/> (a partir da branch `main`).
 ## Desenvolvimento
 
 - `python tools/serve.py` e abre <http://localhost:8765> (o `index.html` também abre com duplo clique).
-- Sem build e sem dependências instaladas: JavaScript em scripts clássicos com o namespace `YC`. GSAP 3.12.5 e canvas-confetti 1.9.3 vêm do CDN; se falharem, o jogo continua sem essas animações.
+- Sem build e sem dependências instaladas: JavaScript em scripts clássicos com o namespace `YC`. GSAP 3.12.5, canvas-confetti 1.9.3 e Three.js 0.160.0 (por importmap, carregado pelo único módulo `src/view3d/three-bridge.js`) vêm do CDN; se falharem, o jogo continua com o tabuleiro CSS e sem essas animações.
 
 | Comando | O que faz |
 |---|---|

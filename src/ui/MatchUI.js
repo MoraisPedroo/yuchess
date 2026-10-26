@@ -24,19 +24,22 @@
     mount({ match, viewer, labels = {}, online = null, clockMs = 0 }) {
       this.match = match; this.bus = match.bus; this.viewer = viewer; this.labels = labels; this.online = online;
       const opp = YC.other(viewer);
-      this.root.innerHTML = `
-        <div id="match-stage" class="arena">
-          <div class="arena-bg"><i class="beam b1"></i><i class="beam b2"></i><i class="beam b3"></i><div class="stands"></div><div class="floor"></div></div>
-          <header class="hud"><section class="hud-p opp" data-team="${opp}"></section>
-            <div class="hud-mid"><div class="hud-logo">Chess<span>-Gi-</span>Oh!</div><div class="hud-turn"></div></div>
-            <section class="hud-p me" data-team="${viewer}"></section></header>
-          <div class="feed"></div>
-          <div class="opp-hand"></div>
-          <div class="table-3d"><div class="plane">
+      this.use3D = !!(YC.Board3D && YC.Board3D.available());
+      const table = this.use3D ? '<div class="stage3d-host"></div>' : `<div class="table-3d"><div class="plane">
             <div class="side left"><div class="zone" data-team="${opp}"></div><div class="side-label">Zona de Armadilhas</div><div class="zone" data-team="${viewer}"></div></div>
             <div class="board-host"></div>
             <div class="side right"><div class="piles" data-team="${opp}"></div><div class="side-label">Baralho · Cemitério</div><div class="piles" data-team="${viewer}"></div></div>
-          </div></div>
+          </div></div>`;
+      this.root.innerHTML = `
+        <div id="match-stage" class="arena${this.use3D ? ' webgl' : ''}">
+          <div class="arena-bg"><i class="beam b1"></i><i class="beam b2"></i><i class="beam b3"></i><div class="stands"></div><div class="floor"></div></div>
+          ${table}
+          <header class="hud"><section class="hud-p opp" data-team="${opp}"></section>
+            <div class="hud-mid"><div class="jumbo left"></div><div class="hud-logo"><b>CHESS-GI-OH!</b><small>CARTOON EDITION</small></div><div class="jumbo right"></div></div>
+            <section class="hud-p me" data-team="${viewer}"></section></header>
+          <div class="feed"></div>
+          <aside class="card-inspector" hidden><div class="ci-card"></div><div class="ci-desc"></div></aside>
+          <div class="opp-hand"></div>
           <aside class="arena-btns"></aside>
           <div class="m-chain" hidden><h3>Chain</h3><div class="chain-list"></div></div>
           <div class="action-bar" hidden></div>
@@ -49,11 +52,22 @@
         </div>`;
       this.stage = this.root.querySelector('#match-stage');
       this.q = (sel) => this.stage.querySelector(sel);
-      this.board = new YC.BoardView(this.q('.board-host'), {
-        fxLayer: this.q('.arena-fx'),
-        onSquare: (sq) => this.onSquare(sq),
-        onPieceHover: (sq, el) => (sq >= 0 ? YC.PieceInspector.show(this, sq, el.querySelector('.stand') || el) : YC.PieceInspector.hide())
-      });
+      if (this.use3D) {
+        this.board = new YC.Board3D(this.q('.stage3d-host'), {
+          fxLayer: this.q('.arena-fx'),
+          onSquare: (sq) => this.onSquare(sq),
+          onPieceHover: (sq, anchor) => (sq >= 0 ? YC.PieceInspector.show(this, sq, anchor) : YC.PieceInspector.hide()),
+          onZoneHover: (t) => this.onTableHover(t),
+          onZoneClick: (t) => { if (t.rel === 'me' && t.card) this.onZoneCard({ inst: t.card, setTurn: t.setTurn }); },
+          onPileClick: (t) => { if (t.pile === 'gy') this.showGraveyard(t.team); }
+        });
+      } else {
+        this.board = new YC.BoardView(this.q('.board-host'), {
+          fxLayer: this.q('.arena-fx'),
+          onSquare: (sq) => this.onSquare(sq),
+          onPieceHover: (sq, el) => (sq >= 0 ? YC.PieceInspector.show(this, sq, el.querySelector('.stand') || el) : YC.PieceInspector.hide())
+        });
+      }
       this.board.setFlipped(viewer === 'b');
       this.animator = new YC.MatchAnimator({ bus: this.bus, board: this.board, ui: this });
       this.q('[data-a="close-log"]').onclick = () => this.toggleLog(false);
@@ -79,6 +93,7 @@
       this.stopClock();
       window.removeEventListener('resize', this.onResize);
       YC.PieceInspector.hide(); YC.CardZoom.hide();
+      if (this.board && this.board.dispose) this.board.dispose();
       this.root.innerHTML = '';
       this.stage = null;
     }
@@ -102,6 +117,10 @@
 
     renderSides() {
       const m = this.match, s = m.state;
+      if (this.use3D) {
+        this.board.respondUids = this.respondCtx ? this.respondCtx.options.map((o) => o.uid) : [];
+        this.board.syncSides(m, this.viewer);
+      }
       for (const zone of this.stage.querySelectorAll('.zone')) {
         const team = zone.dataset.team, p = m.players[team], me = team === this.viewer;
         const resp = this.respondCtx ? this.respondCtx.options.map((o) => o.uid) : [];
@@ -116,7 +135,7 @@
             const c = me ? H().create(z.inst.id, { size: 'xs', static: true, uid: z.inst.uid }) : H().back('xs');
             if (me) {
               c.classList.add('set-own');
-              YC.CardZoom.attach(c, z.inst.id);
+              this.attachInspect(c, z.inst.id);
               c.addEventListener('click', () => this.onZoneCard(z));
               if (z.setTurn >= s.turnCount) slot.classList.add('fresh');
               if (resp.includes(z.inst.uid)) c.classList.add('respond');
@@ -134,7 +153,7 @@
         box.dataset.key = key;
         box.innerHTML = `<div class="deck-pile${p.deck.length ? '' : ' empty'}" title="Baralho: ${p.deck.length} carta(s)"><span>${p.deck.length}</span></div><div class="gy-pile" title="Cemitério: ${p.gy.length} carta(s)"></div>`;
         const gy = box.querySelector('.gy-pile');
-        if (top) { const c = H().create(top, { size: 'xs', static: true }); gy.appendChild(c); YC.CardZoom.attach(c, top); }
+        if (top) { const c = H().create(top, { size: 'xs', static: true }); gy.appendChild(c); this.attachInspect(c, top); }
         gy.insertAdjacentHTML('beforeend', `<span class="gy-count">${p.gy.length}</span>`);
         gy.onclick = () => this.showGraveyard(team);
       }
@@ -155,6 +174,7 @@
           el = H().create(inst.id, { size: 'md', uid: inst.uid });
           el.classList.add('in-hand', 'enter');
           el.addEventListener('click', () => this.onHandCard(inst));
+          this.attachInspect(el, inst.id);
           this.handEls.set(inst.uid, el);
           setTimeout(() => el.classList.remove('enter'), 500);
         }
@@ -231,11 +251,50 @@
       m.el.querySelector('[data-a="ok"]').onclick = () => m.close();
     }
 
+    // ───────────── painel lateral da carta (nunca tapa o tabuleiro) ─────────────
+    attachInspect(el, id) {
+      el.addEventListener('mouseenter', () => this.inspectCard(typeof id === 'function' ? id() : id));
+      el.addEventListener('mouseleave', () => this.hideCard());
+    }
+
+    inspectCard(id) {
+      const box = this.q && this.q('.card-inspector');
+      if (!box || !id) return;
+      clearTimeout(this.hideCardTimer);
+      if (box.dataset.id !== id) {
+        const c = YC.Cards.get(id), R = YC.Cards.RARITY[c.rarity];
+        box.dataset.id = id;
+        const slot = box.querySelector('.ci-card');
+        slot.innerHTML = '';
+        slot.appendChild(H().create(id, { size: 'lg' }));
+        box.querySelector('.ci-desc').innerHTML = `<b>${YC.HoloCard.esc(c.name)}</b><span class="ci-meta">${YC.Cards.KIND_LABEL[c.kind]} · Velocidade ${c.ss} · <em style="color:${R.color}">${R.label}</em></span><p>${YC.HoloCard.esc(c.text)}</p>`;
+      }
+      if (box.hidden) {
+        box.hidden = false;
+        if (window.gsap) window.gsap.fromTo(box, { x: -24, opacity: 0 }, { x: 0, opacity: 1, duration: 0.2, ease: 'power2.out' });
+      }
+    }
+
+    hideCard() {
+      clearTimeout(this.hideCardTimer);
+      this.hideCardTimer = setTimeout(() => { const box = this.q && this.q('.card-inspector'); if (box) box.hidden = true; }, 120);
+    }
+
+    onTableHover(t) {
+      if (t && t.kind === 'zone' && t.rel === 'me' && t.card) return this.inspectCard(t.card.id);
+      if (t && t.kind === 'pile' && t.pile === 'gy' && t.top) return this.inspectCard(t.top);
+      this.hideCard();
+    }
+
     // ───────────── posições para as animações ─────────────
     zoneEl(team) { return this.stage.querySelector(`.zone[data-team="${team}"]`); }
     pilesEl(team) { return this.stage.querySelector(`.piles[data-team="${team}"]`); }
-    deckRect(team) { const d = this.pilesEl(team) && this.pilesEl(team).querySelector('.deck-pile'); return d ? d.getBoundingClientRect() : null; }
+    deckRect(team) {
+      if (this.use3D) return this.board.deckRect(team);
+      const d = this.pilesEl(team) && this.pilesEl(team).querySelector('.deck-pile'); return d ? d.getBoundingClientRect() : null;
+    }
     zoneSlotRect(team) {
+      if (this.use3D) return this.board.zoneSlotRect(team, Math.max(0, this.match.players[team].zone.length - 1));
       const z = this.zoneEl(team); if (!z) return null;
       const slots = Array.from(z.querySelectorAll('.zone-slot'));
       const free = slots.find((s) => !s.firstChild) || slots[slots.length - 1];
@@ -253,7 +312,7 @@
     }
     cardOriginRect(link) {
       if (link.from === 'board' && link.target) return this.board.rect(link.target.sq);
-      if (link.from === 'zone') { const z = this.zoneEl(link.team); return z ? z.getBoundingClientRect() : null; }
+      if (link.from === 'zone') { if (this.use3D) return this.board.zoneRect(link.team); const z = this.zoneEl(link.team); return z ? z.getBoundingClientRect() : null; }
       return this.handCardRect(link.team, link.inst.uid);
     }
   }

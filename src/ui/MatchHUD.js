@@ -27,25 +27,29 @@
       for (const box of this.stage.querySelectorAll('.hud-p')) {
         const team = box.dataset.team, p = m.players[team], me = team === this.viewer;
         if (!box.firstChild) {
-          box.innerHTML = `<div class="hud-ava ${team}">${YC.PieceArt.svg('k', team)}</div>
-            <div class="hud-info"><b class="hud-name"></b><span class="hud-sub"></span><span class="hud-mat"></span></div>
-            <div class="hud-clock ${me ? 'mine' : 'theirs'}"></div><div class="hud-caps"></div>`;
+          box.innerHTML = `<div class="hud-col"><div class="hud-ava ${team}">${YC.PieceArt.svg('k', team)}</div><div class="hud-caps"></div></div>
+            <div class="hud-stats"><b class="hud-name"></b><span class="hud-sub"></span><div class="hud-mat"></div><div class="hud-clock ${me ? 'mine' : 'theirs'}"></div></div>
+            <div class="hud-hand" title="Cartas na mão"></div>`;
         }
+        const nh = p.hand.length, hh = box.querySelector('.hud-hand');
+        if (hh.dataset.n !== String(nh)) { hh.dataset.n = nh; hh.innerHTML = `${'<i></i>'.repeat(nh)}<b>${nh}</b>`; }
         box.classList.toggle('active', s.active === team && !m.over);
         box.querySelector('.hud-name').textContent = p.name;
         box.querySelector('.hud-sub').textContent = this.labels[team] || (team === 'w' ? 'Brancas' : 'Pretas');
         const mat = this.material(team), diff = mat - this.material(YC.other(team));
-        box.querySelector('.hud-mat').innerHTML = `MATERIAL <b>${mat}</b>${diff > 0 ? ` <em>+${diff}</em>` : ''}`;
+        box.querySelector('.hud-mat').innerHTML = `MATERIAL: <span>${mat}</span>${diff > 0 ? ` <em>+${diff}</em>` : ''}`;
         const lost = m.players[YC.other(team)].lostTypes.slice().sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
         const capKey = lost.join('');
         const caps = box.querySelector('.hud-caps');
         if (caps.dataset.key !== capKey) {
           caps.dataset.key = capKey;
-          caps.innerHTML = lost.length ? lost.map((t) => `<i title="${YC.PIECE_NAME[t]}">${YC.PieceArt.svg(t, YC.other(team))}</i>`).join('') : '<small>Nenhuma peça capturada</small>';
+          caps.innerHTML = lost.length ? lost.map((t) => `<i title="${YC.PIECE_NAME[t]}">${YC.PieceArt.svg(t, YC.other(team))}</i>`).join('') : '<small>—</small>';
+          caps.title = lost.length ? `Capturou ${lost.length} peça(s)` : 'Ainda não capturou peças';
         }
       }
-      const turn = this.q('.hud-turn');
-      turn.innerHTML = m.over ? 'Partida terminada' : `Turno <b>${Math.max(1, s.turnCount)}</b> · ${s.active === this.viewer ? 'a tua vez' : 'vez do adversário'}`;
+      const jl = this.q('.jumbo.left'), jr = this.q('.jumbo.right');
+      if (jl) jl.innerHTML = `<div class="jb-bar"><span>TURNO</span><span>${Math.max(1, s.turnCount)}</span></div><div class="jb-title">${m.over ? 'FIM' : s.active === this.viewer ? 'A TUA VEZ' : 'ADVERSÁRIO'}</div>`;
+      if (jr) jr.innerHTML = `<div class="jb-bar"><span>${m.chain ? 'CHAIN' : 'ARENA'}</span><span>${m.chain ? `ELO ${m.chain.length}` : 'AO VIVO'}</span></div><div class="jb-title">${m.chain ? 'RESPOSTAS' : 'NEON<br>DUEL'}</div>`;
       this.paintClocks();
     },
 

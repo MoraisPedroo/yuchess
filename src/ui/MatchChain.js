@@ -49,7 +49,7 @@
       await YC.FX.flyCard(big, to, item.getBoundingClientRect(), { duration: 0.4 });
       big.remove();
       item.style.visibility = '';
-      YC.CardZoom.attach(item, link.inst.id, { side: 'left' });
+      this.attachInspect(item, link.inst.id);
     },
 
     chainCardRect(link) {

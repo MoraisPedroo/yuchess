@@ -13,6 +13,9 @@ const html = read('index.html');
 const styles = [...html.matchAll(/<link rel="stylesheet" href="(styles\/[^"]+)">/g)].map((m) => m[1]);
 const scripts = [...html.matchAll(/<script src="(src\/[^"]+)"><\/script>/g)].map((m) => m[1]);
 const cdn = [...html.matchAll(/<script src="(https:[^"]+)"><\/script>/g)].map((m) => `<script src="${m[1]}"></script>`).join('\n');
+// Three.js: o importmap e o módulo-ponte (src/view3d/three-bridge.js) vão inline
+const importmap = (html.match(/<script type="importmap">[\s\S]*?<\/script>/) || [''])[0];
+const modules = [...html.matchAll(/<script type="module"[^>]*src="(src\/[^"]+)"><\/script>/g)].map((m) => `<script type="module">\n${read(m[1])}\n</script>`).join('\n');
 if (!styles.length || !scripts.length) throw new Error('Não encontrei CSS/JS no index.html');
 
 const css = styles.map((f) => `/* ── ${f} ── */\n${read(f)}`).join('\n');
@@ -35,6 +38,8 @@ ${desc}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 ${fonts}
+${importmap}
+${modules}
 <style>
 ${css}
 </style>`;

@@ -8,7 +8,12 @@
   <meta name="theme-color" content="#2D1B4E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&family=Chakra+Petch:wght@600;700&family=Cinzel:wght@700;900&family=Cinzel+Decorative:wght@700;900&family=Orbitron:wght@700;900&family=Spectral:ital,wght@0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <!-- Three.js 0.160.0 (palco 3D) por importmap, sem build -->
+  <script type="importmap">
+  { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+  </script>
+  <script type="module" async src="src/view3d/three-bridge.js"></script>
   <link rel="stylesheet" href="styles/base.css">
   <link rel="stylesheet" href="styles/board.css">
   <link rel="stylesheet" href="styles/cards.css">
@@ -68,6 +73,12 @@
   <script src="src/view/BoardView.js"></script>
   <script src="src/view/MatchAnimator.js"></script>
   <script src="src/view/PieceAnimations.js"></script>
+  <script src="src/view3d/Toon3D.js"></script>
+  <script src="src/view3d/PieceMeshes.js"></script>
+  <script src="src/view3d/Board3D.js"></script>
+  <script src="src/view3d/Board3DScene.js"></script>
+  <script src="src/view3d/Board3DSync.js"></script>
+  <script src="src/view3d/Anim3D.js"></script>
   <script src="src/ui/UIKit.js"></script>
   <script src="src/ui/HoloCard.js"></script>
   <script src="src/ui/MatchUI.js"></script>

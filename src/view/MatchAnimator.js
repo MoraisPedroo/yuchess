@@ -12,6 +12,8 @@
     constructor({ bus, board, ui }) {
       this.bus = bus; this.board = board; this.ui = ui;
       this.offs = [];
+      // no palco 3D as animações das peças são as de Anim3D.js (o resto é igual)
+      if (board.is3D && YC.Anim3D) Object.assign(this, YC.Anim3D);
       const on = (ev, fn) => this.offs.push(bus.on(ev, (p) => this.guard(fn.call(this, p || {}))));
       on('match:start', () => this.sync());
       on('turn:start', this.turnStart);
@@ -52,7 +54,7 @@
       on('trap:reveal', ({ trap }) => { this.sync(); return this.pop(trap.sq, 'REVELADA!', '#FA903E', 'magic_zap'); });
       on('emp:blast', this.emp);
       on('aura:pulse', ({ sq }) => { S('ice_freeze'); return FX().ring(this.board.fx, ...this.xy(sq), '#1A73E8', 0.45); });
-      on('check', ({ kingSq }) => { this.sync(); return this.at(kingSq, 'XEQUE!', '#D93025', 'check', { textColor: '#fff' }); });
+      on('check', ({ kingSq }) => { this.sync(); if (this.board.punch) this.board.punch(); return this.at(kingSq, 'XEQUE!', '#D93025', 'check', { textColor: '#fff' }); });
       on('deck:empty', ({ team }) => { if (team === this.ui.viewer) this.ui.toast('O teu baralho acabou: já não compras cartas.'); return FX().wait(200); });
     }
 

@@ -5,7 +5,7 @@
 
 ## Estado atual (2026-10-26)
 
-**No ar (`main`, juntada a 2026-10-26):** <https://yuchess.vercel.app/>. O jogo foi refeito do zero seguindo o relatório "Chess-Gi-Oh! Cartoon Edition" do Pedro. Substitui o protótipo "Chess-Oh! Uno-Head" (xadrez + Uno, estilo 1930) e o modo "Speed Duel" (só cartas) — os dois continuam no histórico do git (`main` cb44011 e branch `pedro/duel-links`).
+**No ar (`main`, juntada a 2026-10-26):** <https://yuchess.vercel.app/>. A partida usa agora um palco 3D em Three.js (ver o registo mais recente). O jogo foi refeito do zero seguindo o relatório "Chess-Gi-Oh! Cartoon Edition" do Pedro. Substitui o protótipo "Chess-Oh! Uno-Head" (xadrez + Uno, estilo 1930) e o modo "Speed Duel" (só cartas) — os dois continuam no histórico do git (`main` cb44011 e branch `pedro/duel-links`).
 
 **Funciona e está testado**
 - Xadrez completo (`src/game/ChessRules.js`): lances legais, xeque, xeque-mate, afogamento, roque, en passant, promoção, 50 lances, repetição tripla, material insuficiente. Contagens *perft* de referência certas (início, Kiwipete, posições 3–5).
@@ -34,7 +34,8 @@
 ## Próximos passos (por prioridade)
 
 1. Teste real online + corrigir o que as regras recusarem.
-2. Balanceamento: a Lança e a Mola são fortes; ver taxas de vitória por carta com `tools/simulate.js` (acrescentar estatística por carta).
+2. Visual 3D: trocar as peças por modelos GLB CC0 (Quaternius, Kenney) se o Pedro preferir; avatares/mascote e fundo de estádio gerados por IA (prompts no relatório do Gemini, secção 5); aplicar o mesmo estilo néon ao menu, loja e baralhos.
+3. Balanceamento: a Lança e a Mola são fortes; ver taxas de vitória por carta com `tools/simulate.js` (acrescentar estatística por carta).
 3. Tutorial interativo curto (primeira partida guiada: equipar, armadilha, resposta).
 4. Escolher alvos à mão nas cartas automáticas (Gerador de Bolhas, Bomba de Fumo, Boneco de Testes) — hoje o motor escolhe o melhor alvo.
 5. Revanche rápida no online e histórico de partidas no perfil.
@@ -47,6 +48,12 @@
 - Num separador escondido o navegador quase para as animações (requestAnimationFrame); o motor espera no máximo 4 s por animação, por isso o jogo nunca bloqueia, só fica lento.
 
 ## Registo de sessões
+
+### 2026-10-26 (madrugada) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Pedido do Pedro**: a arena em CSS 3D "ficou feia"; enviou um relatório do Gemini Deep Research ("Relatório Técnico e de Direção de Arte") que pede uma cena WebGL a sério igual à imagem "Chess Links".
+- **Mudou**: novo palco 3D em Three.js 0.160.0 por importmap (sem build) em `src/view3d/` — câmara do relatório (FOV 40, em telemóvel 46 e à distância certa para caber), bloom seletivo, moldura com tubo néon ciano/magenta, casas de vidro, grelha luminosa, círculo mágico rotativo (shader), Zonas de Armadilhas (3 por jogador) e baralho/cemitério em 3D, peças chibi feitas por código (silhuetas torneadas, cabeça do Cavalo esculpida, coroas, olhos que piscam, contorno cartoon) em pedestais holográficos (azul = tuas, vermelho = adversário), cubos holográficos nas tuas armadilhas, anel dourado de equipamento, cúpula de escudo, cristal de gelo, pilar de xeque, setas e etiquetas "D5". Animações 3D (`Anim3D.js`): salto com onda de choque, investida e vítima a desfazer-se, ressalto, bigorna, estilhaços do escudo, pilar de luz das armadilhas, flash de bloom, zoom de câmara no xeque. HUD como no relatório (painéis chanfrados, relógio de 7 segmentos, MATERIAL, telões, registo de 2 linhas, painel lateral da carta, botão de turno dourado), cartas com moldura por função (Cinzel/Spectral) e brilho por raridade. Fontes novas: Chakra Petch, Orbitron, Cinzel, Cinzel Decorative, Spectral.
+- **Decisões**: peças feitas por código em vez de GLB do Quaternius (sem descarregar ficheiros; há `GLTFLoader` pronto se quisermos trocar mais tarde); avatares com a peça Rei em vez de imagens de IA; peças a 86 % do tamanho do relatório e câmara mais inclinada para as peças da frente não taparem as de trás; o tabuleiro CSS antigo fica como reserva sem WebGL.
+- **Como testar**: os 4 comandos de teste; no navegador jogar contra o bot, passar o rato pelas cartas da mão (painel à esquerda) e pelas peças (cartão animado), ver no telemóvel (modo vertical).
 
 ### 2026-10-26 (noite) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Pedido do Pedro** (com imagens de referência: "Yu-Gi-Oh! Chess Links" e Hearthstone): login não funciona, cartas ilegíveis, animações demasiado rápidas, mão estilo Hearthstone com zoom, histórico escondido, tabuleiro maior, cartão da peça ao passar o rato, relógios e contagem de peças capturadas como na foto.
