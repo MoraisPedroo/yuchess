@@ -14,8 +14,10 @@
     // vídeo do objeto (só Lendárias, assets/video): toca ao passar o rato, no zoom e na Chain
     const vid = opts.size !== 'xs' && opts.size !== 'sm' && YC.ItemToken && YC.ItemToken.video(card);
     const video = vid ? `<video class="hc-video" muted loop playsinline preload="none" data-src="${vid}"></video>` : '';
+    // nomes compridos ("Botas de Vento Supersónico") encolhem a letra em vez de ficarem cortados
+    const len = card.name.length, fit = len > 25 ? ' n-xxl' : len > 21 ? ' n-xl' : len > 15 ? ' n-l' : '';
     return `<div class="hc-face">`
-      + `<div class="hc-head"><span class="hc-name">${esc(card.name)}</span><span class="hc-ss" title="${SS_LABEL[card.ss]}">${card.ss}</span></div>`
+      + `<div class="hc-head"><span class="hc-name${fit}">${esc(card.name)}</span><span class="hc-ss" title="${SS_LABEL[card.ss]}">${card.ss}</span></div>`
       + `<div class="hc-art" style="--c1:${card.theme.primary};--c2:${card.theme.secondary}"><div class="hc-rays"></div>${YC.ItemToken ? YC.ItemToken.cardArt(card) : YC.CardArt.svg(card)}${video}</div>`
       + `<div class="hc-type"><span class="hc-kind k-${card.kind}">${YC.Cards.KIND_LABEL[card.kind]}</span><span class="hc-gem" title="${R.label}"></span></div>`
       + `<div class="hc-text">${esc(card.text)}</div>`

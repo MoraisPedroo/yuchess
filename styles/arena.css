@@ -123,18 +123,20 @@ body.in-match { overflow: hidden; }
 .opp-hand { position: absolute; left: 50%; top: clamp(118px, 15.5vh, 172px); transform: translateX(-50%); z-index: 20; display: flex; justify-content: center; pointer-events: none; }
 .opp-hand .hcard.size-xs { --cw: clamp(30px, 2.4vw, 46px); margin: 0 -7px; transform: rotate(calc(var(--i) * 6deg)) translateY(calc(var(--i) * var(--i) * 1.5px)); }
 .hand-dock { position: absolute; left: 0; right: 0; bottom: 0; height: 0; z-index: 40; }
-.hand-row { position: absolute; left: 50%; bottom: -18px; transform: translateX(-50%); display: flex; align-items: flex-end; }
-.hand-row .hcard { --cw: clamp(104px, 7.2vw, 140px); margin: 0 -12px; transform: translateY(var(--lift, 0px)) rotate(var(--rot, 0deg)); transform-origin: 50% 100%;
+.hand-row { --zmax: 2.05; position: absolute; left: 50%; bottom: -18px; transform: translateX(-50%); display: flex; align-items: flex-end; }
+.hand-row .hcard { --hw: clamp(104px, 7.2vw, 140px); --cw: var(--hw); margin: 0 -12px; transform: translateY(var(--lift, 0px)) rotate(var(--rot, 0deg)); transform-origin: 50% 100%;
   transition: transform .25s cubic-bezier(.22, 1, .36, 1), filter .2s; cursor: grab; touch-action: none; }
-/* zoom estilo Hearthstone: só o desenho cresce; a área de clique fica do tamanho normal */
-.hand-row .hcard .hc-tilt { pointer-events: none; transform-origin: 50% 100%; transform: translateY(var(--zy, 0px)) scale(var(--zs, 1)) rotateX(var(--rx)) rotateY(var(--ry));
-  transition: transform .3s cubic-bezier(.2, 1.25, .4, 1); }
+/* zoom estilo Hearthstone: só o desenho cresce; a área de clique fica do tamanho normal. O desenho é feito já no
+   tamanho ampliado (--zmax × a carta) e encolhido em repouso: ao ampliar fica a 100 % e o texto sai nítido */
+.hand-row .hcard .hc-tilt { --cw: calc(var(--hw) * var(--zmax)); inset: auto; left: calc(50% - var(--cw) / 2); bottom: 0; width: var(--cw); height: calc(var(--cw) * 1.4);
+  pointer-events: none; transform-origin: 50% 100%; transform: translateY(var(--zy, 0px)) scale(calc(var(--zs, 1) / var(--zmax))) rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform .3s cubic-bezier(.2, 1.1, .4, 1); }
 .hand-row .hcard.tilting .hc-tilt { transition: transform .14s ease-out; }
 .hand-row .hcard:hover { transform: translateY(0) rotate(0deg); z-index: 60; }
-.hand-row .hcard:hover .hc-tilt { --zs: 1.85; --zy: -40px; }
+.hand-row .hcard:hover .hc-tilt { --zs: var(--zmax); --zy: -40px; }
 .hand-row .hcard.picked { transform: translateY(-34px) rotate(0deg); z-index: 55; }
 .hand-row .hcard.picked .hc-tilt { --zs: 1.15; }
-.hand-row .hcard.picked:hover .hc-tilt { --zs: 1.85; --zy: -8px; }
+.hand-row .hcard.picked:hover .hc-tilt { --zs: var(--zmax); --zy: -8px; }
 .hand-row .hcard.dragging { visibility: hidden; }
 .hand-row .hcard.enter { animation: hand-in .5s cubic-bezier(.2, 1.4, .4, 1); }
 .hand-row .hcard.playable .hc-face { box-shadow: 0 0 0 2px #7CFF9B, 0 0 16px rgba(124, 255, 155, .8); }
@@ -143,17 +145,17 @@ body.in-match { overflow: hidden; }
 .hand-row .hcard.dim { filter: brightness(.7) saturate(.75); }
 .hand-row .hcard.dim:hover { filter: none; }
 /* etiqueta ao lado da carta ampliada */
-.hc-tip { position: absolute; bottom: calc(var(--cw) * .7); left: calc(50% + var(--cw) * .98); width: 214px; padding: 10px 12px; z-index: 2; text-align: left;
+.hc-tip { position: absolute; bottom: calc(var(--hw) * 1.1); left: calc(50% + var(--hw) * var(--zmax) / 2 + 12px); width: 236px; padding: 11px 14px; z-index: 2; text-align: left;
   background: rgba(5, 11, 26, .95); border: 1.5px solid var(--cyan); border-radius: 8px; box-shadow: 0 0 18px rgba(0, 229, 255, .35);
   pointer-events: none; opacity: 0; transform: translateX(-8px); transition: opacity .15s, transform .2s; }
-.hcard.tip-left .hc-tip { left: auto; right: calc(50% + var(--cw) * .98); transform: translateX(8px); }
+.hcard.tip-left .hc-tip { left: auto; right: calc(50% + var(--hw) * var(--zmax) / 2 + 12px); transform: translateX(8px); }
 .hand-row .hcard:hover .hc-tip { opacity: 1; transform: none; transition-delay: .12s; }
 .hand-row .hcard.dragging .hc-tip { display: none; }
-.hc-tip b { display: block; font-family: 'Chakra Petch', sans-serif; font-size: 15px; color: #fff; }
-.tip-meta { display: block; font-size: 11.5px; color: #9FB3CC; margin: 2px 0 6px; }
-.tip-meta em { font-style: normal; font-weight: 700; }
-.hc-tip p { margin: 0 0 5px; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 13px; line-height: 1.35; color: #E2EEFF; }
-.hc-tip small { font-size: 11px; color: #7FA0C0; }
+.hc-tip b { display: block; font-family: 'Chakra Petch', sans-serif; font-size: 17px; line-height: 1.15; color: #fff; }
+.tip-meta { display: block; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 13px; color: #A9BDD6; margin: 3px 0 8px; }
+.tip-meta em { font-style: normal; font-weight: 800; }
+.hc-tip p { margin: 0 0 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14.5px; line-height: 1.35; color: #EEF5FF; }
+.hc-tip small { display: block; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 12.5px; color: #8FB0D0; }
 @media (hover: none) { .hand-row .hcard.picked .hc-tilt { --zs: 1.7; --zy: -16px; } }
 @keyframes hand-in { from { transform: translateY(80px) scale(.6); opacity: 0; } }
 
@@ -221,7 +223,7 @@ body.in-match { overflow: hidden; }
   .action-bar span { flex: 1 1 100%; text-align: center; font-size: 13px; }
   .log-drawer { left: 4vw; right: 4vw; width: auto; top: 86px; bottom: 200px; }
   .hand-row { bottom: -8px; }
-  .hand-row .hcard { --cw: 86px; margin: 0 -8px; }
+  .hand-row .hcard { --hw: 86px; margin: 0 -8px; }
   .hand-row .hcard:hover { transform: translateY(var(--lift, 0px)) rotate(var(--rot, 0deg)); }
   .hand-row .hcard:hover .hc-tilt { --zs: 1; --zy: 0px; }
   .hand-row .hcard.picked { transform: translateY(-20px) rotate(0deg); }

@@ -52,6 +52,11 @@ Row 4: 29) an orange jackhammer with red details; 30) a purple wind-up alarm clo
 
 1. Imagem inicial 1280×720: o objeto recortado (da folha original) em grande sobre fundo índigo escuro com brilho na cor da carta.
 2. Anexar a imagem e pedir: animar este objeto exato (mesmo desenho/contorno), a flutuar devagar, brilho a pulsar, faíscas à volta, câmara fixa, ciclo sem salto, sem texto.
+   Prompts usados (anexar `_tmp_art/start_<icone>.png`):
+   - Cetro: *Animate this exact cartoon object… a golden royal scepter…* (ver a conversa "Animated Golden Royal Scepter").
+   - Bigorna: *Animate this exact cartoon object, a heavy black iron anvil with a red stripe, keeping the same design, thick dark outline and colors. It hovers slowly up and down over the dark indigo background, then drops a little and lands with a small cartoon impact: a ring shockwave, dust puffs and golden sparks. A red glow pulses behind it. Static camera, object centered, smooth seamless loop, 2D cartoon game asset look. No text, no logos, no people.*
+   - Espelho: *Animate this exact cartoon object, a pink rubber hand mirror with cyan glass, keeping the same design, thick dark outline and colors. It floats and sways gently side to side; a bright white reflection sweeps across the cyan glass and little star sparkles bounce off it. A soft pink and cyan glow pulses behind. Static camera, object centered, smooth seamless loop, 2D cartoon game asset look. No text, no logos, no people.*
+   - Apito: *Animate this exact cartoon object, a shiny golden referee whistle on a black cord, keeping the same design, thick dark outline and colors. It floats and swings gently on its cord; cartoon sound-wave rings and small golden star sparkles burst from the mouthpiece in rhythm. A warm golden glow pulses behind. Static camera, object centered, smooth seamless loop, 2D cartoon game asset look. No text, no logos, no people.*
 3. Converter: `ffmpeg -ss 0.6 -t 4.8 -i in.mp4 -filter_complex "[0:v]scale=480:-2,fps=30,split[a][b];[b]reverse[r];[a][r]concat=n=2:v=1:a=0,format=yuv420p[v]" -map "[v]" -an -c:v libx264 -crf 27 -preset slow -movflags +faststart assets/video/<icone>.mp4` e acrescentar o ícone a `ItemToken.VIDEO`.
 
 ## Ideias para depois (vídeo / animação)

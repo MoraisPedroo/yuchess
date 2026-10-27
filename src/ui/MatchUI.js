@@ -193,6 +193,9 @@
         el.classList.toggle('respond', !!(this.respondCtx && this.respondCtx.options.some((o) => o.uid === inst.uid)));
       });
       for (const [uid, el] of this.handEls) if (!keep.has(uid)) { el.remove(); this.handEls.delete(uid); }
+      // zoom da mão: a carta ampliada fica com 250–300 px de largura (texto legível), sem sair do ecrã
+      const hw = row.firstElementChild ? row.firstElementChild.offsetWidth : 0;
+      if (hw) row.style.setProperty('--zmax', (Math.min(300, Math.max(250, innerWidth * 0.17), innerHeight * 0.4) / hw).toFixed(3));
     }
 
     renderButtons() {

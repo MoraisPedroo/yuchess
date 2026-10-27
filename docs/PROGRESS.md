@@ -35,7 +35,7 @@
 
 1. Teste real online + corrigir o que as regras recusarem.
 2. Visual: aplicar o estilo néon/3D ao menu, loja e baralhos (os retratos 3D podem entrar lá com `YC.pieceHTML` se houver um renderer); fundo de estádio gerado por IA (prompts no relatório do Gemini, secção 5). Os modelos GLB deixaram de ser precisos: as peças de vinil feitas por código substituem-nos.
-1b. ~~Arte dos objetos com o Gemini~~ (feito a 2026-10-27: 32 imagens em `assets/items/`, 16 efeitos em `assets/fx/`, estádio). Vídeos das Lendárias: Cetro feito; faltam Bigorna, Espelho e Apito (quando o Gemini tiver capacidade; acrescentar o ícone a `ItemToken.VIDEO`).
+1b. ~~Arte dos objetos com o Gemini~~ (feito a 2026-10-27: 32 imagens em `assets/items/`, 16 efeitos em `assets/fx/`, estádio). Vídeos das Lendárias: Cetro feito; faltam Bigorna, Espelho e Apito (quando o Gemini tiver capacidade — um pedido de cada vez; prompts prontos em `docs/ART-PROMPTS.md`; acrescentar o ícone a `ItemToken.VIDEO`). Alternativa: o Google Flow (Veo, mesma conta Pro, gasta créditos de IA).
 2b. Arrastar: hoje só a mão arrasta. Falta arrastar uma carta da Zona (Magia Rápida virada) para o tabuleiro e um "seta de mira" do Íman entre as duas peças.
 3. Balanceamento: a Lança e a Mola são fortes; ver taxas de vitória por carta com `tools/simulate.js` (acrescentar estatística por carta).
 3. Tutorial interativo curto (primeira partida guiada: equipar, armadilha, resposta).
@@ -50,6 +50,14 @@
 - Num separador escondido o navegador quase para as animações (requestAnimationFrame); o motor espera no máximo 4 s por animação, por isso o jogo nunca bloqueia, só fica lento.
 
 ## Registo de sessões
+
+### 2026-10-27 (manhã) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Pedido do Pedro**: a leitura da carta continuava má; a passagem carta → objeto ao arrastar não era fluida e a carta "tremia como se estivesse a 4x"; pedir ao Gemini e descarregar os vídeos que faltam.
+- **Porque tremia**: a inclinação era calculada a cada `pointermove` (saltava com a distância entre eventos) e criava um tween novo por evento; o fantasma tinha um `filter: drop-shadow` desfocado que se refazia a cada quadro, e lá dentro continuavam a correr os raios, brilhos e o brilho lendário da carta; a transformação usava `back.out(2.4)` (ressalto grande) e trocava carta ↔ objeto sempre que o rato passava na linha da mão.
+- **Correções** (`src/ui/MatchDrag.js`, `styles/match.css`): o `pointermove` só guarda a posição; um ciclo `requestAnimationFrame` (`dragLoop`) move o fantasma com uma mola independente dos fps e inclina-o pela velocidade suavizada (carta: rotateX/Y; objeto: balança); alvo, etiqueta e marcador calculados no máximo uma vez por quadro e só quando mudam; sem `filter` nem animações CSS dentro do fantasma; a carta parte do sítio onde estava desenhada na mão (ampliada) e encolhe até ao tamanho de arrastar; a moldura encolhe para o desenho e o objeto nasce do tamanho do desenho (sem ressaltos), com histerese (vira objeto 56 px acima da mão, só volta a carta dentro dela). Medido: 0,7 ms por quadro em média, 3,9 ms no quadro da transformação.
+- **Leitura da carta**: a carta da mão é desenhada já no tamanho ampliado e encolhida em repouso (o texto deixa de ser uma imagem esticada); a ampliada tem 250–300 px de largura conforme o ecrã (`--zmax` calculado em `MatchUI.renderHand`); texto das cartas em Nunito em vez de Spectral; desenho um pouco mais baixo (`aspect-ratio` 1,8) para o texto caber todo; nomes compridos encolhem a letra (`n-l`, `n-xl`, `n-xxl` em `HoloCard.faceHTML`) em vez de ficarem cortados ("Botas de Vento Supersónico"); etiqueta ao lado com letra maior. Verificado: as 31 cartas cabem sem cortes em md, lg e xl.
+- **Vídeos**: a Bigorna e o Espelho foram pedidos ao Gemini (prompts em `docs/ART-PROMPTS.md`), mas voltou a responder "at full capacity" (6 tentativas em dois dias). Atenção: enviar um segundo pedido enquanto o primeiro está a gerar cancela o primeiro — pedir um de cada vez.
+- **Como testar**: os 4 comandos; no navegador passar o rato numa carta da mão (texto nítido, nome inteiro) e arrastar uma Armadilha de Casa e um Equipamento devagar e depressa (a carta inclina sem tremer, vira objeto uma só vez, e volta a carta ao regressar à mão).
 
 ### 2026-10-27 (madrugada) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Pedido do Pedro**: algumas animações não estavam fluidas ("parece 4x"); fazer vídeos, animações e sprites bonitos para tudo o que for preciso e testar sozinho.

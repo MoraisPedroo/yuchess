@@ -1,6 +1,6 @@
 /* cards.css — cartas holográficas 3D (relatório "Chess-Gi-Oh! Arena"): moldura pela função da carta
    (Equipamento cobalto/turquesa, Armadilha de Casa violeta, Reativa âmbar, Counter platina com néon vermelho,
-   Magia Rápida verde-água), nome em Cinzel, texto em Spectral e acabamento por raridade
+   Magia Rápida verde-água), nome em Cinzel, texto em Nunito (lê-se melhor em pequeno) e acabamento por raridade
    (Comum mate · Rara prateada · Épica dourada com prisma · Lendária com folha estelar). Tamanho por --cw. */
 .hcard { --cw: 132px; --rx: 0deg; --ry: 0deg; --mx: 50%; --my: 50%; --hue: 0deg;
   --frame: #166D89; --frame2: #0B3547; --edge: #5CE1E6; --rar: #A4AFC0;
@@ -34,10 +34,13 @@
 .hc-head { display: flex; align-items: center; gap: 4px; background: rgba(0, 0, 0, .45); border: 1px solid rgba(255, 255, 255, .18); border-radius: calc(var(--cw) * .025); padding: calc(var(--cw) * .018) calc(var(--cw) * .035); }
 .hc-name { flex: 1; font-family: 'Cinzel', 'Cinzel Decorative', serif; font-weight: 700; font-size: calc(var(--cw) * .07); line-height: 1.05; color: #fff; overflow: hidden;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; text-shadow: 0 1px 2px #000; }
+.hc-name.n-l { font-size: calc(var(--cw) * .058); }
+.hc-name.n-xl { font-size: calc(var(--cw) * .05); letter-spacing: -.01em; }
+.hc-name.n-xxl { font-size: calc(var(--cw) * .045); letter-spacing: -.015em; line-height: 1; -webkit-line-clamp: 3; }
 .hc-ss { flex: none; padding: .05em .4em; border-radius: calc(var(--cw) * .02); background: #00E5FF; color: #001219; font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: calc(var(--cw) * .06); }
 .hc-ss::before { content: 'VEL '; font-size: .75em; }
 .k-COUNTER .hc-ss { background: #FF3355; color: #fff; }
-.hc-art { position: relative; flex: 0 0 auto; aspect-ratio: 1.55; border: 1.5px solid rgba(255, 255, 255, .45); border-radius: calc(var(--cw) * .02); overflow: hidden;
+.hc-art { position: relative; flex: 0 0 auto; aspect-ratio: 1.8; border: 1.5px solid rgba(255, 255, 255, .45); border-radius: calc(var(--cw) * .02); overflow: hidden;
   background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, .95) 0%, var(--c2) 36%, var(--c1) 100%); display: grid; place-items: center; box-shadow: inset 0 0 calc(var(--cw) * .05) rgba(0, 0, 0, .5); }
 .hc-rays { position: absolute; inset: -30%; background: repeating-conic-gradient(from 0deg, rgba(255, 255, 255, .26) 0 9deg, transparent 9deg 22deg); animation: spin-slow 24s linear infinite; }
 .hc-art img.card-icon { object-fit: contain; }
@@ -48,7 +51,7 @@
 .hc-kind { font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: calc(var(--cw) * .056); text-transform: uppercase; letter-spacing: .04em; color: #FFD166; }
 .hc-gem { width: calc(var(--cw) * .08); height: calc(var(--cw) * .08); transform: rotate(45deg); border: 1px solid #000; background: var(--rar); box-shadow: 0 0 calc(var(--cw) * .04) var(--rar); }
 .hc-text { flex: 1; background: rgba(5, 10, 22, .82); border: 1px solid rgba(255, 255, 255, .25); border-radius: calc(var(--cw) * .02); padding: calc(var(--cw) * .03) calc(var(--cw) * .035);
-  font-family: 'Spectral', serif; font-weight: 500; font-size: calc(var(--cw) * .06); line-height: 1.16; color: #E2EEFF; overflow: hidden; }
+  font-family: 'Nunito', sans-serif; font-weight: 700; font-size: calc(var(--cw) * .06); line-height: 1.15; color: #EEF5FF; overflow: hidden; }
 .size-xs .hc-text, .size-xs .hc-type, .size-sm .hc-text { display: none; }
 .size-xs .hc-name { font-size: calc(var(--cw) * .1); -webkit-line-clamp: 2; }
 .size-xs .hc-ss { display: none; }

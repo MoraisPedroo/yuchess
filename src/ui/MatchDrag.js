@@ -1,15 +1,22 @@
 /* MatchDrag.js — arrastar cartas da mão para o tabuleiro (estilo Hearthstone), acrescenta métodos ao MatchUI.
-   Ao afastar-se da mão, a carta "vira objeto" (a bomba fica uma bombinha, as botas um item a flutuar) com uma
-   etiqueta que diz o que fazer e fica verde (alvo válido) ou vermelha (porquê não). Ao largar: Equipamento numa
-   peça → EQUIP; Armadilha de Casa numa casa → SET_TRAP (o objeto cai na casa); Reativa/Counter na Zona (ou no
-   tabuleiro) → SET_CARD; Magia Rápida no tabuleiro → ACTIVATE ou na Zona → SET_CARD. Alvo inválido: volta à mão. */
+   A carta segue o rato com uma mola (um só ciclo por fotograma, inclinação pela velocidade, sem tweens por evento).
+   Ao afastar-se da mão a ilustração "sai" da carta e vira o objeto (a bomba fica uma bombinha, as botas um item
+   a flutuar), com uma etiqueta que diz o que fazer, verde (alvo válido) ou vermelha (porquê não). Ao largar:
+   Equipamento numa peça → EQUIP; Armadilha de Casa numa casa → SET_TRAP (o objeto cai na casa); Reativa/Counter
+   na Zona (ou no tabuleiro) → SET_CARD; Magia Rápida no tabuleiro → ACTIVATE ou na Zona → SET_CARD. Alvo
+   inválido: volta à mão. */
 (function (YC) {
   'use strict';
 
   const E = () => YC.CardEffects;
   const G = () => window.gsap;
   const START_PX = 8;
+  const CARD_W = 128;      // largura da carta arrastada
+  const CARD_CY = -14;     // centro da carta em relação ao ponteiro (o ponteiro fica um pouco abaixo do meio)
+  const ITEM_S0 = 0.62;    // o objeto nasce do tamanho do desenho dentro da carta
   const SQ = (sq) => YC.Chess.sqName(sq).toUpperCase();
+  const clamp = (v, a) => (v > a ? a : v < -a ? -a : v);
+  const follow = (k, dt) => 1 - Math.exp(-k * dt);   // suavização igual a 30, 60 ou 144 fps
   const HINT = {
     EQUIP: 'Larga o objeto numa peça tua que brilhe.',
     GRID: 'Larga o objeto numa casa vazia das filas 3 a 6.',
@@ -50,78 +57,101 @@
       this.selCard = inst;
       this.mode = def.kind === 'EQUIP' ? 'equip' : def.kind === 'GRID' ? 'trap'
         : def.kind === 'QUICK' && def.target === 'SQUARE' ? 'target-sq' : def.kind === 'QUICK' && def.target === 'STEAL' ? 'steal-from' : 'card';
+      // parte da carta tal como está desenhada na mão (talvez ampliada)
+      const r0 = (el.querySelector('.hc-tilt') || el).getBoundingClientRect();
       const ghost = document.createElement('div');
       ghost.className = 'drag-ghost';
-      const cardWrap = document.createElement('div');
-      cardWrap.className = 'dg-card';
+      ghost.innerHTML = '<div class="dg-card"><div class="dg-tilt"></div></div><div class="dg-label"></div>';
+      const cardWrap = ghost.firstChild, tilt = cardWrap.firstChild, label = ghost.lastChild;
       const card = YC.HoloCard.create(inst.id, { size: 'md', static: true });
-      card.style.setProperty('--cw', '128px');
-      cardWrap.appendChild(card);
-      const label = document.createElement('div');
-      label.className = 'dg-label';
-      ghost.append(cardWrap, label);
-      let item = null;
+      card.style.setProperty('--cw', `${CARD_W}px`);
+      tilt.appendChild(card);
+      let item = null, sway = null;
       if (MORPH[def.kind]) {
         item = document.createElement('div');
         item.className = 'dg-item';
-        item.appendChild(YC.ItemToken.create(def, { size: 92 }));
-        ghost.appendChild(item);
+        sway = document.createElement('div');
+        sway.className = 'dg-sway';
+        sway.appendChild(YC.ItemToken.create(def, { size: 92 }));
+        item.appendChild(sway);
+        ghost.insertBefore(item, label);
       }
       document.body.appendChild(ghost);
       const row = this.q('.hand-row').getBoundingClientRect();
-      this.drag = { el, inst, def, ghost, cardWrap, item, label, vis: cardWrap, form: 'card', handTop: row.top, lx: e.clientX, rot: 0, over: false, ok: null, lkey: '' };
+      const x = r0.left + r0.width / 2, y = r0.top + r0.height / 2 - CARD_CY;
+      this.drag = { el, inst, def, ghost, cardWrap, tilt, item, sway, label, form: 'card', handTop: row.top,
+        px: e.clientX, py: e.clientY, ev: e, x, y, vx: 0, vy: 0, t: performance.now(), dirty: true, over: false, ok: null, lkey: '', left: false };
       el.classList.add('dragging');
       this.dragging = true;
       this.renderSoft();
       if (YC.Sound) YC.Sound.play('card_flip');
+      ghost.style.transform = `translate3d(${x}px, ${y}px, 0)`;
       if (g) {
-        g.set(ghost, { x: e.clientX, y: e.clientY });
-        g.fromTo(cardWrap, { scale: 1.25 }, { scale: 1, duration: 0.2, ease: 'power2.out' });
-        if (item) g.set(item, { scale: 0.2, opacity: 0 });
+        g.fromTo(cardWrap, { scale: r0.width / CARD_W }, { scale: 1, duration: 0.32, ease: 'power3.out' });
+        if (item) g.set(item, { scale: ITEM_S0, opacity: 0 });
         g.set(label, { opacity: 0 });
-        this.drag.qx = g.quickTo(ghost, 'x', { duration: 0.1, ease: 'power3' });
-        this.drag.qy = g.quickTo(ghost, 'y', { duration: 0.1, ease: 'power3' });
-      }
+      } else if (item) item.style.opacity = 0;
+      this.dragLoop(this.drag);
     },
 
+    /** O rato só guarda a posição; o ciclo dragLoop desenha uma vez por fotograma. */
     dragMove(e) {
-      const d = this.drag, g = G();
-      if (d.qx) { d.qx(e.clientX); d.qy(e.clientY); } else d.ghost.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
-      // inclina para o lado do movimento
-      d.rot = Math.max(-24, Math.min(24, d.rot * 0.6 + (e.clientX - d.lx) * 0.9));
-      d.lx = e.clientX;
-      const t = this.dropTarget(e), over = !!t;
-      const act = this.dropAction(d.inst, t);
-      // longe da mão (ou por cima do tabuleiro) a carta vira objeto
-      const away = over || e.clientY < d.handTop - 24;
-      if (d.item) { const form = away ? 'item' : 'card'; if (form !== d.form) this.dragMorph(d, form); }
-      else if (g && over !== d.over) g.to(d.cardWrap, { scale: over ? 0.6 : 1, duration: 0.2, ease: 'power2.out' });
-      if (g) g.to(d.vis, { rotation: d.form === 'item' ? d.rot * 0.6 : d.rot, duration: 0.25, ease: 'power2.out', overwrite: 'auto' });
+      const d = this.drag;
+      d.px = e.clientX; d.py = e.clientY; d.ev = e; d.dirty = true;
+    },
+
+    dragLoop(d) {
+      const step = (now) => {
+        if (this.drag !== d) return;
+        const dt = Math.min(0.05, Math.max(0.001, (now - d.t) / 1000));
+        d.t = now;
+        // mola: a carta corre atrás do ponteiro; a velocidade (suavizada) dá a inclinação
+        const k = follow(24, dt), nx = d.x + (d.px - d.x) * k, ny = d.y + (d.py - d.y) * k, kv = follow(8, dt);
+        d.vx += ((nx - d.x) / dt - d.vx) * kv;
+        d.vy += ((ny - d.y) / dt - d.vy) * kv;
+        d.x = nx; d.y = ny;
+        d.ghost.style.transform = `translate3d(${nx.toFixed(1)}px, ${ny.toFixed(1)}px, 0)`;
+        d.tilt.style.transform = `rotateX(${clamp(-d.vy * 0.012, 16).toFixed(2)}deg) rotateY(${clamp(d.vx * 0.014, 18).toFixed(2)}deg) rotate(${clamp(d.vx * 0.007, 10).toFixed(2)}deg)`;
+        if (d.sway) d.sway.style.transform = `rotate(${clamp(-d.vx * 0.012, 14).toFixed(2)}deg)`;
+        if (d.dirty) { d.dirty = false; this.dragUpdate(d); }
+        d.raf = requestAnimationFrame(step);
+      };
+      d.raf = requestAnimationFrame(step);
+    },
+
+    /** Alvo por baixo do ponteiro, forma (carta/objeto), cores e etiqueta. Corre no máximo uma vez por fotograma. */
+    dragUpdate(d) {
+      const g = G(), t = this.dropTarget(d.ev), over = !!t, act = this.dropAction(d.inst, t);
+      // por cima do tabuleiro (ou bem acima da mão) vira objeto; só volta a carta quando regressa à mão
+      if (d.item) {
+        let form = d.form;
+        if (over || d.py < d.handTop - 56) form = 'item';
+        else if (d.py > d.handTop - 8) form = 'card';
+        if (form !== d.form) this.dragMorph(d, form);
+      } else if (g && over !== d.over) g.to(d.cardWrap, { scale: over ? 0.62 : 1, duration: 0.28, ease: 'power3.out', overwrite: 'auto' });
       d.over = over;
       const ok = act ? 'ok' : over ? 'bad' : null;
       if (ok !== d.ok) { d.ghost.classList.toggle('ok', ok === 'ok'); d.ghost.classList.toggle('bad', ok === 'bad'); d.ok = ok; }
-      d.label.classList.toggle('left', e.clientX > innerWidth - 320);
+      const left = d.px > innerWidth - 320;
+      if (left !== d.left) { d.left = left; d.label.classList.toggle('left', left); }
       this.dragLabel(d, t, act, d.form === 'item' || over);
       const sq = t && (t.kind === 'square' || t.kind === 'piece') ? t.sq : -1;
-      if (this.board.dropMark) this.board.dropMark(sq, !!act);
+      if (sq !== d.markSq || !!act !== d.markOk) { d.markSq = sq; d.markOk = !!act; if (this.board.dropMark) this.board.dropMark(sq, !!act); }
     },
 
-    /** Transformação carta ↔ objeto, com nuvem de brilhos. */
+    /** Carta ↔ objeto: a moldura encolhe para o desenho e o objeto sai dele (e o contrário), sem ressaltos. */
     dragMorph(d, form) {
       const g = G(), toItem = form === 'item';
       d.form = form;
-      d.vis = toItem ? d.item : d.cardWrap;
-      YC.ItemToken.puff(d.ghost, d.def.theme.primary, 0, toItem ? -38 : -14);
+      YC.ItemToken.puff(d.ghost, d.def.theme.primary, 0, -38);
       if (YC.Sound) YC.Sound.play(toItem ? 'magic_zap' : 'card_flip');
       if (!g) { d.cardWrap.style.opacity = toItem ? 0 : 1; d.item.style.opacity = toItem ? 1 : 0; return; }
       g.killTweensOf([d.cardWrap, d.item]);
-      if (toItem) {
-        g.to(d.cardWrap, { scale: 0.12, rotation: -30, opacity: 0, duration: 0.18, ease: 'power2.in' });
-        g.fromTo(d.item, { scale: 0.2, opacity: 0, rotation: 25 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.45, delay: 0.05, ease: 'back.out(2.4)' });
-      } else {
-        g.to(d.item, { scale: 0.2, opacity: 0, duration: 0.15, ease: 'power2.in' });
-        g.fromTo(d.cardWrap, { scale: 0.3, opacity: 0, rotation: 20 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.32, delay: 0.04, ease: 'back.out(1.8)' });
-      }
+      const [out, inn, s0] = toItem ? [d.cardWrap, d.item, ITEM_S0] : [d.item, d.cardWrap, 0.5];
+      g.to(out, { scale: toItem ? 0.42 : ITEM_S0, duration: 0.26, ease: 'power2.in' });
+      g.to(out, { opacity: 0, duration: 0.2, delay: 0.06, ease: 'none' });
+      g.fromTo(inn, { scale: s0 }, { scale: 1, duration: 0.36, ease: 'power3.out' });
+      g.fromTo(inn, { opacity: 0 }, { opacity: 1, duration: 0.16, ease: 'none' });
     },
 
     /** Etiqueta ao lado do objeto: o que fazer, onde vai cair ou porque não dá. */
@@ -132,11 +162,12 @@
       const text = state === 'idle' ? this.dragIdleText(d.def) : state === 'ok' ? this.dragOkText(d.def, act, sq) : this.dragWhyNot(d.def, t, sq);
       const key = `${show}|${state}|${text}`;
       if (key === d.lkey) return;
+      const wasShown = d.lkey.startsWith('true');
       d.lkey = key;
-      d.label.className = `dg-label ${state}${d.label.classList.contains('left') ? ' left' : ''}`;
+      d.label.className = `dg-label ${state}${d.left ? ' left' : ''}`;
       d.label.innerHTML = `<b>${YC.HoloCard.esc(d.def.name)}</b><span>${text}</span>`;
-      if (g) g.to(d.label, { opacity: show ? 1 : 0, x: show ? 0 : -6, duration: 0.18, overwrite: 'auto' });
-      else d.label.style.opacity = show ? 1 : 0;
+      if (!g) { d.label.style.opacity = show ? 1 : 0; return; }
+      if (show !== wasShown) g.to(d.label, { opacity: show ? 1 : 0, x: show ? 0 : -6, duration: 0.2, ease: 'power2.out', overwrite: 'auto' });
     },
 
     dragIdleText(def) {
@@ -187,10 +218,13 @@
     async dragEnd(e) {
       const d = this.drag, g = G();
       this.drag = null;
+      cancelAnimationFrame(d.raf);
       this.dragging = false;
       this.dragJustEnded = true;
       setTimeout(() => { this.dragJustEnded = false; }, 250);
       if (this.board.dropMark) this.board.dropMark(-1);
+      // a partir daqui o GSAP anima o fantasma: parte de onde a mola o deixou
+      if (g) { g.set(d.ghost, { x: d.x, y: d.y }); g.to([d.tilt, d.sway].filter(Boolean), { rotationX: 0, rotationY: 0, rotation: 0, duration: 0.3, ease: 'power2.out' }); }
       const act = this.dropAction(d.inst, this.dropTarget(e));
       if (act && act.steal != null) {
         // Íman: a peça de onde se rouba já está escolhida; falta a tua peça que recebe
@@ -200,7 +234,7 @@
         return this.toast('Agora escolhe a tua peça que recebe o equipamento.');
       }
       if (act) {
-        const vis = d.form === 'item' ? d.item : d.cardWrap.firstChild, r = vis.getBoundingClientRect();
+        const vis = d.form === 'item' ? d.item : d.cardWrap.querySelector('.hcard'), r = vis.getBoundingClientRect();
         this.dropRects.set(d.inst.uid, { rect: { left: r.left, top: r.top, width: r.width, height: r.height }, t: performance.now() });
         if (g) g.to(d.label, { opacity: 0, duration: 0.12 });
         if (act.type === 'SET_TRAP' && d.form === 'item' && this.board.is3D) {
@@ -208,7 +242,7 @@
           this.dropTokens = this.dropTokens || new Map();
           this.dropTokens.set(d.inst.uid, d.ghost);
           setTimeout(() => { if (this.dropTokens.get(d.inst.uid) === d.ghost) { this.dropTokens.delete(d.inst.uid); d.ghost.remove(); } }, 6000);
-        } else if (g) g.to(d.ghost, { scale: 0.2, opacity: 0, duration: 0.18, ease: 'power2.in', onComplete: () => d.ghost.remove() });
+        } else if (g) g.to(d.ghost, { scale: 0.2, opacity: 0, duration: 0.2, ease: 'power2.in', onComplete: () => d.ghost.remove() });
         else d.ghost.remove();
         setTimeout(() => d.el.classList.remove('dragging'), 400);
         return this.send(act);
@@ -220,7 +254,7 @@
       if (g) g.to(d.label, { opacity: 0, duration: 0.12 });
       const home = d.el.getBoundingClientRect();
       if (g) {
-        await new Promise((res) => g.to(d.ghost, { x: home.left + home.width / 2, y: home.top + home.height * 0.58, duration: 0.38, ease: 'back.out(1.4)', onComplete: res }));
+        await new Promise((res) => g.to(d.ghost, { x: home.left + home.width / 2, y: home.top + home.height / 2 - CARD_CY, duration: 0.4, ease: 'power3.out', onComplete: res }));
       }
       d.ghost.remove();
       d.el.classList.remove('dragging');
