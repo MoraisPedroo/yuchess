@@ -12,7 +12,7 @@ const tests = [];
 const test = (name, fn) => tests.push({ name, fn });
 const eq = (got, want, what) => { if (got !== want) throw new Error(`${what}: ${JSON.stringify(got)} (esperado ${JSON.stringify(want)})`); };
 
-const FILL = Array(12).fill('gt_jaula_estatica');
+const FILL = Array(YC.Cards.RULES.DECK_SIZE).fill('gt_jaula_estatica');
 
 /** Partida a meio: `team` a jogar no turno `turn`; respostas guionadas por equipa (ids de carta, por ordem). */
 function setup(fen, { team = 'w', turn, hand = {}, zone = {}, deck = {}, replies = {} } = {}) {

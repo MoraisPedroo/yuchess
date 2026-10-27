@@ -24,7 +24,7 @@ service cloud.firestore {
     // Lugar numa sala: numa ranqueada o rating tem de ser o do perfil (não dá para mentir no Elo).
     function seatOk(seat, uid, ranked) {
       return seat.keys().hasOnly(['uid', 'name', 'rating', 'deck']) && seat.uid == uid && validName(seat.name)
-        && seat.deck is list && seat.deck.size() == 12
+        && seat.deck is list && (seat.deck.size() == 22 || seat.deck.size() == 12)
         && seat.rating is int && (!ranked || seat.rating == get(profilePath(uid)).data.rating);
     }
 

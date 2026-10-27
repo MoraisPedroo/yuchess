@@ -4,7 +4,7 @@ Projeto: **Chess-Gi-Oh! Cartoon Edition** — xadrez a sério (regras normais) m
 
 - **Contra o bot** (Fácil/Médio/Difícil) e **online** (ranqueada com Elo ou sala privada por código).
 - **Loja**: pacotinhos de 5 cartas (100 de ouro) com raridades Comum/Rara/Épica/Lendária, pity e Poeira Estelar.
-- **Baralhos**: montar baralhos de 12, criar cartas com Poeira Estelar.
+- **Baralhos**: montar baralhos de 22 (`YC.Cards.RULES.DECK_SIZE`), criar cartas com Poeira Estelar.
 
 Equipa: **Pedro** (trabalha com Claude Code) e **Diego** (trabalha com Codex). Os dois agentes partilham este ficheiro e o `docs/PROGRESS.md`.
 
@@ -33,7 +33,7 @@ Escreve como se o próximo leitor não tivesse visto nada do que fizeste.
 | `python tools/serve.py` → <http://localhost:8765> | Servidor local sem cache. |
 | `node tools/test-chess-rules.js` | Regras de xadrez (contagens *perft* de referência) + equipamentos que mudam lances. Tem de dar `Tudo certo.` (`--deep` corre as contagens grandes). |
 | `node tools/test-cards.js` | Um teste de cenário por carta/regra (32). Tem de dar `32/32 testes passaram.` |
-| `node tools/simulate.js 30` | 30 partidas bot vs bot sem ecrã; verifica invariantes (24 cartas sempre, 1 Rei de cada cor, Chain fechada, quem jogou não fica em xeque). Tem de dar `30/30` e `Cartas nunca ativadas: nenhuma`. |
+| `node tools/simulate.js 30` | 30 partidas bot vs bot sem ecrã; verifica invariantes (2 × 22 cartas sempre, 1 Rei de cada cor, Chain fechada, quem jogou não fica em xeque). Tem de dar `30/30` e `Cartas nunca ativadas: nenhuma`. |
 | `node tools/simulate-online.js 8` | Protocolo online (lockstep) com dois motores ligados por mensagens, com latência e desistências. Tem de dar `Sincronizadas: 8/8`. |
 | `node tools/build.js` | Gera `dist/chess-gi-oh.html` (ficheiro único). `dist/` não vai para o git. |
 | `tools/gallery.html` | Galeria das peças (todos os estados) e das 31 cartas. |
@@ -80,7 +80,7 @@ Mapa rápido:
 - Coleções:
   - `users/{uid}` — coleção do jogador (ouro, poeira, inventário, baralhos, pity, estatísticas). Só o próprio lê/escreve. Sem login fica só no `localStorage`.
   - `players/{uid}` (perfil + rating, leitura pública) e `players/{uid}/history/{sala}` (caução da ranqueada).
-  - `matches/{código}` (sala com `v: 2` e o `deck` de 12 de cada lugar) e `matches/{código}/actions/{seq}` (ações e respostas da Chain).
+  - `matches/{código}` (sala com `v: 2` e o `deck` de 22 de cada lugar; as regras aceitam 22 ou 12) e `matches/{código}/actions/{seq}` (ações e respostas da Chain).
 - **Regras em `firestore.rules`**. Se mudares o formato de qualquer escrita no cliente, atualiza as regras e publica: `npx firebase-tools deploy --only firestore:rules` (ou cola na consola: Firestore → Regras).
 - Ranking: Elo K=32, início 1000. No início da ranqueada desconta-se a derrota (caução); quem ganha recupera a caução + o ganho. As regras só aceitam vitória se as "claims" dos dois coincidirem ou houver abandono (adversário 150 s sem jogar na vez dele).
 - Limitações conhecidas: no lockstep cada cliente tem o estado completo (incluindo a mão e as armadilhas do adversário) — um batoteiro com as ferramentas do navegador vê informação escondida. A economia (ouro, cartas) é calculada no cliente, por isso também dá para fazer batota nela; o rating continua protegido pelas regras. Resolver isto exige um servidor com autoridade (Cloud Functions).

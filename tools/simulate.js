@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* Põe o bot contra si próprio em N partidas sem ecrã e verifica invariantes:
-   as 24 cartas nunca se perdem nem duplicam, há sempre 1 Rei de cada cor, a Chain fecha no fim do turno,
+   as cartas dos dois baralhos (2 × 22) nunca se perdem nem duplicam, há sempre 1 Rei de cada cor, a Chain fecha no fim do turno,
    e quem acabou de jogar não fica em xeque. Uso: node tools/simulate.js [N] [--verbose] */
 'use strict';
 const path = require('path');
@@ -42,7 +42,7 @@ async function playOne(i) {
   m.bus.on('turn:start', () => { snapped = false; });
   m.bus.on('turn:end', ({ team }) => {
     const total = countCards(m);
-    if (total !== 24) problems.push(`turno ${m.state.turnCount}: ${total} cartas`);
+    if (total !== 2 * YC.Cards.RULES.DECK_SIZE) problems.push(`turno ${m.state.turnCount}: ${total} cartas`);
     const kings = m.pos.board.filter((p) => p && p.type === 'k');
     if (kings.length !== 2 || kings[0].color === kings[1].color) problems.push(`turno ${m.state.turnCount}: reis inválidos`);
     if (m.chain) problems.push(`turno ${m.state.turnCount}: Chain aberta`);

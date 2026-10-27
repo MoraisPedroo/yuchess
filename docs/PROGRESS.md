@@ -11,7 +11,7 @@
 - Xadrez completo (`src/game/ChessRules.js`): lances legais, xeque, xeque-mate, afogamento, roque, en passant, promoção, 50 lances, repetição tripla, material insuficiente. Contagens *perft* de referência certas (início, Kiwipete, posições 3–5).
 - 31 cartas do relatório com efeitos, Chain de Velocidade 1/2/3, janelas de resposta (captura, destruição, xeque), Zona de Armadilhas com "enjoo", Armadilhas de Casa escondidas (máx. 3), escudos, congelar, metamorfose, teletransporte, etc. 31 testes de cenário a passar.
 - Bot (Fácil/Médio/Difícil) e simulações: 30/30 partidas bot vs bot sem quebrar invariantes; todas as cartas chegam a ser usadas.
-- Economia: pacotinhos de 5 cartas com raridades, pity épico/lendário, duplicados → Poeira Estelar, criação de cartas, validação de baralhos, recompensas.
+- Economia: pacotinhos de 5 cartas com raridades, pity épico/lendário, duplicados → Poeira Estelar, criação de cartas, validação de baralhos, recompensas. **Baralhos de 22 cartas** desde 2026-10-27 (perfis antigos de 12 são convertidos sozinhos: `Economy.migrate22`).
 - Interface cartoon nova (peças com expressões, cartas holográficas, animações GSAP, confetes, sons sintetizados): Arena, Loja com abertura em 4 atos, Baralhos, partida contra o bot com respostas da Chain, layout de telemóvel. Testado no navegador (partidas inteiras bot vs bot no ecrã sem erros; equipar, virar carta, lance e resposta com a Égide feitos à mão).
 - Protocolo online: 8/8 pares sincronizados em memória (com latência e desistências).
 
@@ -29,10 +29,12 @@
 ## Em curso / a meio
 
 - O Pedro está a testar a versão publicada e vai enviar os erros que encontrar (sobretudo: velocidade das animações, arrastar cartas no telemóvel, legibilidade do zoom).
-- Falta publicar o `firestore.rules` no Firebase (ver "Configuração pendente") para o online funcionar.
+- Falta publicar o `firestore.rules` no Firebase (ver "Configuração pendente") para o online funcionar. As regras aceitam agora baralhos de 22 (e de 12, para clientes antigos em cache).
+- **Cartas novas (31 → 120)**: o Pedro vai correr o prompt `docs/DEEP-RESEARCH-CARTAS.md` no Gemini Deep Research e trazer o relatório. Depois: dados em `Cards.js`, efeitos em `CardEffects.js` (provavelmente um motor de "receitas" genérico, porque o relatório devolve cada efeito em primitivas), ícones/arte, um teste por carta, baralho inicial e baralhos do bot de 22.
 
 ## Próximos passos (por prioridade)
 
+00. **Expandir para 120 cartas** com o relatório do Deep Research (ver "Em curso").
 0. ~~Redesenho da estética~~ (feito a 2026-10-27 com o relatório do Gemini; ver `docs/DIRECAO-DE-ARTE.md`). Continuar com a lista "Por fazer" desse ficheiro: sons novos, modo daltónico, calha da Chain, Frame Break, câmara 3D nos menus, missões, ecrã VS no online.
 1. Teste real online + corrigir o que as regras recusarem.
 2. Visual: aplicar o estilo néon/3D ao menu, loja e baralhos (os retratos 3D podem entrar lá com `YC.pieceHTML` se houver um renderer); fundo de estádio gerado por IA (prompts no relatório do Gemini, secção 5). Os modelos GLB deixaram de ser precisos: as peças de vinil feitas por código substituem-nos.
@@ -51,6 +53,14 @@
 - Num separador escondido o navegador quase para as animações (requestAnimationFrame); o motor espera no máximo 4 s por animação, por isso o jogo nunca bloqueia, só fica lento.
 
 ## Registo de sessões
+
+### 2026-10-27 (noite, 2) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Pedido do Pedro**: usar outra vez o Deep Research para chegar a pelo menos 120 cartas; baralho passa a 22 cartas; nos Baralhos, mostrar a carta grande ao passar o rato.
+- **Prompt do Deep Research** em `docs/DEEP-RESEARCH-CARTAS.md`: regras exatas do motor, as 31 cartas atuais, o vocabulário de primitivas que o motor já tem (gatilhos, ações, alvos), limites (nada no Rei, nada de lances extra, máx. 15 primitivas novas) e um formato JSON por carta (receita do efeito, condição de uso, dica do bot, teste, cores, ícone, som, descrição do objeto) + baralho inicial e do bot de 22, economia, folhas de arte 4×4 e vídeos das Lendárias.
+- **Baralho de 22**: `RULES.DECK_SIZE = 22`; baralho inicial novo de 22 só com cartas já existentes (6 Equip., 7 Arm. de Casa, 5 Reativas, 2 Counter, 2 Magias); `autoDeck` com a mistura nova. Perfis da versão 1 passam à versão 2 em `Economy.normalize` → `migrate22`: dá as cartas do baralho inicial que faltem (sem duplicar se correr outra vez) e completa cada baralho até 22 com a coleção (`fillDeck`). Salas online enviam `RULES.DECK_SIZE` cartas; `firestore.rules` aceita 22 (e 12). `tools/simulate.js` verifica 2 × 22 cartas; `test-cards.js` usa `DECK_SIZE`.
+- **Baralhos (ecrã)**: zoom grande (300 px) ao passar o rato em qualquer carta da coleção (incluindo as que ainda não tens) e do baralho (abre à esquerda); grelha do baralho com 8 colunas (6 no telemóvel) para as 22 cartas caberem com os botões à vista num ecrã de ~600 px; "Apagar" passou a ícone de caixote ao lado do nome do baralho (`YC.Icon('trash')`).
+- **Como testar**: os 4 comandos; abrir Baralhos (22/22, passar o rato numa carta), tirar e pôr cartas, Arena → JOGAR (os dois baralhos com 22).
+- **Decisões**: máx. 2 Lendárias e 2 cópias mantêm-se até o relatório recomendar outra coisa; mão inicial 3 / máx. 5 iguais.
 
 ### 2026-10-27 (noite) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Pedido do Pedro**: aplicar o relatório do Gemini Deep Research (conta dele, conversa "Direção de Arte Chess-Gi-Oh!") para tirar a "cara de site feito por IA": UI, animações, pacotinhos, ecrã inicial e transições.

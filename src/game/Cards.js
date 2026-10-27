@@ -92,13 +92,16 @@
     return c;
   });
 
+  // 22 cartas: 6 Equipamentos, 7 Armadilhas de Casa, 5 Reativas, 2 Counter-Traps e 2 Magias Rápidas
   const STARTER_DECK = [
-    'eq_espada_ganancia', 'eq_botas_vento', 'eq_botas_vento', 'eq_capa_magnetica',
-    'gt_jaula_estatica', 'gt_jaula_estatica', 'gt_bomba_tinta', 'gt_pantano_chiclete',
-    'rt_escudo_divino', 'rt_fumaca_ninja', 'ct_tesoura_corta_fio', 'ct_quebra_escudo'
+    'eq_espada_ganancia', 'eq_botas_vento', 'eq_botas_vento', 'eq_capa_magnetica', 'eq_capa_magnetica', 'eq_mola_canguru',
+    'gt_jaula_estatica', 'gt_jaula_estatica', 'gt_bomba_tinta', 'gt_bomba_tinta', 'gt_pantano_chiclete', 'gt_pantano_chiclete',
+    'gt_mina_repulsora',
+    'rt_escudo_divino', 'rt_fumaca_ninja', 'rt_fumaca_ninja', 'rt_vampiro_energia', 'rt_vampiro_energia',
+    'ct_tesoura_corta_fio', 'ct_tesoura_corta_fio', 'ct_quebra_escudo', 'ct_quebra_escudo'
   ];
 
-  const RULES = { DECK_SIZE: 12, START_HAND: 3, MAX_HAND: 5, MAX_GRID_TRAPS: 3, ZONE_SLOTS: 3, ACTIONS_PER_TURN: 2, MAX_EQUIPS: 2, CHAIN_MAX: 8, MAX_COPIES: 2, MAX_LEGENDARIES: 2 };
+  const RULES = { DECK_SIZE: 22, START_HAND: 3, MAX_HAND: 5, MAX_GRID_TRAPS: 3, ZONE_SLOTS: 3, ACTIONS_PER_TURN: 2, MAX_EQUIPS: 2, CHAIN_MAX: 8, MAX_COPIES: 2, MAX_LEGENDARIES: 2 };
 
   YC.Cards = {
     RARITY, TYPE_LABEL, KIND_LABEL, CARDS, LIST, STARTER_DECK, RULES,

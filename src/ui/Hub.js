@@ -189,7 +189,7 @@
       YC.UI.modal(`<h2>Como se joga</h2>
         <ol class="rules-list">
           <li><b>Xadrez normal.</b> Ganha quem der xeque-mate. Afogamento, repetição tripla e 50 lances dão empate.</li>
-          <li><b>Baralho de 12 cartas.</b> Começas com 3 na mão (máx. 5) e compras 1 no início de cada turno (só as Brancas não compram no 1.º). Perder um Cavalo, Bispo, Torre ou Dama dá-te 1 carta.</li>
+          <li><b>Baralho de 22 cartas.</b> Começas com 3 na mão (máx. 5) e compras 1 no início de cada turno (só as Brancas não compram no 1.º). Perder um Cavalo, Bispo, Torre ou Dama dá-te 1 carta.</li>
           <li><b>Até 2 ações de carta por turno</b>, antes do lance: <em>equipar</em> uma peça, <em>esconder</em> uma Armadilha de Casa (máx. 3) ou <em>virar</em> uma carta na Zona de Armadilhas.</li>
           <li><b>Armadilhas de Casa</b> disparam quando uma peça inimiga pisa a casa. <b>Reativas</b> e <b>Counter-Traps</b> ficam viradas na Zona e respondem a partir do turno seguinte.</li>
           <li><b>Chain:</b> cada carta ativada pode levar resposta (Velocidade 1 → 2 → 3). Resolve-se do último elo para o primeiro. O Rei é imune a congelar e a ser destruído.</li>

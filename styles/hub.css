@@ -163,7 +163,7 @@
 }
 
 /* ───────── Baralhos ───────── */
-.builder { display: grid; grid-template-columns: 1fr 470px; gap: 18px; align-items: start; }
+.builder { display: grid; grid-template-columns: 1fr 520px; gap: 18px; align-items: start; }
 .coll, .deck { padding: 16px; }
 .coll-head, .deck-head { display: flex; align-items: center; gap: 10px; justify-content: space-between; margin-bottom: 10px; }
 .coll-head h2, .deck-head h2 { -webkit-text-stroke: 1.5px var(--border-ink); paint-order: stroke fill; text-shadow: 0 2px 0 var(--border-ink); }
@@ -175,9 +175,9 @@
 .deck { position: sticky; top: 84px; }
 .deck-count { font-family: var(--font-num); font-weight: 700; font-size: 1.5rem; color: var(--color-danger); font-variant-numeric: tabular-nums; }
 .deck-count.ok { color: var(--color-success); }
-.deck-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 8px 0; padding: 10px; background: var(--surface-1); border-radius: 12px; box-shadow: var(--shadow-tray); }
-.deck-slot { aspect-ratio: 1 / 1.4; border-radius: 10px; border: 2.5px dashed rgba(148, 163, 184, .35); display: grid; place-items: center; }
-.deck-slot .hcard { --cw: 92px; cursor: pointer; }
+.deck-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin: 8px 0; padding: 10px; background: var(--surface-1); border-radius: 12px; box-shadow: var(--shadow-tray); }
+.deck-slot { aspect-ratio: 1 / 1.4; border-radius: 8px; border: 2.5px dashed rgba(148, 163, 184, .35); display: grid; place-items: center; }
+.deck-slot .hcard { --cw: 52px; cursor: pointer; }
 .deck-errors { margin: 4px 0 10px; padding-left: 18px; color: #FCA5A5; font-size: .86rem; min-height: 1em; font-weight: 700; }
 .deck-btns { display: flex; flex-wrap: wrap; gap: 8px; }
 .deck-pick { flex: 1; }
@@ -265,4 +265,7 @@
   .stage-piece { width: 150px; height: 150px; bottom: 44px; } .stage-piece.sp-n { width: 128px; height: 128px; }
   .pedestal { height: 110px; }
   .play-btn { min-height: 64px; font-size: 1.6rem; }
+  .deck-grid { grid-template-columns: repeat(6, 1fr); padding: 8px; }
+  .deck-slot .hcard { --cw: 44px; }
+  .deck-head { flex-wrap: wrap; }
 }

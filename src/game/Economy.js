@@ -24,7 +24,7 @@
       const inventory = {};
       for (const id of Cards().STARTER_DECK) inventory[id] = (inventory[id] || 0) + 1;
       return {
-        version: 1, displayName: name, gold: Economy.START_GOLD, stardust: Economy.START_DUST, inventory,
+        version: 2, displayName: name, gold: Economy.START_GOLD, stardust: Economy.START_DUST, inventory,
         decks: [{ id: 'inicial', name: 'Baralho Inicial', cards: Cards().STARTER_DECK.slice() }],
         activeDeckId: 'inicial', pityEpic: 0, pityLegendary: 0,
         stats: { wins: 0, losses: 0, draws: 0, packs: 0 }, updatedAt: 0
@@ -38,6 +38,32 @@
       out.stats = { ...base.stats, ...(p && p.stats) };
       out.decks = Array.isArray(out.decks) && out.decks.length ? out.decks : base.decks;
       if (!out.decks.find((d) => d.id === out.activeDeckId)) out.activeDeckId = out.decks[0].id;
+      if (!(out.version >= 2)) Economy.migrate22(out);
+      return out;
+    },
+
+    /** Perfis da versão 1 (baralhos de 12): oferece as cartas do baralho inicial novo que faltem
+        e completa cada baralho até 22 com cartas da coleção. Pode correr mais de uma vez sem dar nada a mais. */
+    migrate22(p) {
+      const need = {};
+      for (const id of Cards().STARTER_DECK) need[id] = (need[id] || 0) + 1;
+      for (const [id, n] of Object.entries(need)) if (Economy.owned(p, id) < n) p.inventory[id] = n;
+      p.decks = p.decks.map((d) => ({ ...d, cards: Economy.fillDeck(p, (d.cards || []).filter((id) => Cards().get(id))) }));
+      p.version = 2;
+    },
+
+    /** Completa um baralho até ao tamanho certo com cartas da coleção (raridade primeiro, mistura de tipos). */
+    fillDeck(p, cards) {
+      const R = Cards().RULES, out = cards.slice(0, R.DECK_SIZE);
+      const n = (id) => out.filter((x) => x === id).length;
+      let legends = out.filter((id) => Cards().get(id).rarity === 'LEGENDARY').length;
+      for (const id of Economy.autoDeck(p, () => 0.5).concat(Object.keys(p.inventory))) {
+        if (out.length >= R.DECK_SIZE) break;
+        const c = Cards().get(id);
+        if (!c || n(id) >= Math.min(Economy.owned(p, id), Economy.cap(id))) continue;
+        if (c.rarity === 'LEGENDARY') { if (legends >= R.MAX_LEGENDARIES) continue; legends++; }
+        out.push(id);
+      }
       return out;
     },
 
@@ -100,7 +126,7 @@
       p.inventory[id] = Economy.owned(p, id) + 1;
     },
 
-    /** Exatamente 12, cartas que tens, máx. 2 cópias (1 se Lendária) e máx. 2 Lendárias. */
+    /** Exatamente 22 (RULES.DECK_SIZE), cartas que tens, máx. 2 cópias (1 se Lendária) e máx. 2 Lendárias. */
     validateDeck(p, cards, { ignoreOwnership = false } = {}) {
       const R = Cards().RULES, errors = [], count = {};
       for (const id of cards) count[id] = (count[id] || 0) + 1;
@@ -147,7 +173,7 @@
       const pool = [];
       for (const [id, n] of Object.entries(p.inventory)) for (let i = 0; i < Math.min(n, Economy.cap(id)); i++) pool.push(Cards().get(id));
       pool.sort((a, b) => order[b.rarity].order - order[a.rarity].order || rng() - 0.5);
-      const want = { EQUIP: 4, GRID: 4, REACTIVE: 2, COUNTER: 1, QUICK: 1 };
+      const want = { EQUIP: 6, GRID: 7, REACTIVE: 4, COUNTER: 2, QUICK: 3 };
       const deck = [];
       let legends = 0;
       const tryAdd = (c) => {

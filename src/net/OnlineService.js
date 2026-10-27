@@ -1,6 +1,6 @@
 /* OnlineService.js — salas no Firestore: criar sala privada (código de 5 letras), entrar por código,
    fila ranqueada, batimento cardíaco, desistência, abandono e o transporte das ações do lockstep.
-   Estrutura: matches/{código} (com o baralho de 12 de cada lugar) + matches/{código}/actions/{seq}.
+   Estrutura: matches/{código} (com o baralho de 22 de cada lugar) + matches/{código}/actions/{seq}.
    Equipas no Firestore: 'WHITE'/'BLACK' (no motor são 'w'/'b'; ver YC.TEAM_NAME). */
 (function (YC) {
   'use strict';
@@ -22,7 +22,7 @@
   const Online = {
     FORFEIT_MS,
     matchRef(id) { return FB().doc('matches', id); },
-    seat(profile, deck) { return { uid: profile.uid, name: profile.name, rating: profile.rating, deck: deck.slice(0, 12) }; },
+    seat(profile, deck) { return { uid: profile.uid, name: profile.name, rating: profile.rating, deck: deck.slice(0, YC.Cards.RULES.DECK_SIZE) }; },
 
     async createRoom(profile, ranked, deck) {
       const fb = FB(), F = fb.F;

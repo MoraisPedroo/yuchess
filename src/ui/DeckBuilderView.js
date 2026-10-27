@@ -1,9 +1,10 @@
 /* DeckBuilderView.js — Baralhos: coleção (com filtros e oficina de criação com Poeira Estelar)
-   à esquerda e o baralho de 12 à direita. Validação: 12 cartas, máx. 2 cópias (1 Lendária), máx. 2 Lendárias. */
+   à esquerda e o baralho de 22 à direita. Validação: 22 cartas, máx. 2 cópias (1 Lendária), máx. 2 Lendárias. */
 (function (YC) {
   'use strict';
 
   const E = () => YC.Economy;
+  const SIZE = () => YC.Cards.RULES.DECK_SIZE;
   const esc = (s) => YC.HoloCard.esc(s);
   const KINDS = [['ALL', 'Todas'], ['EQUIP', 'Equipamentos'], ['GRID', 'Armadilhas de Casa'], ['REACTIVE', 'Reativas'], ['COUNTER', 'Counter-Traps'], ['QUICK', 'Magias Rápidas']];
 
@@ -18,6 +19,7 @@
 
     render(root) {
       View.root = root || View.root;
+      YC.CardZoom.hide();
       if (!View.draft) View.load();
       const p = YC.ProfileStore.profile, d = View.draft;
       const v = E().validateDeck(p, d.cards);
@@ -32,8 +34,9 @@
             <div class="deck-head">
               <select class="deck-pick">${p.decks.map((x) => `<option value="${esc(x.id)}" ${x.id === d.id ? 'selected' : ''}>${esc(x.name)}${x.id === p.activeDeckId ? ' (em uso)' : ''}</option>`).join('')}<option value="__new">+ Novo baralho</option></select>
               <input class="text-in deck-name" maxlength="24" value="${esc(d.name)}">
+              <button class="icon-btn deck-del" data-a="del" title="Apagar baralho" aria-label="Apagar baralho">${YC.Icon('trash', { size: 22 })}</button>
             </div>
-            <div class="deck-count ${d.cards.length === 12 ? 'ok' : ''}">${d.cards.length}/12</div>
+            <div class="deck-count ${d.cards.length === SIZE() ? 'ok' : ''}">${d.cards.length}/${SIZE()}</div>
             <div class="deck-grid"></div>
             <ul class="deck-errors">${v.errors.slice(0, 3).map((e) => `<li>${esc(e)}</li>`).join('')}</ul>
             <div class="deck-btns">
@@ -41,7 +44,6 @@
               <button class="btn small" data-a="use" ${v.ok ? '' : 'disabled'}>${p.activeDeckId === d.id ? 'Em uso' : 'Usar nas partidas'}</button>
               <button class="btn small violet" data-a="auto">Auto-completar</button>
               <button class="btn small ghost" data-a="clear">Esvaziar</button>
-              <button class="btn small red" data-a="del">Apagar</button>
             </div>
           </section>
         </div>`;
@@ -67,6 +69,7 @@
         if (!owned) el.classList.add('locked');
         el.insertAdjacentHTML('beforeend', `<span class="count-badge">${inDeck}/${owned}</span>`);
         el.onclick = () => View.add(c.id);
+        YC.CardZoom.attach(el, c.id, { width: 300 });
         cell.appendChild(el);
         if (owned < E().cap(c.id)) {
           const cost = E().craftCost(c.id);
@@ -85,12 +88,13 @@
       const grid = View.root.querySelector('.deck-grid');
       const order = YC.Cards.RARITY;
       const cards = View.draft.cards.slice().sort((a, b) => YC.Cards.get(a).kind.localeCompare(YC.Cards.get(b).kind) || order[YC.Cards.get(b).rarity].order - order[YC.Cards.get(a).rarity].order);
-      for (let i = 0; i < 12; i++) {
+      for (let i = 0; i < SIZE(); i++) {
         const slot = document.createElement('div');
         slot.className = 'deck-slot';
         if (cards[i]) {
-          const el = YC.HoloCard.create(cards[i], { size: 'sm' });
+          const el = YC.HoloCard.create(cards[i], { size: 'xs', static: true });
           el.title = 'Clica para tirar do baralho';
+          YC.CardZoom.attach(el, cards[i], { side: 'left', width: 300 });
           el.onclick = () => View.remove(cards[i]);
           slot.appendChild(el);
         }
@@ -101,7 +105,7 @@
     add(id) {
       const p = YC.ProfileStore.profile, d = View.draft;
       const n = d.cards.filter((x) => x === id).length, c = YC.Cards.get(id);
-      if (d.cards.length >= 12) return YC.UI.toast('O baralho já tem 12 cartas.', true);
+      if (d.cards.length >= SIZE()) return YC.UI.toast(`O baralho já tem ${SIZE()} cartas.`, true);
       if (n >= E().owned(p, id)) return YC.UI.toast(E().owned(p, id) ? 'Não tens mais cópias desta carta.' : 'Ainda não tens esta carta: abre pacotes ou cria-a.', true);
       if (n >= E().cap(id)) return YC.UI.toast(`Máximo ${E().cap(id)} cópia(s) por baralho.`, true);
       if (c.rarity === 'LEGENDARY' && d.cards.filter((x) => YC.Cards.get(x).rarity === 'LEGENDARY').length >= YC.Cards.RULES.MAX_LEGENDARIES) return YC.UI.toast('Máximo 2 Lendárias por baralho.', true);
