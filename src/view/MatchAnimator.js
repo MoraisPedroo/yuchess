@@ -59,7 +59,8 @@
     }
 
     dispose() { this.offs.forEach((off) => off()); this.offs = []; }
-    guard(p) { return Promise.race([Promise.resolve(p).catch((e) => console.error('[anim]', e)), new Promise((r) => setTimeout(r, SAFE_MS))]).then(() => this.sync()); }
+    // o limite acompanha a velocidade: a 0,5 as animações demoram o dobro e cortá-las a meio fazia as peças saltarem
+    guard(p) { return Promise.race([Promise.resolve(p).catch((e) => console.error('[anim]', e)), new Promise((r) => setTimeout(r, SAFE_MS / Math.min(1, FX().speed || 1)))]).then(() => this.sync()); }
     sync() { this.board.sync(this.ui.match, { viewer: this.ui.viewer }); this.ui.renderSoft(); }
     xy(sq) { const c = this.board.center(sq); return [c.x, c.y]; }
     pel(piece) { return piece ? this.board.el(piece.id) : null; }

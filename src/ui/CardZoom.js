@@ -21,7 +21,7 @@
         Zoom.remove();
         const wrap = document.createElement('div');
         wrap.className = 'card-zoom';
-        const card = YC.HoloCard.create(id, { size: 'xl', static: true });
+        const card = YC.HoloCard.create(id, { size: 'xl', static: true, autoplay: true });
         card.style.setProperty('--cw', `${Zoom.W}px`);
         wrap.appendChild(card);
         document.body.appendChild(wrap);

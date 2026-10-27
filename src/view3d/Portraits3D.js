@@ -80,7 +80,17 @@
 
   const P3 = {
     /** O palco 3D regista o seu renderer ao nascer e retira-o ao sair. */
-    attach(r) { renderer = r; },
+    attach(r) { renderer = r; P3.prefetch(); },
+
+    /** Desenha as 12 fotos (e os bustos dos Reis) aos poucos, nos tempos mortos, para não haver solavanco
+        na primeira captura de cada tipo de peça. */
+    prefetch() {
+      const todo = [['k', 'w', true], ['k', 'b', true]];
+      for (const c of ['w', 'b']) for (const t of ['k', 'q', 'r', 'b', 'n', 'p']) todo.push([t, c, false]);
+      const idle = window.requestIdleCallback || ((f) => setTimeout(f, 150));
+      const step = () => { if (!renderer || !todo.length) return; const [t, c, bust] = todo.shift(); P3.url(t, c, bust); idle(step, { timeout: 800 }); };
+      setTimeout(step, 600);
+    },
     detach(r) { if (renderer === r) renderer = null; },
 
     url(type, color, bust = false) {

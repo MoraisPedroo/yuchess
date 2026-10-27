@@ -112,7 +112,7 @@
         </section>`;
       const md = root.querySelector('.mini-deck');
       deck.cards.forEach((id) => { const c = YC.HoloCard.create(id, { size: 'xs', static: true }); md.appendChild(c); });
-      const hc = YC.HoloCard.create('rt_espelho_magico', { size: 'lg' });
+      const hc = YC.HoloCard.create('rt_espelho_magico', { size: 'lg', autoplay: true });
       root.querySelector('.hero-card').appendChild(hc);
       root.querySelectorAll('[data-level]').forEach((b) => b.onclick = () => { Hub.level = b.dataset.level; try { localStorage.setItem('chessgioh.level', Hub.level); } catch (e) { /* */ } Hub.renderArena(); });
       root.querySelectorAll('[data-clock]').forEach((b) => b.onclick = () => { Hub.clock = Number(b.dataset.clock); try { localStorage.setItem('chessgioh.clock', Hub.clock); } catch (e) { /* */ } Hub.renderArena(); });

@@ -9,11 +9,14 @@
 
   function esc(s) { return String(s).replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch])); }
 
-  function faceHTML(card) {
+  function faceHTML(card, opts = {}) {
     const R = YC.Cards.RARITY[card.rarity];
+    // vídeo do objeto (só Lendárias, assets/video): toca ao passar o rato, no zoom e na Chain
+    const vid = opts.size !== 'xs' && opts.size !== 'sm' && YC.ItemToken && YC.ItemToken.video(card);
+    const video = vid ? `<video class="hc-video" muted loop playsinline preload="none" data-src="${vid}"></video>` : '';
     return `<div class="hc-face">`
       + `<div class="hc-head"><span class="hc-name">${esc(card.name)}</span><span class="hc-ss" title="${SS_LABEL[card.ss]}">${card.ss}</span></div>`
-      + `<div class="hc-art" style="--c1:${card.theme.primary};--c2:${card.theme.secondary}"><div class="hc-rays"></div>${YC.ItemToken ? YC.ItemToken.cardArt(card) : YC.CardArt.svg(card)}</div>`
+      + `<div class="hc-art" style="--c1:${card.theme.primary};--c2:${card.theme.secondary}"><div class="hc-rays"></div>${YC.ItemToken ? YC.ItemToken.cardArt(card) : YC.CardArt.svg(card)}${video}</div>`
       + `<div class="hc-type"><span class="hc-kind k-${card.kind}">${YC.Cards.KIND_LABEL[card.kind]}</span><span class="hc-gem" title="${R.label}"></span></div>`
       + `<div class="hc-text">${esc(card.text)}</div>`
       + `<div class="hc-holo"></div><div class="hc-glare"></div>`
@@ -30,9 +33,29 @@
     el.className = `hcard r-${card.rarity} k-${card.kind} size-${opts.size || 'md'}${opts.faceDown ? ' face-down' : ''}`;
     el.dataset.id = id;
     if (opts.uid) el.dataset.uid = opts.uid;
-    el.innerHTML = `<div class="hc-tilt">${faceHTML(card)}${BACK}</div>`;
+    el.innerHTML = `<div class="hc-tilt">${faceHTML(card, opts)}${BACK}</div>`;
     if (!opts.static) attachTilt(el);
+    if (el.querySelector('.hc-video')) {
+      if (opts.autoplay) playVideo(el);
+      else { el.addEventListener('mouseenter', () => playVideo(el)); el.addEventListener('mouseleave', () => stopVideo(el)); }
+    }
     return el;
+  }
+
+  /** Começa o vídeo da carta (só aparece quando já está a tocar, para não piscar a preto). */
+  function playVideo(el) {
+    const v = el.querySelector('.hc-video');
+    if (!v) return;
+    if (!v.src) { v.src = v.dataset.src; v.addEventListener('playing', () => el.classList.add('vplay')); }
+    v.muted = true;
+    const p = v.play();
+    if (p && p.catch) p.catch(() => {});
+  }
+  function stopVideo(el) {
+    const v = el.querySelector('.hc-video');
+    if (!v) return;
+    v.pause();
+    el.classList.remove('vplay');
   }
 
   /** Só o verso (cartas do adversário, baralho). */
@@ -68,5 +91,5 @@
     });
   }
 
-  YC.HoloCard = { create, back, faceHTML, esc };
+  YC.HoloCard = { create, back, faceHTML, esc, playVideo, stopVideo };
 })(typeof window !== 'undefined' ? (window.YC = window.YC || {}) : (globalThis.YC = globalThis.YC || {}));

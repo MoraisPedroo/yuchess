@@ -39,6 +39,8 @@
   background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, .95) 0%, var(--c2) 36%, var(--c1) 100%); display: grid; place-items: center; box-shadow: inset 0 0 calc(var(--cw) * .05) rgba(0, 0, 0, .5); }
 .hc-rays { position: absolute; inset: -30%; background: repeating-conic-gradient(from 0deg, rgba(255, 255, 255, .26) 0 9deg, transparent 9deg 22deg); animation: spin-slow 24s linear infinite; }
 .hc-art img.card-icon { object-fit: contain; }
+.hc-video { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .35s; pointer-events: none; }
+.hcard.vplay .hc-video { opacity: 1; }
 .hc-art .card-icon { position: relative; width: 74%; height: 74%; filter: drop-shadow(0 calc(var(--cw) * .02) 0 rgba(17, 17, 17, .35)); }
 .hc-type { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
 .hc-kind { font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: calc(var(--cw) * .056); text-transform: uppercase; letter-spacing: .04em; color: #FFD166; }

@@ -24,7 +24,7 @@
       this.q('.m-chain').hidden = false;
       this.renderButtons();
       const stage = this.q('.chain-stage');
-      const big = H().create(link.inst.id, { size: 'lg', static: true });
+      const big = H().create(link.inst.id, { size: 'lg', static: true, autoplay: true });
       const label = document.createElement('div');
       label.className = 'link-label';
       label.innerHTML = `<b>Elo ${chain.length}</b> · ${esc(this.nameOf(link.team))} ativa${link.def.kind === 'GRID' ? ' uma armadilha' : ''}`;

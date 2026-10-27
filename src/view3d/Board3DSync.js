@@ -50,7 +50,8 @@
       if (g.userData.mine === mine && g.getObjectByName('pedestal')) return;
       const old = g.getObjectByName('pedestal');
       if (old) g.remove(old);
-      g.add(PM().pedestal(mine ? T3().NEON.mine : T3().NEON.theirs));
+      g.userData.ped = PM().pedestal(mine ? T3().NEON.mine : T3().NEON.theirs);
+      g.add(g.userData.ped);
       g.userData.mine = mine;
     },
 
@@ -58,7 +59,7 @@
     accessory(g, name, on, make) {
       let a = g.getObjectByName(name);
       if (on && !a) { a = make(); a.name = name; a.traverse((o) => { o.raycast = () => {}; }); g.add(a); }
-      if (a) a.visible = !!on;
+      if (a) { a.visible = !!on; (g.userData.acc || (g.userData.acc = {}))[name] = a; }
       return a;
     },
 
@@ -276,13 +277,15 @@
           const k = (t + u.phase) % 3.6;
           u.eyes.scale.y = k > 3.45 ? 0.12 : 1;
         }
-        const ring = g.getObjectByName('equipRing');
+        // referências guardadas (procurar pelo nome a cada quadro custava milhares de visitas à árvore)
+        const acc = u.acc || {};
+        const ring = acc.equipRing;
         if (ring && ring.visible) ring.rotation.z = t * 1.6;
-        const dome = g.getObjectByName('shield');
+        const dome = acc.shield;
         if (dome && dome.visible) dome.rotation.y = t * 0.5;
-        const ped = g.getObjectByName('pedestal');
+        const ped = u.ped;
         if (ped) ped.children[3].material.opacity = 0.1 + (u.selected ? 0.3 : 0) + Math.sin(t * 3 + u.phase) * 0.04;
-        const pillar = g.getObjectByName('checkPillar');
+        const pillar = acc.checkPillar;
         if (pillar && pillar.visible) pillar.material.opacity = 0.2 + 0.18 * (0.5 + 0.5 * Math.sin(t * 12));
       }
       for (const trap of this.layers.traps.children) { trap.userData.spin.rotation.y = t; trap.userData.spin.rotation.x = t * 0.6; trap.position.y = 0.38 + Math.sin(t * 2 + trap.userData.trapSq) * 0.05; }

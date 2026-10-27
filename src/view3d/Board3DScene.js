@@ -58,14 +58,38 @@
     }`;
 
   Object.assign(YC.Board3D.prototype, {
+    /** Estádio desenhado com o Gemini (assets/arena/stadium.jpg); até carregar fica o fundo feito em canvas. */
+    loadStadium() {
+      const THREE = T();
+      new THREE.TextureLoader().load(YC.asset('assets/arena/stadium.jpg'), (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        this.bgTex = tex;
+        this.scene.background = tex;
+        this.scene.backgroundIntensity = 0.8;
+        // o chão passa a véu escuro: vê-se o estádio por baixo do tabuleiro
+        if (this.floor) { const m = this.floor.material; m.transparent = true; m.opacity = 0.3; m.depthWrite = false; m.needsUpdate = true; }
+        if (this.underGlow) this.underGlow.material.opacity = 0.4;
+        this.fitBackground();
+      });
+    },
+
+    /** "Cover": a imagem enche o ecrã sem deformar, em paisagem e no telemóvel na vertical. */
+    fitBackground() {
+      const t = this.bgTex;
+      if (!t || !t.image) return;
+      const A = this.canvas.clientWidth / Math.max(1, this.canvas.clientHeight), I = t.image.width / t.image.height;
+      if (A > I) { t.repeat.set(1, I / A); t.offset.set(0, (1 - I / A) / 2); } else { t.repeat.set(A / I, 1); t.offset.set((1 - A / I) / 2, 0); }
+    },
+
     buildArena() {
       const THREE = T(), scene = this.scene;
       this.pickables = [];
       scene.background = stadium();
+      this.loadStadium();
 
-      const floor = new THREE.Mesh(new THREE.PlaneGeometry(80, 50), new THREE.MeshStandardMaterial({ color: 0x080a22, roughness: 0.55, metalness: 0.35 }));
+      const floor = this.floor = new THREE.Mesh(new THREE.PlaneGeometry(80, 50), new THREE.MeshStandardMaterial({ color: 0x080a22, roughness: 0.55, metalness: 0.35 }));
       floor.rotation.x = -Math.PI / 2; floor.position.y = -0.34;
-      const under = new THREE.Mesh(new THREE.PlaneGeometry(18, 18), new THREE.MeshBasicMaterial({ map: T3().radial(0x7B42F6, 'floorGlow'), transparent: true, opacity: 0.75, depthWrite: false, blending: THREE.AdditiveBlending }));
+      const under = this.underGlow = new THREE.Mesh(new THREE.PlaneGeometry(18, 18), new THREE.MeshBasicMaterial({ map: T3().radial(0x7B42F6, 'floorGlow'), transparent: true, opacity: 0.75, depthWrite: false, blending: THREE.AdditiveBlending }));
       under.rotation.x = -Math.PI / 2; under.position.y = -0.33;
       scene.add(floor, under);
 

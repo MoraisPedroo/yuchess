@@ -7,6 +7,9 @@
   const FX = () => YC.FX;
   const S = (n) => YC.Sound && YC.Sound.play(n);
   const hold = (g) => g.children[0];
+  // desenho (assets/fx) de cada armadilha de casa ao disparar
+  const TRAP_ART = { gt_bomba_tinta: 'INK', gt_jaula_estatica: 'LIGHTNING', gt_pantano_chiclete: 'BUBBLEGUM', gt_raio_encolhedor: 'TOXIC',
+    gt_buraco_minhoca: 'MAGIC_CIRCLE', gt_mina_repulsora: 'MAGIC_CIRCLE', gt_mola_retorno: 'SWOOSH', gt_guilhotina_bigorna: 'IMPACT' };
 
   Object.assign(YC.Anim3D, {
     beam(sq, hex, h = 5) {
@@ -23,7 +26,7 @@
       S('magic_zap');
       this.beam(sq, 0x81C995);
       b.sparks(p.x, 0.6, p.z, 0x81C995, { n: 22 });
-      if (shrink) b.text3D(p.x, 1.3, p.z, 'ZAP!', '#81C995', 1);
+      if (shrink) { b.burst(p.x, 0.8, p.z, 'TOXIC', { size: 1.2 }); b.text3D(p.x, 1.3, p.z, 'ZAP!', '#81C995', 1); }
       if (g) await FX().to(hold(g).scale, { x: 0.2, y: 0.2, z: 0.2, duration: 0.3, ease: 'power2.in' });
       this.sync();
       if (g) await FX().to(hold(g).scale, { x: 1, y: 1, z: 1, duration: 0.8, ease: 'elastic.out(1.2, 0.4)' });
@@ -34,6 +37,8 @@
       S('reveal_epic');
       this.beam(sq, 0xFFD700, 6);
       this.board.sparks(p.x, 0.8, p.z, 0xFFD700, { n: 34, speed: 2.4 });
+      this.board.burst(p.x, 1.4, p.z, 'CROWN', { size: 1.5, life: 1.4, rise: 0.35 });
+      this.board.scatter(p.x, 1, p.z, 'CONFETTI', { n: 10, size: 0.4, speed: 3 });
       this.board.text3D(p.x, 1.6, p.z, 'PROMOÇÃO!', '#FFD700', 1);
       this.board.flash(2.6);
       return this.morph(piece, sq, false);
@@ -42,6 +47,8 @@
     async shieldShatter({ piece, sq }) {
       const b = this.board, g = this.g3(piece), p = this.w3(sq);
       S('glass');
+      b.burst(p.x, 0.9, p.z, 'IMPACT', { size: 1.6, life: 0.7 });
+      b.scatter(p.x, 0.8, p.z, 'GLASS', { n: 7, size: 0.38, speed: 3.2 });
       b.text3D(p.x, 1.4, p.z, 'CRASH!', '#12B5CB', 1.15);
       b.shakeCam(0.16, 0.4);
       b.flash(3);
@@ -72,6 +79,7 @@
       this.beam(sq, 0xFFD700, 3);
       b.sparks(p.x, 0.6, p.z, 0xFFD700, { n: 24, speed: 2 });
       b.sparks(p.x, 0.6, p.z, hex, { n: 16, speed: 2 });
+      b.scatter(p.x, 0.9, p.z, 'SPARKLE', { n: 9, size: 0.34, speed: 2 });
       b.text3D(p.x, 1.5, p.z, 'EQUIPADO!', '#FFD700', 0.85);
       this.wave3D(sq, 0xFFD700, 1.2);
       b.flash(2.2);
@@ -114,6 +122,8 @@
       b.shakeCam(0.16, 0.4);
       b.flash(2.6);
       this.wave3D(sq, hex, 1.4);
+      const art = TRAP_ART[trap.id] || 'IMPACT';
+      if (art === 'MAGIC_CIRCLE') b.decal(p.x, p.z, art, { size: 2, life: 1.8, spin: 2.5 }); else b.burst(p.x, 0.8, p.z, art, { size: 1.9, life: 1.1 });
       b.text3D(p.x, 1.6, p.z, 'TRAP!', c.theme.primary, 1.3);
       const g = this.g3(piece);
       if (g) FX().fromTo(hold(g).position, { x: -0.05 }, { x: 0.05, duration: 0.05, repeat: 11, yoyo: true, ease: 'none' }).then(() => { hold(g).position.x = 0; });
@@ -151,6 +161,7 @@
       this.beam(trap.sq, hex, 2.6);
       b.sparks(p.x, 0.4, p.z, hex, { n: 18, speed: 1.8 });
       this.wave3D(trap.sq, hex);
+      b.decal(p.x, p.z, 'MAGIC_CIRCLE', { size: 1.05, life: 1.6, spin: 1.6 });
       b.text3D(p.x, 1.2, p.z, 'ARMADA!', c.theme.primary, 0.75);
       // mostra a carta ao lado da casa durante uns segundos (só tu a vês)
       YC.CardZoom.show({ getBoundingClientRect: () => b.rect(trap.sq) }, trap.id, { delay: 0 });

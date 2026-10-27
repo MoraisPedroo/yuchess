@@ -10,12 +10,16 @@
   const Item = {
     /** Ícones (theme.icon) com imagem em assets/items/<icon em minúsculas>.png. */
     IMG: new Set(YC.ITEM_ART || []),
+    /** Objetos com vídeo em assets/video/<icone>.mp4 (feitos com o Veo a partir da imagem do objeto). */
+    VIDEO: new Set(['ROYAL_SCEPTER']),
+
+    video(def) { return Item.VIDEO.has(def.theme.icon) ? `assets/video/${def.theme.icon.toLowerCase()}.mp4` : null; },
 
     /** URL da imagem do objeto (ou null se só houver o SVG). No ficheiro único do build vem embutida. */
     src(def) {
       const icon = def.theme.icon;
       if (!Item.IMG.has(icon)) return null;
-      return (YC.ITEM_ART_DATA && YC.ITEM_ART_DATA[icon]) || `assets/items/${icon.toLowerCase()}.png`;
+      return YC.asset(`assets/items/${icon.toLowerCase()}.png`);
     },
 
     art(def) {

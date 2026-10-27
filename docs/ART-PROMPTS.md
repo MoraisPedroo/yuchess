@@ -43,6 +43,17 @@ Row 4: 29) an orange jackhammer with red details; 30) a purple wind-up alarm clo
 | A | GREED_SWORD, WIND_BOOTS, SPRING_COIL, ICE_CROWN, ROYAL_SCEPTER, SPIKE_ARMOR, SPRING_SPEAR, MAGNET_CAPE, GRAVITY_PIT, ELECTRIC_CAGE, HEAVY_ANVIL, BUBBLEGUM_SWAMP, EJECT_PAD, SHRINK_RAY, WORMHOLE, INK_MINE |
 | B | CRYSTAL_SHIELD, RUBBER_MIRROR, SMOKE_BOMB, DUMMY_DOLL, ROYAL_SIREN, PIGGY_BANK, TWIN_BUBBLES, JUDGE_HAMMER, GIANT_SCISSORS, THIEF_MAGNET, GOLDEN_WHISTLE, EMP_BLAST, JACKHAMMER, REWIND_CLOCK, BOXING_GLOVE, TREASURE_CHEST |
 
+## Folha de efeitos (FX) e estádio
+
+- Efeitos: mesmo estilo, 4×4 — estrela, impacto, explosão, fumo / tinta, raio, gelo, moeda / círculo mágico, vidro, chiclete, tóxico / rasto, zanga, confetes, coroa. Recorte: `python tools/slice-items.py folha-fx.jpg FX` (vai para `assets/fx/`).
+- Estádio: imagem 16:9, estádio de e-sports à noite visto de cima com o centro escuro e vazio (o tabuleiro fica por cima), sem texto. Guardar como `assets/arena/stadium.jpg` (1920 px, JPEG ~82).
+
+## Vídeos (Veo, "Criar vídeo")
+
+1. Imagem inicial 1280×720: o objeto recortado (da folha original) em grande sobre fundo índigo escuro com brilho na cor da carta.
+2. Anexar a imagem e pedir: animar este objeto exato (mesmo desenho/contorno), a flutuar devagar, brilho a pulsar, faíscas à volta, câmara fixa, ciclo sem salto, sem texto.
+3. Converter: `ffmpeg -ss 0.6 -t 4.8 -i in.mp4 -filter_complex "[0:v]scale=480:-2,fps=30,split[a][b];[b]reverse[r];[a][r]concat=n=2:v=1:a=0,format=yuv420p[v]" -map "[v]" -an -c:v libx264 -crf 27 -preset slow -movflags +faststart assets/video/<icone>.mp4` e acrescentar o ícone a `ItemToken.VIDEO`.
+
 ## Ideias para depois (vídeo / animação)
 
 - **Vídeos curtos (Veo) só para as Lendárias** (Cetro, Bigorna, Espelho, Apito): 4 s em ciclo, o objeto a rodar num pedestal néon, convertido para WebM pequeno (`ffmpeg -i in.mp4 -vf scale=360:-2 -c:v libvpx-vp9 -b:v 0 -crf 38 -an out.webm`) e mostrado na carta ampliada. Para as 31 cartas ficaria pesado demais (dezenas de MB).

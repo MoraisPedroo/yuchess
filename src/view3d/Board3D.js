@@ -53,12 +53,18 @@
       const rim = new THREE.DirectionalLight(0x59e1ff, 0.5);
       rim.position.set(-6, 5, -9);
       this.scene.add(key, rim);
+      // luzes dos clarões sempre na cena (a 0): mudar o número de luzes obriga a recompilar todos os shaders (solavanco)
+      this.flashLights = [0, 1, 2].map(() => { const l = new THREE.PointLight(0xffffff, 0, 4.5, 1.8); this.scene.add(l); return l; });
+      this.flashNext = 0;
 
       this.raycaster = new THREE.Raycaster();
       this.pointer = new THREE.Vector2();
       this.buildArena();
       this.layout();
       if (YC.Portraits3D) YC.Portraits3D.attach(r);
+      // compila já os shaders dos efeitos; e um quadro lento não faz as animações saltarem para a frente
+      if (this.fxWarmUp) this.fxWarmUp();
+      if (window.gsap) window.gsap.ticker.lagSmoothing(120, 33);
 
       this.tick = this.tick.bind(this);
       this.clock = new THREE.Clock();
@@ -101,6 +107,7 @@
       this.composer.setSize(w, h);
       this.bloom.resolution.set(w / 2, h / 2);
       if (this.fx) this.fx._unit = this.unit();
+      if (this.fitBackground) this.fitBackground();
     }
 
     tick() {

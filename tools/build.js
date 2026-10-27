@@ -24,10 +24,13 @@ const js = scripts.map((f) => {
   if (/<\/script/i.test(src)) throw new Error(`${f} contém "</script" e partiria o HTML`);
   return `// ── ${f} ──\n${src}`;
 }).join('\n');
-// imagens dos objetos (assets/items, geradas com tools/slice-items.py) vão embutidas no ficheiro único
-const itemsDir = path.join(ROOT, 'assets', 'items');
-const items = fs.existsSync(itemsDir) ? fs.readdirSync(itemsDir).filter((f) => f.endsWith('.png')) : [];
-const itemData = items.length ? `\nYC.ITEM_ART_DATA = {${items.map((f) => `${JSON.stringify(f.slice(0, -4).toUpperCase())}: "data:image/png;base64,${fs.readFileSync(path.join(itemsDir, f)).toString('base64')}"`).join(',')}};` : '';
+// imagens de assets/ (objetos, efeitos, estádio — arte gerada) vão embutidas no ficheiro único (YC.asset lê-as);
+// os vídeos ficam de fora (pesados): sem eles a carta mostra a imagem parada
+const MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
+const assetFiles = [];
+const walk = (dir) => { if (!fs.existsSync(dir)) return; for (const f of fs.readdirSync(dir)) { const p = path.join(dir, f); if (fs.statSync(p).isDirectory()) walk(p); else if (MIME[path.extname(f).toLowerCase()]) assetFiles.push(p); } };
+walk(path.join(ROOT, 'assets'));
+const itemData = assetFiles.length ? `\nYC.ASSET_DATA = {${assetFiles.map((p) => `${JSON.stringify(path.relative(ROOT, p).split(path.sep).join('/'))}: "data:${MIME[path.extname(p).toLowerCase()]};base64,${fs.readFileSync(p).toString('base64')}"`).join(',')}};` : '';
 
 const bodyStart = html.indexOf('<body>') + '<body>'.length;
 const bodyEnd = html.indexOf('<!-- Animação') > 0 ? html.indexOf('<!-- Animação') : html.indexOf('<script src=');

@@ -44,6 +44,7 @@
 .pack-body::before { content: ''; position: absolute; inset: -40%; background: repeating-conic-gradient(rgba(255, 255, 255, .14) 0 8deg, transparent 8deg 20deg); animation: spin-slow 30s linear infinite; }
 .pack-logo { position: relative; font-family: var(--font-head); font-weight: 700; font-size: 44px; line-height: .9; text-align: center; color: var(--gold); -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); transform: rotate(-6deg); }
 .pack-logo span { color: #fff; }
+.pack-art { position: relative; width: 118px; margin: -6px 0 -10px; filter: drop-shadow(0 6px 0 rgba(17, 17, 17, .35)) drop-shadow(0 0 14px rgba(255, 215, 0, .55)); animation: bob 2.6s ease-in-out infinite; pointer-events: none; }
 .pack-sub { position: relative; font-family: var(--font-head); font-size: .85rem; background: var(--ink); color: var(--cream); padding: .25em .8em; border-radius: 99px; }
 .pack-shine { position: absolute; inset: 0; background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, .45) 48%, transparent 60%); background-size: 260% 100%; animation: shine 3.2s ease-in-out infinite; }
 @keyframes shine { 0% { background-position: 130% 0; } 60%, 100% { background-position: -30% 0; } }

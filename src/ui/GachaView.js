@@ -7,7 +7,9 @@
   const E = () => YC.Economy;
   const RAY = { COMMON: '#C9D3E0', RARE: '#5FA2FF', EPIC: '#C58AF9', LEGENDARY: '#FCC934' };
   const esc = (s) => YC.HoloCard.esc(s);
-  const packHTML = (cls = '') => `<div class="pack ${cls}"><div class="pack-flap"></div><div class="pack-body"><div class="pack-logo">Chess<br><span>Gi-Oh!</span></div><div class="pack-sub">5 cartas · 1 Rara ou melhor</div><div class="pack-shine"></div></div></div>`;
+  // baú desenhado no Gemini (assets/items/treasure_chest.png) por cima do logótipo, se existir
+  const chest = () => ((YC.ITEM_ART || []).includes('TREASURE_CHEST') ? `<img class="pack-art" src="${YC.asset('assets/items/treasure_chest.png')}" alt="" draggable="false">` : '');
+  const packHTML = (cls = '') => `<div class="pack ${cls}"><div class="pack-flap"></div><div class="pack-body">${chest()}<div class="pack-logo">Chess<br><span>Gi-Oh!</span></div><div class="pack-sub">5 cartas · 1 Rara ou melhor</div><div class="pack-shine"></div></div></div>`;
 
   const View = {
     render(root) {

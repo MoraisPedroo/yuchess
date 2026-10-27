@@ -26,12 +26,108 @@
     });
   }
 
+  // desenhos de efeitos gerados (assets/fx/*.png, lista em FxArtList.js); sem eles usa-se só o brilho em canvas
+  const artTex = new Map();
+  function art(name) {
+    if (!(YC.FX_ART || []).includes(name)) return null;
+    if (!artTex.has(name)) {
+      const THREE = T(), t = new THREE.TextureLoader().load(YC.asset(`assets/fx/${name.toLowerCase()}.png`));
+      t.colorSpace = THREE.SRGBColorSpace;
+      artTex.set(name, t);
+    }
+    return artTex.get(name);
+  }
+  const backOut = (k) => { const c = 1.9; k -= 1; return 1 + (c + 1) * k * k * k + c * k * k; };
+
   Object.assign(YC.Board3D.prototype, {
     fxInit() {
       if (this.parts) return;
       this.parts = [];
       this.fxGroup = new (T().Group)();
       this.scene.add(this.fxGroup);
+      for (const n of YC.FX_ART || []) art(n); // carrega já, para não aparecerem vazios na primeira vez
+    },
+
+    /** Há desenho para este efeito? */
+    hasArt(name) { return !!art(name); },
+
+    /** Um desenho que rebenta no sítio (estrela de impacto, explosão, gelo…): cresce com ressalto, fica e desaparece. */
+    burst(x, y, z, name, { size = 1.4, life = 0.9, spin = 0, rise = 0, hold = 0.55, rot = Math.random() * 0.6 - 0.3 } = {}) {
+      const tex = art(name);
+      if (!tex) return false;
+      this.fxInit();
+      const THREE = T();
+      const m = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: false, rotation: rot });
+      const s = new THREE.Sprite(m);
+      s.position.set(x, y, z);
+      s.renderOrder = 15;
+      s.scale.setScalar(0.01);
+      this.fxGroup.add(s);
+      this.parts.push({ o: s, v: rise ? new THREE.Vector3(0, rise, 0) : null, age: 0, life, op: 1, hold, pop: size, rotSpd: spin, dispose: true });
+      return true;
+    },
+
+    /** Vários desenhos pequenos a voar (estrelas, moedas, cacos de vidro, confetes), a rodar, com gravidade. */
+    scatter(x, y, z, name, { n = 8, size = 0.32, speed: sp = 2.6, life = 1.2, g = 5, up = 1.3 } = {}) {
+      const tex = art(name);
+      if (!tex) return false;
+      this.fxInit();
+      const THREE = T();
+      for (let i = 0; i < n; i++) {
+        const m = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, rotation: Math.random() * 6.28 });
+        const s = new THREE.Sprite(m);
+        s.scale.setScalar(size * (0.65 + Math.random() * 0.7));
+        s.position.set(x, y, z);
+        s.renderOrder = 12;
+        const a = Math.random() * Math.PI * 2, e = Math.random() * 0.9;
+        const v = new THREE.Vector3(Math.cos(a) * Math.cos(e), Math.sin(e) + up * 0.5, Math.sin(a) * Math.cos(e)).multiplyScalar(sp * (0.45 + Math.random() * 0.7));
+        this.fxGroup.add(s);
+        this.parts.push({ o: s, v, g, drag: 1, age: 0, life: life * (0.7 + Math.random() * 0.5), op: 1, hold: 0.6, rotSpd: (Math.random() - 0.5) * 8, dispose: true });
+      }
+      return true;
+    },
+
+    /** Desenho deitado no chão (círculo mágico): abre, roda e apaga-se. */
+    decal(x, z, name, { size = 1.6, life = 1.4, spin = 1.2, y = 0.05 } = {}) {
+      const tex = art(name);
+      if (!tex) return false;
+      this.fxInit();
+      const THREE = T();
+      const m = new THREE.Mesh(this.decalGeo || (this.decalGeo = new THREE.PlaneGeometry(1, 1)), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, color: T3().glow(0xffffff, 1.15) }));
+      m.rotation.x = -Math.PI / 2;
+      m.position.set(x, y, z);
+      m.scale.setScalar(0.01);
+      m.raycast = () => {};
+      this.fxGroup.add(m);
+      this.parts.push({ o: m, age: 0, life, op: 1, hold: 0.6, pop: size, flatSpin: spin, dispose: true });
+      return true;
+    },
+
+    /** Compila no arranque os shaders de todos os efeitos e guarda os materiais de amostra: sem eles, o
+        primeiro estilhaço/feixe/armadilha (e o primeiro depois de os anteriores desaparecerem) congelava o jogo. */
+    fxWarmUp() {
+      const THREE = T();
+      this.fxInit();
+      const geo = new THREE.BoxGeometry(0.001, 0.001, 0.001), tex = softTex();
+      const mats = [
+        new THREE.MeshBasicMaterial({ transparent: true, side: THREE.DoubleSide, depthWrite: false }),
+        new THREE.MeshBasicMaterial({ transparent: true }),
+        new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }),
+        new THREE.MeshStandardMaterial({ transparent: true, roughness: 0.35 })
+      ];
+      const tmp = new THREE.Group();
+      for (const m of mats) tmp.add(new THREE.Mesh(geo, m));
+      tmp.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial()));
+      const sp = [new THREE.SpriteMaterial({ map: tex, transparent: true }), new THREE.SpriteMaterial({ map: tex, depthTest: false })];
+      for (const m of sp) tmp.add(new THREE.Sprite(m));
+      const out = new THREE.Mesh(geo, T3().outlineMat(0.014));
+      tmp.add(out);
+      tmp.traverse((o) => { if (o.isSprite) o.scale.setScalar(0.001); o.frustumCulled = false; });
+      // um quadro a sério (pelo composer): o renderer.compile compilava a versão do ecrã e não a do bloom
+      this.scene.add(tmp);
+      try { this.composer.render(); } catch (e) { /* sem aquecimento */ }
+      this.scene.remove(tmp);
+      this.warm = tmp; // fica guardado: libertar estes materiais apagava os programas compilados
     },
 
     /** Camada dos efeitos (o mark() limpa a camada das marcas a cada atualização). */
@@ -78,9 +174,14 @@
           if (p.bounce && p.o.position.y < 0.03 && p.v.y < 0) { p.o.position.y = 0.03; p.v.y *= -p.bounce; p.v.x *= 0.6; p.v.z *= 0.6; }
         }
         if (p.spin) { p.o.rotation.x += p.spin.x * dt; p.o.rotation.y += p.spin.y * dt; }
-        const fade = p.fadeIn ? Math.min(1, k / p.fadeIn) * (1 - k) : 1 - k * k;
+        if (p.rotSpd) p.o.material.rotation += p.rotSpd * dt;
+        if (p.flatSpin) p.o.rotation.z += p.flatSpin * dt;
+        const fade = p.hold != null ? (k < p.hold ? 1 : 1 - (k - p.hold) / (1 - p.hold))
+          : p.fadeIn ? Math.min(1, k / p.fadeIn) * (1 - k) : 1 - k * k;
         p.o.material.opacity = p.op * fade;
         if (p.grow) p.o.scale.setScalar(p.s0 + (p.s1 - p.s0) * k);
+        // "pop": cresce depressa com ressalto (primeiros 22 %) e depois alarga devagar
+        if (p.pop) p.o.scale.setScalar(p.pop * (k < 0.22 ? Math.max(0.01, backOut(k / 0.22)) : 1 + (k - 0.22) * 0.12));
       }
     },
 
@@ -104,6 +205,8 @@
         this.fxGroup.add(s);
         this.parts.push({ o: s, v, g, drag: 1.2, age: 0, life: life * (0.6 + Math.random() * 0.6), op: 1, dispose: true });
       }
+      // e algumas estrelinhas desenhadas por cima do brilho
+      if (n >= 10) this.scatter(x, y, z, 'SPARKLE', { n: Math.round(n / 5), size: size * 1.5, speed: sp * 0.8, life, g: g * 0.8, up });
     },
 
     /** Estilhaços sólidos (peças partidas, escudos, gelo) com ressalto no chão. */
@@ -127,13 +230,16 @@
     smoke3D(x, y, z, hex = 0xC9C2E8, { n = 7, size = 0.7, life = 1.3 } = {}) {
       this.fxInit();
       const THREE = T();
+      // nuvem desenhada (assets/fx/smoke.png) se existir; senão a mancha em canvas
+      const drawn = art('SMOKE');
       for (let i = 0; i < n; i++) {
-        const s = this.sprite(hex, size, 0.6, smokeTex(), false);
-        s.material.color.set(hex);
+        const s = this.sprite(hex, size, 0.6, drawn || smokeTex(), false);
+        s.material.color.set(drawn ? 0xffffff : hex);
+        s.material.rotation = Math.random() * 6.28;
         s.position.set(x + (Math.random() - 0.5) * 0.4, y + Math.random() * 0.2, z + (Math.random() - 0.5) * 0.4);
         const v = new THREE.Vector3((Math.random() - 0.5) * 0.8, 0.5 + Math.random() * 0.5, (Math.random() - 0.5) * 0.8);
         this.fxGroup.add(s);
-        this.parts.push({ o: s, v, g: 0, drag: 1.5, age: 0, life, op: 0.75, grow: true, s0: size * 0.5, s1: size * 1.6, fadeIn: 0.15, dispose: true });
+        this.parts.push({ o: s, v, g: 0, drag: 1.5, age: 0, life, op: drawn ? 0.9 : 0.75, grow: true, s0: size * 0.5, s1: size * (drawn ? 1.3 : 1.6), fadeIn: 0.15, rotSpd: (Math.random() - 0.5) * 1.5, dispose: true });
       }
     },
 
@@ -172,13 +278,14 @@
 
     /** Clarão de luz real (ilumina as peças à volta). */
     lightFlash(x, y, z, hex = 0xffffff, power = 6, dur = 0.6) {
-      const THREE = T();
+      // usa uma das luzes fixas do palco (acrescentar luzes recompila os shaders todos)
+      const pool = this.flashLights;
+      if (!pool || !window.gsap) return;
+      const l = pool[this.flashNext++ % pool.length];
+      window.gsap.killTweensOf(l);
       // intensidade moderada: com a exposição alta do palco, mais do que isto lava as peças de branco
-      const l = new THREE.PointLight(hex, power * 0.35, 4.5, 1.8);
-      l.position.set(x, y, z);
-      this.scene.add(l);
-      if (!window.gsap) { this.scene.remove(l); return; }
-      window.gsap.to(l, { intensity: 0, duration: dur / speed(), ease: 'power2.out', onComplete: () => { this.scene.remove(l); l.dispose && l.dispose(); } });
+      l.color.set(hex); l.position.set(x, y, z); l.intensity = power * 0.35;
+      window.gsap.to(l, { intensity: 0, duration: dur / speed(), ease: 'power2.out' });
     },
 
     /** Tremor da câmara (melhor do que abanar o canvas). */

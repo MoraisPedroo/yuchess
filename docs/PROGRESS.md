@@ -35,7 +35,7 @@
 
 1. Teste real online + corrigir o que as regras recusarem.
 2. Visual: aplicar o estilo néon/3D ao menu, loja e baralhos (os retratos 3D podem entrar lá com `YC.pieceHTML` se houver um renderer); fundo de estádio gerado por IA (prompts no relatório do Gemini, secção 5). Os modelos GLB deixaram de ser precisos: as peças de vinil feitas por código substituem-nos.
-1b. ~~Arte dos objetos com o Gemini~~ (feito a 2026-10-27: 32 imagens em `assets/items/`). Seguinte: vídeo curto para as 4 Lendárias e a mesma arte na Loja/Baralhos.
+1b. ~~Arte dos objetos com o Gemini~~ (feito a 2026-10-27: 32 imagens em `assets/items/`, 16 efeitos em `assets/fx/`, estádio). Vídeos das Lendárias: Cetro feito; faltam Bigorna, Espelho e Apito (quando o Gemini tiver capacidade; acrescentar o ícone a `ItemToken.VIDEO`).
 2b. Arrastar: hoje só a mão arrasta. Falta arrastar uma carta da Zona (Magia Rápida virada) para o tabuleiro e um "seta de mira" do Íman entre as duas peças.
 3. Balanceamento: a Lança e a Mola são fortes; ver taxas de vitória por carta com `tools/simulate.js` (acrescentar estatística por carta).
 3. Tutorial interativo curto (primeira partida guiada: equipar, armadilha, resposta).
@@ -50,6 +50,14 @@
 - Num separador escondido o navegador quase para as animações (requestAnimationFrame); o motor espera no máximo 4 s por animação, por isso o jogo nunca bloqueia, só fica lento.
 
 ## Registo de sessões
+
+### 2026-10-27 (madrugada) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Pedido do Pedro**: algumas animações não estavam fluidas ("parece 4x"); fazer vídeos, animações e sprites bonitos para tudo o que for preciso e testar sozinho.
+- **Causa dos solavancos (medida no Chrome do Pedro, GTX 1660 Super)**: um quadro normal custa ~4 ms, mas cada clarão de luz (luz nova na cena → recompilação de todos os shaders) custava 55 ms, e voltava a custar ao sair; os primeiros estilhaços 49–69 ms, e de novo sempre que os anteriores desapareciam (o Three apaga o shader quando o último material de um tipo é libertado); as fotos das peças eram feitas na hora da captura (16–24 ms); e o limite de 4 s do `MatchAnimator.guard` cortava a meio animações que a 0,5× demoram mais (Chain ~3,7 s) — as peças saltavam e a animação seguinte começava por cima. Tudo isto parecia "acelerado".
+- **Correções**: 3 luzes de clarão fixas (`Board3D.flashLights`), `fxWarmUp()` (pré-compila e guarda os materiais dos efeitos), `gsap.ticker.lagSmoothing(120, 33)`, fotos pré-desenhadas nos tempos mortos (`Portraits3D.prefetch`), limite do guard ÷ velocidade, e referências dos acessórios guardadas (sem `getObjectByName` a cada quadro). Agora todos os efeitos ficam entre 7 e 11 ms por quadro.
+- **Arte nova do Gemini** (conversa "Game Item Icon Grid"): folha de 16 efeitos → `assets/fx/` (estrela, impacto, explosão, fumo, tinta, raio, gelo, moeda, círculo mágico, vidro, chiclete, tóxico, rasto, zanga, confetes, coroa), usada em capturas, destruição, gelo, escudo, promoção, teletransporte, armadilhas (cada uma com o seu desenho) e nos balões de texto; fundo do estádio → `assets/arena/stadium.jpg` (o chão passou a véu escuro para se ver o estádio); o baú aparece no pacotinho da Loja.
+- **Vídeo (Veo, a partir da imagem do objeto)**: Cetro do Falso Monarca → `assets/video/royal_scepter.mp4` (ciclo de 9,6 s em vai-e-vem, 480×270, sem som, 216 KB; toca no zoom da carta, na Chain e ao passar o rato). A Bigorna falhou porque o Gemini estava "at full capacity"; faltam Bigorna, Espelho e Apito (imagens iniciais em `_tmp_art/`, fora do git).
+- **Como testar**: os 4 comandos; no navegador fazer uma captura (estrela de impacto + POW sem solavanco), armar uma armadilha (círculo mágico), passar o rato no Cetro do Falso Monarca.
 
 ### 2026-10-27 · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Pedido do Pedro**: quando se arrasta uma carta para o campo ela deve transformar-se no objeto (a bomba numa bombinha, as botas num item) com um resumo de onde a pôr; usar o Gemini (conta Pro) para gerar arte, sprite sheets ou vídeos e profissionalizar o jogo.

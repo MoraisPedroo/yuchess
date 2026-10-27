@@ -24,7 +24,12 @@ SHEETS = {
           'GRAVITY_PIT', 'ELECTRIC_CAGE', 'HEAVY_ANVIL', 'BUBBLEGUM_SWAMP', 'EJECT_PAD', 'SHRINK_RAY', 'WORMHOLE', 'INK_MINE'],
     'B': ['CRYSTAL_SHIELD', 'RUBBER_MIRROR', 'SMOKE_BOMB', 'DUMMY_DOLL', 'ROYAL_SIREN', 'PIGGY_BANK', 'TWIN_BUBBLES', 'JUDGE_HAMMER',
           'GIANT_SCISSORS', 'THIEF_MAGNET', 'GOLDEN_WHISTLE', 'EMP_BLAST', 'JACKHAMMER', 'REWIND_CLOCK', 'BOXING_GLOVE', 'TREASURE_CHEST'],
+    # efeitos visuais (partículas do palco 3D): vão para assets/fx/ e src/view3d/FxArtList.js
+    'FX': ['SPARKLE', 'IMPACT', 'EXPLOSION', 'SMOKE', 'INK', 'LIGHTNING', 'ICE', 'COIN',
+           'MAGIC_CIRCLE', 'GLASS', 'BUBBLEGUM', 'TOXIC', 'SWOOSH', 'ANGER', 'CONFETTI', 'CROWN'],
 }
+FX_OUT = os.path.join(ROOT, 'assets', 'fx')
+FX_JS = os.path.join(ROOT, 'src', 'view3d', 'FxArtList.js')
 TOL = 38      # distância de cor (0–441) até onde um píxel ainda conta como fundo
 EDGE = 70     # faixa de suavização do contorno
 
@@ -91,25 +96,27 @@ def fit(rgba):
     return canvas.resize((SIZE, SIZE), Image.LANCZOS)
 
 
-def save(icon, img):
-    os.makedirs(OUT, exist_ok=True)
+def save(icon, img, out=None):
+    out = out or OUT
+    os.makedirs(out, exist_ok=True)
     res = fit(cut_background(img))
     if res is None:
         print(f'  {icon}: vazio, ignorado')
         return
-    res.save(os.path.join(OUT, f'{icon.lower()}.png'), optimize=True)
+    res.save(os.path.join(out, f'{icon.lower()}.png'), optimize=True)
     print(f'  {icon}: ok')
 
 
-def write_list():
-    names = sorted(f[:-4].upper() for f in os.listdir(OUT) if f.endswith('.png')) if os.path.isdir(OUT) else []
+def write_list(fx=False):
+    out, js, var, what = (FX_OUT, FX_JS, 'FX_ART', 'efeitos com imagem em assets/fx/') if fx else (OUT, LIST_JS, 'ITEM_ART', 'ícones com imagem em assets/items/')
+    names = sorted(f[:-4].upper() for f in os.listdir(out) if f.endswith('.png')) if os.path.isdir(out) else []
     body = ', '.join(f"'{n}'" for n in names)
-    with open(LIST_JS, 'w', encoding='utf-8', newline='\n') as f:
-        f.write('/* ItemArtList.js — gerado por tools/slice-items.py: ícones com imagem em assets/items/. */\n')
+    with open(js, 'w', encoding='utf-8', newline='\n') as f:
+        f.write(f'/* {os.path.basename(js)} — gerado por tools/slice-items.py: {what}. */\n')
         f.write('(function (YC) {\n  \'use strict\';\n')
-        f.write(f'  YC.ITEM_ART = [{body}];\n')
+        f.write(f'  YC.{var} = [{body}];\n')
         f.write("})(typeof window !== 'undefined' ? (window.YC = window.YC || {}) : (globalThis.YC = globalThis.YC || {}));\n")
-    print(f'{len(names)} imagens em assets/items/ - {os.path.relpath(LIST_JS, ROOT)} atualizado')
+    print(f'{len(names)} imagens em {os.path.relpath(out, ROOT)} - {os.path.relpath(js, ROOT)} atualizado')
 
 
 def main():
@@ -126,10 +133,10 @@ def main():
             r, c = divmod(k, n)
             inset = 0.02
             cell = sheet.crop((int((c + inset) * cw), int((r + inset) * ch), int((c + 1 - inset) * cw), int((r + 1 - inset) * ch)))
-            save(icon, cell)
+            save(icon, cell, FX_OUT if which == 'FX' else None)
     else:
         save(which, sheet)
-    write_list()
+    write_list(which == 'FX')
 
 
 if __name__ == '__main__':

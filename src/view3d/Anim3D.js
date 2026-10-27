@@ -10,17 +10,30 @@
   const S = (n) => YC.Sound && YC.Sound.play(n);
   const hold = (g) => g.children[0];
   const BODY = { w: 0xF3EEE6, b: 0x4A3A8C };
+  // desenho (assets/fx) que acompanha cada balão de texto
+  const TEXT_ART = { 'CLANG!': 'IMPACT', 'SPLOSH!': 'INK', 'FALHOU!': 'SMOKE', 'ÉGIDE!': 'SPARKLE', 'BOING!': 'SWOOSH', 'PUF!': 'SMOKE', 'XEQUE!': 'IMPACT',
+    'ROUBADO!': 'ANGER', 'REVELADA!': 'MAGIC_CIRCLE', 'CACTO!': 'TOXIC', '+1 CARTA!': 'COIN', 'BLOQUEADO!': 'GLASS', 'IMUNE!': 'SPARKLE', 'BONECO!': 'SWOOSH' };
 
   const Anim3D = {
     g3(piece) { return piece ? this.board.el(piece.id) : null; },
     w3(sq) { return this.board.sqWorld(sq); },
     teamHex(piece) { return piece && piece.color === this.ui.viewer ? 0x00E5FF : 0xFF1E42; },
 
+    /** Mostra um desenho de efeito numa casa: espalhado (estrelas, moedas, cacos), no chão (círculo) ou a rebentar. */
+    artFx(name, sq, { size = 1.3, y = 0.9 } = {}) {
+      if (!name || sq == null || sq < 0) return;
+      const b = this.board, p = this.w3(sq);
+      if (name === 'MAGIC_CIRCLE') return b.decal(p.x, p.z, name, { size: size * 1.2 });
+      if (name === 'COIN' || name === 'GLASS' || name === 'SPARKLE' || name === 'CONFETTI') return b.scatter(p.x, y, p.z, name, { n: 7, size: size * 0.3 });
+      return b.burst(p.x, y, p.z, name, { size });
+    },
+
     /** Substitui os balões 2D por texto néon 3D + faíscas. */
     at(sq, text, fill, sound, { ring, small } = {}) {
       if (sq == null || sq < 0) return FX().wait(100);
       const p = this.w3(sq), hex = new (T().Color)(fill).getHex();
       if (sound) S(sound);
+      this.artFx(TEXT_ART[text], sq, { size: small ? 0.9 : 1.3 });
       this.board.text3D(p.x, 1.2, p.z, text, fill, small ? 0.75 : 1.1);
       this.board.sparks(p.x, 0.5, p.z, hex, { n: small ? 10 : 18, speed: 2.4 });
       this.wave3D(sq, ring ? new (T().Color)(ring).getHex() : hex);
@@ -31,6 +44,7 @@
       if (sq == null || sq < 0) return FX().wait(100);
       const p = this.w3(sq);
       if (sound) S(sound);
+      this.artFx(TEXT_ART[text], sq, { size: 0.9 });
       this.board.text3D(p.x, 1.1, p.z, text, color, 0.75);
       return FX().wait(550);
     },
@@ -135,6 +149,7 @@
         .to(h.rotation, { x: dz * 0.45, z: -dx * 0.45, duration: 0.2 }, '<')
         .call(() => {
           S('capture');
+          b.burst(V.x, 0.9, V.z, 'IMPACT', { size: 1.9, life: 0.8 });
           b.text3D(V.x, 1.3, V.z, ['POW!', 'BAM!', 'KAPOW!', 'TOMA!'][Math.floor(Math.random() * 4)], '#FF4F9A', 1.25);
           b.sparks(V.x, 0.6, V.z, 0xFFFFFF, { n: 16, speed: 3.6 });
           b.sparks(V.x, 0.6, V.z, hex, { n: 22, speed: 3 });
@@ -161,6 +176,7 @@
       S('sword_draw');
       await FX().to(h.position, { x: -dx * 0.15, z: -dz * 0.15, duration: 0.25, ease: 'power2.out' });
       await FX().to(h.position, { x: dx * dist * 0.55, z: dz * dist * 0.55, duration: 0.16, ease: 'expo.in' });
+      b.burst(B.x, 0.8, B.z, 'IMPACT', { size: 1.5, life: 0.7 });
       b.text3D(B.x, 1.2, B.z, 'ZÁS!', '#FA903E', 1.1);
       b.sparks(B.x, 0.6, B.z, 0xFA903E, { n: 22 });
       b.shakeCam(0.12, 0.3);
@@ -174,6 +190,7 @@
       S('hop');
       if (gt) {
         const p = gt.position;
+        this.board.burst(p.x + 0.25, (gt.userData.h || 1) * 0.86 + 0.35, p.z, 'ANGER', { size: 0.55, life: 1.3, hold: 0.7 });
         const ring = new THREE.Mesh(new THREE.RingGeometry(0.42, 0.5, 40), new THREE.MeshBasicMaterial({ color: YC.T3.glow(0xFF1E42, 2.4), transparent: true, side: THREE.DoubleSide, depthWrite: false }));
         ring.rotation.x = -Math.PI / 2; ring.position.set(p.x, 0.04, p.z);
         this.board.fxLayer().add(ring);
@@ -192,6 +209,7 @@
       b.busy.add(piece.id);
       await FX().to(g.position, { x: A.x + (B.x - A.x) * 0.55, z: A.z + (B.z - A.z) * 0.55, y: 0.3, duration: 0.24, ease: 'expo.in', onUpdate: this.trailer(g, this.teamHex(piece)) });
       S('spring_jump');
+      b.burst(B.x, 0.7, B.z, 'SWOOSH', { size: 1.2, life: 0.8 });
       b.text3D(B.x, 1.2, B.z, 'BOING!', '#12B5CB', 1);
       b.sparks(B.x, 0.6, B.z, 0x12B5CB, { n: 20 });
       b.flash(2);
@@ -209,6 +227,7 @@
         await FX().to(hold(g).scale, { x: 1.25, y: 1.25, z: 1.25, duration: 0.18, ease: 'power2.in' });
       }
       S('explosion_bam');
+      b.burst(p.x, 0.8, p.z, 'EXPLOSION', { size: 2.3, life: 1.1, rise: 0.4 });
       b.text3D(p.x, 1.3, p.z, 'BAM!', '#FA903E', 1.25);
       b.sparks(p.x, 0.5, p.z, 0xFA903E, { n: 30, speed: 3.6 });
       b.shards3D(p.x, 0.5, p.z, BODY[piece.color], { n: 20 });
@@ -230,7 +249,7 @@
       const foot = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.14, 0.5), metal); foot.position.y = 0.07;
       const horn = new THREE.Mesh(new THREE.ConeGeometry(0.11, 0.34, 12), metal); horn.rotation.z = Math.PI / 2; horn.position.set(0.6, 0.52, 0);
       grp.add(top, waist, foot, horn);
-      grp.traverse((o) => { if (o.isMesh) YC.T3.addOutline(o, 0.02); });
+      grp.traverse((o) => { if (o.isMesh) YC.T3.addOutline(o, 0.014); });
       grp.position.set(p.x, 8, p.z);
       b.fxLayer().add(grp);
       await FX().to(grp.position, { y: 0.15, duration: 0.55, ease: 'power3.in' });
@@ -245,6 +264,7 @@
       this.sync();
       const g = b.pieceAtSq(sq), ice = g && g.getObjectByName('ice');
       b.sparks(p.x, 0.6, p.z, 0x9FE6FF, { n: 24, speed: 1.6, g: 0.5, life: 1.2 });
+      b.burst(p.x, 0.8, p.z, 'ICE', { size: 1.4, life: 1.2 });
       b.text3D(p.x, 1.3, p.z, 'BRRR!', '#8FD3FF', 0.9);
       b.lightFlash(p.x, 1, p.z, 0x80E5FF, 6, 0.8);
       this.wave3D(sq, 0x80E5FF);
@@ -259,6 +279,8 @@
       const A = this.w3(from), B = this.w3(to), h = hold(g);
       if (style === 'teleport') {
         S('magic_zap');
+        b.decal(A.x, A.z, 'MAGIC_CIRCLE', { size: 1.5, life: 1.6 });
+        b.decal(B.x, B.z, 'MAGIC_CIRCLE', { size: 1.5, life: 2.2 });
         b.sparks(A.x, 0.6, A.z, 0xC58AF9, { n: 26, speed: 1.4, g: -1 });
         this.wave3D(from, 0x7B42F6, 1.2);
         await FX().to(h.rotation, { y: Math.PI * 6, duration: 0.7, ease: 'power2.in' });
