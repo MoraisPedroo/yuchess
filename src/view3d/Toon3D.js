@@ -176,7 +176,7 @@
       const tex = T3.canvasTex(key, 128, 128, (g, w) => base(g, w));
       const img = new Image();
       img.onload = () => { const g = tex.image.getContext('2d'); g.clearRect(0, 0, 128, 128); base(g, 128); g.drawImage(img, 18, 18, 92, 92); tex.needsUpdate = true; };
-      img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(YC.CardArt.svg(card).replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" '))}`;
+      img.src = YC.ItemToken ? YC.ItemToken.canvasSrc(card) : `data:image/svg+xml;charset=utf-8,${encodeURIComponent(YC.CardArt.svg(card).replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" '))}`;
       return tex;
     },
 
@@ -209,7 +209,7 @@
         draw(g, c.width, c.height, img);
         tex.needsUpdate = true;
       };
-      img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(YC.CardArt.svg(card).replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" '))}`;
+      img.src = YC.ItemToken ? YC.ItemToken.canvasSrc(card) : `data:image/svg+xml;charset=utf-8,${encodeURIComponent(YC.CardArt.svg(card).replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" '))}`;
       return tex;
     }
   };

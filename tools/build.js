@@ -24,6 +24,10 @@ const js = scripts.map((f) => {
   if (/<\/script/i.test(src)) throw new Error(`${f} contém "</script" e partiria o HTML`);
   return `// ── ${f} ──\n${src}`;
 }).join('\n');
+// imagens dos objetos (assets/items, geradas com tools/slice-items.py) vão embutidas no ficheiro único
+const itemsDir = path.join(ROOT, 'assets', 'items');
+const items = fs.existsSync(itemsDir) ? fs.readdirSync(itemsDir).filter((f) => f.endsWith('.png')) : [];
+const itemData = items.length ? `\nYC.ITEM_ART_DATA = {${items.map((f) => `${JSON.stringify(f.slice(0, -4).toUpperCase())}: "data:image/png;base64,${fs.readFileSync(path.join(itemsDir, f)).toString('base64')}"`).join(',')}};` : '';
 
 const bodyStart = html.indexOf('<body>') + '<body>'.length;
 const bodyEnd = html.indexOf('<!-- Animação') > 0 ? html.indexOf('<!-- Animação') : html.indexOf('<script src=');
@@ -45,7 +49,7 @@ ${css}
 </style>`;
 const tail = `${cdn}
 <script>
-${js}
+${js}${itemData}
 </script>`;
 
 fs.mkdirSync(path.join(ROOT, 'dist'), { recursive: true });

@@ -56,12 +56,15 @@
     },
 
     async equipAttach({ piece, sq, card, inst }) {
-      const b = this.board;
+      const b = this.board, I = YC.ItemToken;
       const from = this.ui.chainCardRect({ inst }) || this.ui.deckRect(piece.color);
       if (from) {
-        const c = YC.HoloCard.create(card.id, { size: 'sm', static: true });
-        await FX().flyCard(c, from, b.rect(sq), { duration: 0.75, endScale: 0.2, spin: 360 });
-        c.remove();
+        // é o objeto (não a carta) que voa até à peça
+        const fly = this.flyToken(card, 76), pr = b.pieceRect(sq);
+        I.puff(fly, card.theme.primary);
+        await I.fly(fly, I.center(from), { x: pr.left + pr.width / 2, y: pr.top + pr.height * 0.35 }, { duration: 0.75, scale0: 0.5, scale1: 1, lift: 130 });
+        await FX().to(fly.firstChild, { scale: 0.15, opacity: 0, duration: 0.22, ease: 'power2.in' });
+        fly.remove();
       }
       S(card.theme.sfx);
       this.sync();
@@ -77,6 +80,28 @@
         if (ring) FX().fromTo(ring.scale, { x: 3, y: 3, z: 3 }, { x: 1, y: 1, z: 1, duration: 0.7, ease: 'expo.out' });
         await FX().fromTo(hold(g).scale, { x: 1.3, y: 0.7, z: 1.3 }, { x: 1, y: 1, z: 1, duration: 0.9, ease: 'elastic.out(1.2, 0.35)' });
       }
+    },
+
+    /** Ficha do objeto da carta presa ao ecrã (para voar sobre o palco). */
+    flyToken(def, size = 84) {
+      const fly = document.createElement('div');
+      fly.className = 'fly-token';
+      fly.appendChild(YC.ItemToken.create(def, { size }));
+      document.body.appendChild(fly);
+      return fly;
+    },
+
+    /** O objeto paira por cima da casa, cai, achata-se no impacto e afunda-se nela. */
+    async landToken(el, inner, x, y) {
+      const tl = FX().timeline();
+      tl.to(el, { x, y: y - 56, duration: 0.3, ease: 'power2.out' })
+        .to(el, { y, duration: 0.22, ease: 'power2.in' })
+        .to(inner, { scaleX: 1.3, scaleY: 0.65, duration: 0.08, ease: 'power1.out' })
+        .call(() => S('hop'))
+        .to(inner, { scaleX: 1, scaleY: 1, duration: 0.28, ease: 'back.out(3)' })
+        .to(inner, { scale: 0.25, opacity: 0, y: '+=16', duration: 0.3, ease: 'power2.in' }, '+=0.18');
+      await tl;
+      el.remove();
     },
 
     async trapTrigger({ trap, sq, piece }) {
@@ -95,24 +120,34 @@
       await FX().wait(900);
     },
 
-    /** Armadilha escondida: a carta voa para a casa, mergulha num feixe e (se for tua) mostra os detalhes. */
+    /** Armadilha escondida: a carta vira o objeto (a bomba, a jaula…), que cai na casa; o adversário só vê
+        uma carta virada a ir para o tabuleiro. Mostra-te os detalhes da armadilha ao lado da casa. */
     async trapSet({ trap, team, inst }) {
       S('card_flip');
-      const b = this.board, mine = team === this.ui.viewer;
+      const b = this.board, mine = team === this.ui.viewer, c = YC.Cards.get(trap.id), I = YC.ItemToken;
+      const tok = mine && this.ui.takeDropToken ? this.ui.takeDropToken(inst.uid) : null;
       const from = this.ui.handCardRect(team, inst.uid);
       if (mine) this.ui.hideHand.add(inst.uid);
       this.ui.renderSoft();
-      if (!from) return;
-      const w = b.wrap.getBoundingClientRect();
-      const to = mine ? b.rect(trap.sq) : { left: w.left + w.width / 2 - 30, top: w.top + w.height / 2 - 40, width: 60, height: 84 };
-      const card = mine ? YC.HoloCard.create(inst.id, { size: 'sm', static: true }) : YC.HoloCard.back('sm');
-      await FX().flyCard(card, from, to, { duration: 0.65, endScale: mine ? 0.45 : 0.6, arc: 0.2 });
-      await FX().to(card, { opacity: 0, scale: 0.1, duration: 0.3 });
-      card.remove();
+      const sc = I.center(b.rect(trap.sq));
+      if (tok) {
+        // largado com o rato: o objeto já está no ecrã (o centro dele fica 38 px acima do ponto de ancoragem)
+        await this.landToken(tok, tok.querySelector('.dg-item'), sc.x, sc.y + 2);
+      } else if (mine && from) {
+        const fly = this.flyToken(c, 84);
+        I.puff(fly, c.theme.primary);
+        await I.fly(fly, I.center(from), { x: sc.x, y: sc.y - 90 }, { duration: 0.6, scale0: 0.6, scale1: 1, lift: 60 });
+        await this.landToken(fly, fly.firstChild, sc.x, sc.y - 36);
+      } else if (from) {
+        const w = b.wrap.getBoundingClientRect(), card = YC.HoloCard.back('sm');
+        await FX().flyCard(card, from, { left: w.left + w.width / 2 - 30, top: w.top + w.height / 2 - 40, width: 60, height: 84 }, { duration: 0.65, endScale: 0.6, arc: 0.2 });
+        await FX().to(card, { opacity: 0, scale: 0.1, duration: 0.3 });
+        card.remove();
+      }
       this.ui.hideHand.delete(inst.uid);
       if (!mine) return this.ui.toast('O adversário escondeu uma armadilha no tabuleiro…');
       this.sync();
-      const c = YC.Cards.get(trap.id), p = this.w3(trap.sq), hex = new (T().Color)(c.theme.primary).getHex();
+      const p = this.w3(trap.sq), hex = new (T().Color)(c.theme.primary).getHex();
       this.beam(trap.sq, hex, 2.6);
       b.sparks(p.x, 0.4, p.z, hex, { n: 18, speed: 1.8 });
       this.wave3D(trap.sq, hex);

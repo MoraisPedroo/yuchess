@@ -28,13 +28,15 @@
 
 ## Em curso / a meio
 
-- Nada a meio no código. O Pedro está a testar a versão publicada e vai enviar os erros que encontrar (sobretudo: velocidade das animações, arrastar cartas no telemóvel, legibilidade do zoom).
+- Arte dos objetos (ver Próximos passos 1b): o Claude in Chrome não estava ligado, por isso as imagens ainda não foram geradas no Gemini.
+- O Pedro está a testar a versão publicada e vai enviar os erros que encontrar (sobretudo: velocidade das animações, arrastar cartas no telemóvel, legibilidade do zoom).
 - Falta publicar o `firestore.rules` no Firebase (ver "Configuração pendente") para o online funcionar.
 
 ## Próximos passos (por prioridade)
 
 1. Teste real online + corrigir o que as regras recusarem.
 2. Visual: aplicar o estilo néon/3D ao menu, loja e baralhos (os retratos 3D podem entrar lá com `YC.pieceHTML` se houver um renderer); fundo de estádio gerado por IA (prompts no relatório do Gemini, secção 5). Os modelos GLB deixaram de ser precisos: as peças de vinil feitas por código substituem-nos.
+1b. **Arte dos objetos com o Gemini** (a meio): prompts prontos em `docs/ART-PROMPTS.md`, recorte com `tools/slice-items.py`. Falta gerar as 2 folhas, descarregá-las e correr o recorte. O jogo já usa as imagens sozinho assim que estiverem em `assets/items/`.
 2b. Arrastar: hoje só a mão arrasta. Falta arrastar uma carta da Zona (Magia Rápida virada) para o tabuleiro e um "seta de mira" do Íman entre as duas peças.
 3. Balanceamento: a Lança e a Mola são fortes; ver taxas de vitória por carta com `tools/simulate.js` (acrescentar estatística por carta).
 3. Tutorial interativo curto (primeira partida guiada: equipar, armadilha, resposta).
@@ -49,6 +51,13 @@
 - Num separador escondido o navegador quase para as animações (requestAnimationFrame); o motor espera no máximo 4 s por animação, por isso o jogo nunca bloqueia, só fica lento.
 
 ## Registo de sessões
+
+### 2026-10-27 · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Pedido do Pedro**: quando se arrasta uma carta para o campo ela deve transformar-se no objeto (a bomba numa bombinha, as botas num item) com um resumo de onde a pôr; usar o Gemini (conta Pro) para gerar arte, sprite sheets ou vídeos e profissionalizar o jogo.
+- **Mudou**: `src/ui/ItemToken.js` (novo: ficha do objeto com aura, sombra e flutuação; nuvem de brilhos; voo em arco), `MatchDrag.js` reescrito (carta ↔ objeto ao sair/voltar à mão; etiqueta com o que fazer, "Esconder em E4" / "Equipar o Peão em E2" a verde, ou a razão a vermelho: "Só nas filas 3 a 6", "Casa ocupada", "Só nas tuas peças"…), `Anim3DCards.js` (ao armar, o objeto paira, cai, achata-se e afunda na casa; ao equipar é o objeto que voa até à peça). Reativas e Counter-Traps continuam carta (vão viradas para a Zona).
+- **Arte**: `docs/ART-PROMPTS.md` (2 prompts de folhas 4×4 com os 31 objetos + baú, mesmo estilo de vinil, fundo branco), `tools/slice-items.py` (recorta, tira o fundo e gera `src/ui/ItemArtList.js`), cartas/cubos/medalhas/fichas passam a usar `assets/items/*.png` quando existir; o `build.js` embute as imagens no ficheiro único. Testado com uma folha falsa.
+- **Decisões**: vídeos do Veo só para as Lendárias (o resto ficaria pesado); sprite sheets da IA não são consistentes entre quadros, por isso explosões e fumo continuam por código.
+- **Como testar**: os 4 comandos; no navegador arrastar uma Armadilha de Casa (vira objeto e cai na casa) e um Equipamento (etiqueta muda conforme a peça).
 
 ### 2026-10-26 (tarde) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Pedido do Pedro**: as animações continuavam feias e rápidas; queria o estilo Hearthstone (passar o rato/clicar abre a carta no sítio, não num painel lateral), ver os detalhes da armadilha ao armá-la, arrastar a carta até à casa ou peça, e peças e "fotos" das peças mais bonitas.

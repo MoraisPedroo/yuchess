@@ -13,7 +13,7 @@
     const R = YC.Cards.RARITY[card.rarity];
     return `<div class="hc-face">`
       + `<div class="hc-head"><span class="hc-name">${esc(card.name)}</span><span class="hc-ss" title="${SS_LABEL[card.ss]}">${card.ss}</span></div>`
-      + `<div class="hc-art" style="--c1:${card.theme.primary};--c2:${card.theme.secondary}"><div class="hc-rays"></div>${YC.CardArt.svg(card)}</div>`
+      + `<div class="hc-art" style="--c1:${card.theme.primary};--c2:${card.theme.secondary}"><div class="hc-rays"></div>${YC.ItemToken ? YC.ItemToken.cardArt(card) : YC.CardArt.svg(card)}</div>`
       + `<div class="hc-type"><span class="hc-kind k-${card.kind}">${YC.Cards.KIND_LABEL[card.kind]}</span><span class="hc-gem" title="${R.label}"></span></div>`
       + `<div class="hc-text">${esc(card.text)}</div>`
       + `<div class="hc-holo"></div><div class="hc-glare"></div>`

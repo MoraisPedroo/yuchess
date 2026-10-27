@@ -43,6 +43,33 @@
 /* carta a ser arrastada da mão (MatchDrag) */
 .drag-ghost { position: fixed; left: 0; top: 0; z-index: 96; pointer-events: none; will-change: transform; filter: drop-shadow(0 22px 26px rgba(0, 0, 0, .6)); }
 .drag-ghost .hc-face { transition: box-shadow .15s; }
+.dg-card { position: absolute; left: -64px; top: -104px; }
+.dg-item { position: absolute; left: -46px; top: -84px; }
+.dg-label { position: absolute; left: 56px; top: -84px; width: max-content; min-width: 150px; max-width: 250px; padding: 7px 11px; text-align: left;
+  background: rgba(5, 11, 26, .94); border: 1.5px solid var(--cyan); border-radius: 8px; box-shadow: 0 0 16px rgba(0, 229, 255, .35); }
+.dg-label.left { left: auto; right: 56px; }
+.dg-label b { display: block; font-family: 'Chakra Petch', sans-serif; font-size: 14px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dg-label span { display: block; margin-top: 2px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px; line-height: 1.3; color: #CFE3FF; }
+.dg-label.ok { border-color: #7CFF9B; box-shadow: 0 0 18px rgba(124, 255, 155, .5); } .dg-label.ok span { color: #B4FFC8; }
+.dg-label.bad { border-color: #FF3355; box-shadow: 0 0 18px rgba(255, 51, 85, .45); } .dg-label.bad span { color: #FFB8C4; }
+/* a carta transformada em objeto (ItemToken) */
+.item-token { position: relative; width: var(--is); height: var(--is); pointer-events: none; }
+.item-token .it-aura { position: absolute; inset: -20%; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--ic) 60%, transparent) 0%, transparent 66%); animation: it-pulse 1.4s ease-in-out infinite; transition: background .2s; }
+.item-token .it-shadow { position: absolute; left: 20%; right: 20%; bottom: -14%; height: 13%; border-radius: 50%; background: rgba(0, 0, 0, .5); filter: blur(3px); animation: it-shadow 1.4s ease-in-out infinite; }
+.item-token .it-bob { position: absolute; inset: 0; animation: it-bob 1.4s ease-in-out infinite; filter: drop-shadow(0 0 5px var(--ic)) drop-shadow(0 7px 8px rgba(0, 0, 0, .55)); }
+.item-token .it-svg, .item-token .it-svg svg, .item-token .it-img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.drag-ghost.ok .item-token .it-aura { background: radial-gradient(circle, rgba(124, 255, 155, .75), transparent 66%); }
+.drag-ghost.bad .item-token .it-aura { background: radial-gradient(circle, rgba(255, 51, 85, .7), transparent 66%); }
+@keyframes it-bob { 50% { transform: translateY(-9%) rotate(4deg); } }
+@keyframes it-shadow { 50% { transform: scale(.78); opacity: .55; } }
+@keyframes it-pulse { 50% { transform: scale(1.12); opacity: .75; } }
+.it-puff { position: absolute; width: 0; height: 0; pointer-events: none; z-index: 3; }
+.it-puff b { position: absolute; left: -42px; top: -42px; width: 84px; height: 84px; border-radius: 50%; border: 3px solid var(--c); box-shadow: 0 0 14px var(--c), inset 0 0 10px var(--c); animation: puff-ring .5s ease-out forwards; }
+.it-puff i { position: absolute; left: -5px; top: -5px; width: 10px; height: 10px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px var(--c), 0 0 3px #fff; animation: puff-dot .55s ease-out forwards; }
+@keyframes puff-ring { from { transform: scale(.2); opacity: 1; } to { transform: scale(1.6); opacity: 0; } }
+@keyframes puff-dot { from { transform: rotate(var(--a)) translateX(0) scale(1); opacity: 1; } to { transform: rotate(var(--a)) translateX(var(--d)) scale(.2); opacity: 0; } }
+.fly-token { position: fixed; left: 0; top: 0; z-index: 72; pointer-events: none; }
+.fly-token .item-token { margin: calc(var(--is) / -2) 0 0 calc(var(--is) / -2); }
 .drag-ghost.ok .hc-face { box-shadow: 0 0 0 3px #7CFF9B, 0 0 30px rgba(124, 255, 155, .95); }
 .drag-ghost.bad .hc-face { box-shadow: 0 0 0 3px #FF3355, 0 0 26px rgba(255, 51, 85, .9); }
 .card-zoom { position: fixed; z-index: 95; pointer-events: none; transform-origin: 50% 50%; filter: drop-shadow(0 18px 30px rgba(0, 0, 0, .55)); }

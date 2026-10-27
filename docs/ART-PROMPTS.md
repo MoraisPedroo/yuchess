@@ -1,0 +1,49 @@
+# Arte dos objetos das cartas (Gemini)
+
+Cada carta tem um **objeto** (a bomba, as botas, a jaula…). O objeto aparece quando arrastas a carta para o tabuleiro, quando ela cai na casa, quando voa para a peça ao equipar e no cubo da armadilha. Sem imagem, o jogo usa o desenho SVG de `src/view/CardArt.js`.
+
+Fluxo:
+
+1. No Gemini (modelo de imagem), colar o **Prompt A** e depois, na mesma conversa, o **Prompt B** (para manter o estilo).
+2. Descarregar as duas imagens (PNG, tamanho máximo) para `C:\Users\<tu>\Downloads`.
+3. Recortar e tirar o fundo:
+   ```bash
+   python tools/slice-items.py "C:/Users/<tu>/Downloads/folha-a.png" A
+   python tools/slice-items.py "C:/Users/<tu>/Downloads/folha-b.png" B
+   ```
+   Gera `assets/items/<icone>.png` (256×256, fundo transparente) e atualiza `src/ui/ItemArtList.js`. Precisa do Pillow (`pip install pillow`).
+4. Abrir `tools/gallery.html` ou uma partida para ver o resultado. Se um objeto sair mal, pede ao Gemini só esse (uma imagem com 1 objeto, mesmo estilo) e corre `python tools/slice-items.py imagem.png ICONE`.
+
+## Prompt A — Equipamentos e Armadilhas de Casa (16)
+
+```
+Create one square image (1:1, as large as possible) laid out as a strict 4×4 grid of 16 game item icons, evenly spaced. Each item is centered in its own cell with a generous empty margin; nothing touches or crosses the cell borders. No grid lines, no text, no letters, no numbers, no labels anywhere.
+Background: one pure flat white (#FFFFFF) for the whole image. No gradient, no vignette, no floor, no drop shadows, no cast shadows.
+Identical style for all 16 icons: premium mobile card-game item art, glossy 3D vinyl toy look (Pixar / Supercell quality render), chunky rounded shapes, a thick dark navy outline (#14102A) around every item like a sticker, soft studio light from the top-left, small white specular highlights, saturated candy colors, slight 3/4 view, cute cartoon but readable at small size.
+Row 1, left to right: 1) a short sword with a pink handle and a golden crossguard, with a shiny gold coin beside it; 2) a cyan sneaker-boot with small white wings on the heel; 3) a big orange metal spring coil with a golden cap; 4) a crown made of blue ice crystals.
+Row 2: 5) a golden royal scepter topped with a big red gem; 6) green cactus-shaped chest armor covered with spikes; 7) a red telescopic spear with a metal spring in the shaft and an orange tip; 8) a purple cape with a blue horseshoe-magnet emblem.
+Row 3: 9) a swirling purple-and-cyan gravity vortex hole with small floating rocks; 10) a small yellow metal cage crackling with blue electric sparks; 11) a heavy black iron anvil with a red stripe; 12) a puddle of pink bubblegum with big round bubbles.
+Row 4: 13) an orange springboard launch pad with green springs and an up-arrow shape; 14) a green retro sci-fi ray gun with a glowing purple tip; 15) a round portal with a blue and purple swirling galaxy inside; 16) a round black cartoon bomb with a lit fuse spark and cyan ink splashes.
+```
+
+## Prompt B — Reativas, Counter-Traps e Magias Rápidas (15 + 1)
+
+```
+Now make a second image with exactly the same rules and the same style as the previous one (square, strict 4×4 grid, pure flat white background, no shadows, no text, thick dark navy outline, glossy 3D vinyl toy look):
+Row 1: 17) a faceted cyan crystal shield with a gold rim; 18) a pink rubber hand mirror with cyan glass; 19) a grey ninja smoke-bomb ball releasing a purple smoke puff; 20) an orange inflatable crash-test dummy doll with a white target symbol on its chest.
+Row 2: 21) a golden royal alarm siren light with a blue lens and a tiny crown on top; 22) a green piggy bank made of patched scrap metal with a gold coin slot; 23) two translucent soap-bubble shields side by side, one cyan and one pink; 24) a big red judge's gavel with golden bands.
+Row 3: 25) giant orange scissors cutting a black wire; 26) a big red horseshoe magnet with blue tips pulling a tiny gear; 27) a shiny golden referee whistle on a black cord; 28) a cyan sci-fi EMP pulse grenade with purple energy rings.
+Row 4: 29) an orange jackhammer with red details; 30) a purple wind-up alarm clock with a golden wind-up key and curved rewind-arrow shapes (no numbers on the dial); 31) a red boxing glove on a green spring; 32) a golden treasure chest glowing from inside.
+```
+
+## Ordem (célula → ícone)
+
+| Folha | Células 1–16 (ou 17–32) |
+|---|---|
+| A | GREED_SWORD, WIND_BOOTS, SPRING_COIL, ICE_CROWN, ROYAL_SCEPTER, SPIKE_ARMOR, SPRING_SPEAR, MAGNET_CAPE, GRAVITY_PIT, ELECTRIC_CAGE, HEAVY_ANVIL, BUBBLEGUM_SWAMP, EJECT_PAD, SHRINK_RAY, WORMHOLE, INK_MINE |
+| B | CRYSTAL_SHIELD, RUBBER_MIRROR, SMOKE_BOMB, DUMMY_DOLL, ROYAL_SIREN, PIGGY_BANK, TWIN_BUBBLES, JUDGE_HAMMER, GIANT_SCISSORS, THIEF_MAGNET, GOLDEN_WHISTLE, EMP_BLAST, JACKHAMMER, REWIND_CLOCK, BOXING_GLOVE, TREASURE_CHEST |
+
+## Ideias para depois (vídeo / animação)
+
+- **Vídeos curtos (Veo) só para as Lendárias** (Cetro, Bigorna, Espelho, Apito): 4 s em ciclo, o objeto a rodar num pedestal néon, convertido para WebM pequeno (`ffmpeg -i in.mp4 -vf scale=360:-2 -c:v libvpx-vp9 -b:v 0 -crf 38 -an out.webm`) e mostrado na carta ampliada. Para as 31 cartas ficaria pesado demais (dezenas de MB).
+- **Folhas de animação (sprite sheets)**: a IA não mantém os quadros consistentes entre si; explosões, faíscas e fumo continuam a ser feitos por código (`Particles3D`).
