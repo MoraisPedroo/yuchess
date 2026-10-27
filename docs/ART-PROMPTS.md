@@ -5,7 +5,7 @@ Cada carta tem um **objeto** (a bomba, as botas, a jaula…). O objeto aparece q
 Fluxo:
 
 1. No Gemini (modelo de imagem), colar o **Prompt A** e depois, na mesma conversa, o **Prompt B** (para manter o estilo).
-2. Descarregar as duas imagens (PNG, tamanho máximo) para `C:\Users\<tu>\Downloads`.
+2. Descarregar as duas imagens com "Baixar imagem no tamanho original" (vêm em JPG 2048×2048) para `C:\Users\<tu>\Downloads`.
 3. Recortar e tirar o fundo:
    ```bash
    python tools/slice-items.py "C:/Users/<tu>/Downloads/folha-a.png" A

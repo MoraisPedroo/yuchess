@@ -28,7 +28,6 @@
 
 ## Em curso / a meio
 
-- Arte dos objetos (ver Próximos passos 1b): o Claude in Chrome não estava ligado, por isso as imagens ainda não foram geradas no Gemini.
 - O Pedro está a testar a versão publicada e vai enviar os erros que encontrar (sobretudo: velocidade das animações, arrastar cartas no telemóvel, legibilidade do zoom).
 - Falta publicar o `firestore.rules` no Firebase (ver "Configuração pendente") para o online funcionar.
 
@@ -36,7 +35,7 @@
 
 1. Teste real online + corrigir o que as regras recusarem.
 2. Visual: aplicar o estilo néon/3D ao menu, loja e baralhos (os retratos 3D podem entrar lá com `YC.pieceHTML` se houver um renderer); fundo de estádio gerado por IA (prompts no relatório do Gemini, secção 5). Os modelos GLB deixaram de ser precisos: as peças de vinil feitas por código substituem-nos.
-1b. **Arte dos objetos com o Gemini** (a meio): prompts prontos em `docs/ART-PROMPTS.md`, recorte com `tools/slice-items.py`. Falta gerar as 2 folhas, descarregá-las e correr o recorte. O jogo já usa as imagens sozinho assim que estiverem em `assets/items/`.
+1b. ~~Arte dos objetos com o Gemini~~ (feito a 2026-10-27: 32 imagens em `assets/items/`). Seguinte: vídeo curto para as 4 Lendárias e a mesma arte na Loja/Baralhos.
 2b. Arrastar: hoje só a mão arrasta. Falta arrastar uma carta da Zona (Magia Rápida virada) para o tabuleiro e um "seta de mira" do Íman entre as duas peças.
 3. Balanceamento: a Lança e a Mola são fortes; ver taxas de vitória por carta com `tools/simulate.js` (acrescentar estatística por carta).
 3. Tutorial interativo curto (primeira partida guiada: equipar, armadilha, resposta).
@@ -58,6 +57,7 @@
 - **Arte**: `docs/ART-PROMPTS.md` (2 prompts de folhas 4×4 com os 31 objetos + baú, mesmo estilo de vinil, fundo branco), `tools/slice-items.py` (recorta, tira o fundo e gera `src/ui/ItemArtList.js`), cartas/cubos/medalhas/fichas passam a usar `assets/items/*.png` quando existir; o `build.js` embute as imagens no ficheiro único. Testado com uma folha falsa.
 - **Decisões**: vídeos do Veo só para as Lendárias (o resto ficaria pesado); sprite sheets da IA não são consistentes entre quadros, por isso explosões e fumo continuam por código.
 - **Como testar**: os 4 comandos; no navegador arrastar uma Armadilha de Casa (vira objeto e cai na casa) e um Equipamento (etiqueta muda conforme a peça).
+- **Arte gerada (mesmo dia)**: com o Claude in Chrome, o Gemini (modo "Criar imagem", 1:1) fez as 2 folhas 4×4 dos prompts de `docs/ART-PROMPTS.md`; vieram em JPG 2048×2048 (o "tamanho original" do Gemini é JPG) e foram recortadas com `tools/slice-items.py` para 32 PNG de 256×256 em `assets/items/` (2,2 MB). Cartas, objetos arrastados, fichas a voar, cubos das armadilhas e medalhas usam-nas; o `dist/` fica com 3,3 MB por levar as imagens embutidas. As folhas originais estão nas Transferências do Pedro (`Gemini_Generated_Image_ug4a….jpg` = A, `…z4gd….jpg` = B) e a conversa ficou no histórico do Gemini dele.
 
 ### 2026-10-26 (tarde) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Pedido do Pedro**: as animações continuavam feias e rápidas; queria o estilo Hearthstone (passar o rato/clicar abre a carta no sítio, não num painel lateral), ver os detalhes da armadilha ao armá-la, arrastar a carta até à casa ou peça, e peças e "fotos" das peças mais bonitas.
