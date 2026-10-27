@@ -3,9 +3,9 @@
 > Ficheiro de passagem de testemunho entre o Pedro (Claude Code) e o Diego (Codex).
 > **Lê-o no início de cada sessão e atualiza-o no fim** (ver `AGENTS.md`, secção 2).
 
-## Estado atual (2026-10-26)
+## Estado atual (2026-10-27)
 
-**No ar (`main`, juntada a 2026-10-26):** <https://yuchess.vercel.app/>. A partida usa um palco 3D em Three.js com peças de vinil, partículas, mão estilo Hearthstone e arrastar cartas (ver o registo mais recente). O jogo foi refeito do zero seguindo o relatório "Chess-Gi-Oh! Cartoon Edition" do Pedro. Substitui o protótipo "Chess-Oh! Uno-Head" (xadrez + Uno, estilo 1930) e o modo "Speed Duel" (só cartas) — os dois continuam no histórico do git (`main` cb44011 e branch `pedro/duel-links`).
+**No ar (`main`, juntada a 2026-10-27):** <https://yuchess.vercel.app/>. A partida usa um palco 3D em Three.js com peças de vinil, partículas, mão estilo Hearthstone e arrastar cartas (ver o registo mais recente). O jogo foi refeito do zero seguindo o relatório "Chess-Gi-Oh! Cartoon Edition" do Pedro. Substitui o protótipo "Chess-Oh! Uno-Head" (xadrez + Uno, estilo 1930) e o modo "Speed Duel" (só cartas) — os dois continuam no histórico do git (`main` cb44011 e branch `pedro/duel-links`).
 
 **Funciona e está testado**
 - Xadrez completo (`src/game/ChessRules.js`): lances legais, xeque, xeque-mate, afogamento, roque, en passant, promoção, 50 lances, repetição tripla, material insuficiente. Contagens *perft* de referência certas (início, Kiwipete, posições 3–5).
@@ -35,7 +35,7 @@
 
 1. Teste real online + corrigir o que as regras recusarem.
 2. Visual: aplicar o estilo néon/3D ao menu, loja e baralhos (os retratos 3D podem entrar lá com `YC.pieceHTML` se houver um renderer); fundo de estádio gerado por IA (prompts no relatório do Gemini, secção 5). Os modelos GLB deixaram de ser precisos: as peças de vinil feitas por código substituem-nos.
-1b. ~~Arte dos objetos com o Gemini~~ (feito a 2026-10-27: 32 imagens em `assets/items/`, 16 efeitos em `assets/fx/`, estádio). Vídeos das Lendárias: Cetro feito; faltam Bigorna, Espelho e Apito (quando o Gemini tiver capacidade — um pedido de cada vez; prompts prontos em `docs/ART-PROMPTS.md`; acrescentar o ícone a `ItemToken.VIDEO`). Alternativa: o Google Flow (Veo, mesma conta Pro, gasta créditos de IA).
+1b. ~~Arte dos objetos com o Gemini~~ (feito a 2026-10-27: 32 imagens em `assets/items/`, 16 efeitos em `assets/fx/`, estádio). ~~Vídeos das Lendárias~~ (feito a 2026-10-27: Cetro, Bigorna, Espelho e Apito).
 2b. Arrastar: hoje só a mão arrasta. Falta arrastar uma carta da Zona (Magia Rápida virada) para o tabuleiro e um "seta de mira" do Íman entre as duas peças.
 3. Balanceamento: a Lança e a Mola são fortes; ver taxas de vitória por carta com `tools/simulate.js` (acrescentar estatística por carta).
 3. Tutorial interativo curto (primeira partida guiada: equipar, armadilha, resposta).
@@ -56,7 +56,7 @@
 - **Regra de compra** (`MatchController.beginTurn`): 1 carta no início de cada turno a partir do turno 2 (antes: só nos teus turnos 3, 5, 7…). Teste novo em `tools/test-cards.js` (32/32). Texto atualizado no Hub e no README. Com 12 cartas o baralho acaba por volta do 10.º turno de cada um (baralho vazio continua a não fazer perder).
 - **Sprite sheets** (`Portraits3D`): cada peça é desenhada em 24 quadros (agachar → salto com pirueta de 360° → aterrar a achatar) com o mesmo renderer e tom das fotos, um quadro por tempo morto; tira PNG de 24 × 230 × 259 px em blob. O quadro tem a mesma base da foto, por isso a troca não mexe a peça. Toca em ciclo no cartão da peça (ao passar o rato numa peça) e na mascote (rato em cima; e um salto no início da tua vez). Não foi o Gemini: desenhar a partir das peças 3D garante que todos os quadros são iguais à peça do tabuleiro.
 - **Histórico** (`src/ui/MatchLog.js`, novo; saiu de `MatchHUD`): separado por turnos, com a cartinha (imagem do objeto na moldura da carta; verso para cartas escondidas do adversário até se revelarem) ou a foto da peça que se mexeu (⚔ nas capturas), e "📍 onde está agora" (ex.: "Está com o Bispo em A4", "Escondida em B5", "Virada na Zona do adversário"). Passar o rato: carta em grande com a legenda e marca dourada na casa (`dropMark` aceita uma cor; o zoom foge da casa marcada). Clicar: abre o cartão da peça com os equipamentos (agora com a imagem do objeto). O motor passou a guardar essa informação em `match.say(texto, equipa, info)` e a escrever "Ativou X" / "Respondeu com X (elo n)" para cada elo da Chain.
-- **Vídeos**: a Bigorna saiu ("Refazer" no Gemini funcionou) → `assets/video/heavy_anvil.mp4` (8,7 s: flutua, cai com impacto de faíscas e poeira, volta; cortei 0,25 s com um objeto estranho que o Veo pôs por cima e fechei o ciclo com uma transição de 0,4 s). Espelho e Apito: ver abaixo.
+- **Vídeos das 4 Lendárias feitos** (Gemini/Veo, um de cada vez; quando respondia "full capacity" usei o botão "Refazer" até passar): `heavy_anvil.mp4` (8,7 s: flutua, cai com impacto de faíscas e poeira, volta; cortei 0,25 s com um objeto estranho que o Veo pôs por cima), `rubber_mirror.mp4` (9 s: balança, reflexo a atravessar o vidro, brilhos) e `golden_whistle.mp4` (9 s: balança no cordão, ondas sonoras e estrelinhas). Ciclos em frente com 0,4–0,5 s de transição no fim (sem vai-e-vem), 480×270, sem som, 126–224 KB. Os originais estão nas Transferências do Pedro (`gemini_generated_video_27ec2109`, `…391a46b1`, `…34e5f11b`). O Espelho também toca na carta em destaque da Arena.
 - **Como testar**: os 4 comandos; no navegador passar o rato numa peça (salto com pirueta) e no Rei mascote; abrir "Histórico", passar o rato numa linha de equipamento (carta + marca dourada) e clicar (cartão da peça); ver que a mão das Pretas tem 4 cartas no 1.º turno delas.
 
 ### 2026-10-27 (manhã) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
