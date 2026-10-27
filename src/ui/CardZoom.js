@@ -35,13 +35,14 @@
         else x = r.right + gap;
         x = Math.max(8, Math.min(innerWidth - w - 8, x));
         let y = Math.max(8, Math.min(innerHeight - h - 8, r.top + r.height / 2 - h / 2));
-        // não tapar o que se quer mostrar (a casa marcada): por cima, por baixo ou ao lado dela
+        // não tapar o que se quer ver (o tabuleiro ou a casa marcada): ao lado dele, por cima ou por baixo
         const hits = (px, py) => avoid && px < avoid.right + 6 && px + w > avoid.left - 6 && py < avoid.bottom + 6 && py + h > avoid.top - 6;
         if (hits(x, y)) {
-          const up = avoid.top - gap - h, down = avoid.bottom + gap;
-          if (up >= 8) y = up;
-          else if (down + h <= innerHeight - 8) y = down;
-          else x = Math.min(innerWidth - w - 8, avoid.right + gap);
+          const sides = [[avoid.right + gap, y], [avoid.left - gap - w, y]];
+          if (side === 'left' || (side === 'auto' && r.left + r.width / 2 < (avoid.left + avoid.right) / 2)) sides.reverse();
+          const cand = [...sides, [x, avoid.top - gap - h], [x, avoid.bottom + gap]];
+          const ok = cand.find(([px, py]) => px >= 8 && px + w <= innerWidth - 8 && py >= 8 && py + h <= innerHeight - 8);
+          if (ok) [x, y] = ok;
         }
         wrap.style.left = `${x}px`; wrap.style.top = `${y}px`;
         Zoom.el = wrap;

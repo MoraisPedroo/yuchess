@@ -59,8 +59,15 @@
       // a peça dá um salto com pirueta (sprite sheet feita da peça 3D) enquanto o rato está em cima
       if (YC.Portraits3D && ui.use3D) YC.Portraits3D.play(el.querySelector('.pi-figure .squash'), p.type, p.color, 'loop');
       const r = anchor.getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight, gap = 16;
-      let x = r.right + gap;
-      if (x + w > innerWidth - 8) x = r.left - gap - w;
+      // fora do tabuleiro (na margem do lado da peça) para nunca tapar as casas onde se quer jogar
+      const br = ui.board.boardRect ? ui.board.boardRect() : null;
+      let x = null;
+      if (br) {
+        const L = br.left - gap - w, Rx = br.right + gap, fitsL = L >= 8, fitsR = Rx + w <= innerWidth - 8;
+        const left = r.left + r.width / 2 < (br.left + br.right) / 2;
+        x = left ? (fitsL ? L : fitsR ? Rx : null) : (fitsR ? Rx : fitsL ? L : null);
+      }
+      if (x == null) { x = r.right + gap; if (x + w > innerWidth - 8) x = r.left - gap - w; }
       x = Math.max(8, Math.min(innerWidth - w - 8, x));
       const y = Math.max(8, Math.min(innerHeight - h - 8, r.top + r.height / 2 - h / 2));
       el.style.left = `${x}px`; el.style.top = `${y}px`;

@@ -288,7 +288,7 @@
     onTableHover(t, rect) {
       const id = t && ((t.kind === 'zone' && t.rel === 'me' && t.card && t.card.id) || (t.kind === 'pile' && t.pile === 'gy' && t.top) || (t.kind === 'trap' && t.id));
       if (!id || !rect || this.dragging) return YC.CardZoom.hide();
-      YC.CardZoom.show({ getBoundingClientRect: () => rect }, id, { delay: 60 });
+      YC.CardZoom.show({ getBoundingClientRect: () => rect }, id, { delay: 60, avoid: this.board.boardRect && this.board.boardRect() });
     }
 
     // ───────────── posições para as animações ─────────────

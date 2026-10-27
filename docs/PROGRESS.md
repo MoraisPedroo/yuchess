@@ -33,6 +33,7 @@
 
 ## Próximos passos (por prioridade)
 
+0. **Redesenho da estética** com o relatório do Gemini Deep Research (prompt em `docs/DEEP-RESEARCH-PROMPT.md`): direção de arte única para menus e partida, paleta e tipografia novas, ícones sem emojis, sistema de motion, transições entre ecrãs, ecrã inicial e abertura de pacotinhos.
 1. Teste real online + corrigir o que as regras recusarem.
 2. Visual: aplicar o estilo néon/3D ao menu, loja e baralhos (os retratos 3D podem entrar lá com `YC.pieceHTML` se houver um renderer); fundo de estádio gerado por IA (prompts no relatório do Gemini, secção 5). Os modelos GLB deixaram de ser precisos: as peças de vinil feitas por código substituem-nos.
 1b. ~~Arte dos objetos com o Gemini~~ (feito a 2026-10-27: 32 imagens em `assets/items/`, 16 efeitos em `assets/fx/`, estádio). ~~Vídeos das Lendárias~~ (feito a 2026-10-27: Cetro, Bigorna, Espelho e Apito).
@@ -50,6 +51,13 @@
 - Num separador escondido o navegador quase para as animações (requestAnimationFrame); o motor espera no máximo 4 s por animação, por isso o jogo nunca bloqueia, só fica lento.
 
 ## Registo de sessões
+
+### 2026-10-27 (fim da tarde) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Pedido do Pedro**: ao mover uma peça, às vezes "algo à frente" aparecia (a animação da coisa) e não deixava ir à casa, ou a casa ficava muito escura e não se conseguia clicar; tirar a "cara de site feito por IA" (UI, animações, pacotinhos, transições) com um prompt para o Deep Research do Gemini.
+- **Causa**: o cartão da peça (agora com a sprite a saltar) e o zoom das armadilhas abriam mesmo ao lado da peça, por cima das casas vizinhas, com fundo azul-escuro; e as casas de destino só tinham um ponto fraco sobre casas quase pretas.
+- **Correções**: o cartão da peça, o zoom de armadilhas/Zona/cemitério, a carta mostrada ao armar e o zoom do histórico abrem sempre fora do tabuleiro, na margem do lado mais perto (`board.boardRect()` em `Board3D`/`BoardView`; `CardZoom.show({ avoid })`; `PieceInspector.render`). Casas de destino acesas (fundo ciano, vermelho nas capturas) e a casa debaixo do rato bem clara com a seta (`Board3DSync.mark/updateArrow`, materiais `moveSq`, `capSq`, `hot`). Em perspetiva, se uma peça alta tapar uma casa de destino marcada, o clique vai para a casa (`Board3D.target` com `this.wanted`); clicar na peça escolhida continua a desescolhê-la. Medido: nas posições testadas 300 de 300 pontos dentro das casas de destino chegam à casa certa.
+- **Estética**: `docs/DEEP-RESEARCH-PROMPT.md` — prompt para o Gemini Deep Research (diagnóstico do "ar de IA", 12 jogos de referência, 3 direções de arte, paleta, tipografia, tokens CSS, motion com curvas e tempos, transições, Arena, pacotinhos, partida, som, prompts de arte e plano). O redesenho fica à espera do relatório.
+- **Como testar**: escolher uma peça (as casas de destino ficam azuis e a do rato acende), passar o rato por peças (o cartão aparece ao lado do tabuleiro, não por cima).
 
 ### 2026-10-27 (tarde) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Pedido do Pedro**: esperar pelos 3 vídeos no Gemini e pô-los a funcionar; sprite sheets das peças atuais a animar ao passar o rato (cartão da peça e o Rei mascote em baixo); comprar 1 carta por turno (começam com 3; as Brancas não compram no 1.º turno); histórico mais completo com as cartinhas jogadas, saber que carta é ao passar o rato e onde ela está no tabuleiro, e ao clicar ver a peça que tem o objeto.

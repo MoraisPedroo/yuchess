@@ -201,6 +201,8 @@
       if (this.markMats[kind]) return this.markMats[kind];
       const conf = {
         last: [0xFCC934, 0.9, 0.32, 'sq'], sel: [0x00E5FF, 1.6, 0.45, 'sq'], move: [0x00E5FF, 1.8, 0.95, 'dot'],
+        // casa de destino acesa (as casas escuras do tabuleiro quase não deixavam ver o ponto) e a casa debaixo do rato
+        moveSq: [0x00E5FF, 1.3, 0.3, 'sq'], capSq: [0xFF1E42, 1.2, 0.26, 'sq'], hot: [0x9CFFF8, 1.9, 0.8, 'sq'],
         cap: [0xFF1E42, 2, 0.95, 'ring'], lance: [0xFA903E, 2, 0.95, 'ring'], equip: [0xFFD700, 1.6, 0.6, 'sq'],
         trap: [0xFF4F9A, 1.6, 0.5, 'sq'], pick: [0xFFD700, 1.6, 0.6, 'sq'], check: [0xFF0033, 1.6, 0.55, 'sq']
       }[kind];
@@ -228,6 +230,7 @@
       for (const mv of moves) {
         if (this.targets.has(mv.to)) continue;
         this.targets.set(mv.to, mv);
+        plane(mv.to, mv.captured ? 'capSq' : 'moveSq', 0.94, 0.011);
         plane(mv.to, mv.captured ? (mv.flag === 'r' ? 'lance' : 'cap') : 'move', mv.captured ? 0.92 : 0.6, 0.014);
         const lab = new THREE.Sprite(new THREE.SpriteMaterial({ map: T3().label(YC.Chess.sqName(mv.to).toUpperCase()), depthTest: false }));
         const p = this.sqWorld(mv.to);
@@ -237,16 +240,28 @@
       for (const sq of equip) plane(sq, 'equip');
       for (const sq of trap) plane(sq, 'trap', 0.82);
       for (const sq of pick) plane(sq, 'pick');
+      // casas onde o clique tem de chegar mesmo que uma peça à frente as tape (Board3D.target)
+      this.wanted = new Set([...this.targets.keys(), ...equip, ...trap, ...pick]);
       for (const g of this.pieceEls.values()) g.userData.selected = g.userData.sq === sel;
       this.arrow = null;
+      this.hotPlane = null;
       this.updateArrow();
     },
 
-    /** Seta luminosa da peça escolhida até à casa de destino debaixo do rato. */
+    /** Casa de destino debaixo do rato bem acesa e seta luminosa da peça escolhida até ela. */
     updateArrow() {
       const THREE = T();
       if (this.arrow) { this.layers.marks.remove(this.arrow); this.arrow.geometry.dispose(); this.arrow.material.dispose(); this.arrow = null; }
+      if (this.hotPlane) { this.layers.marks.remove(this.hotPlane); this.hotPlane = null; }
       const h = this.hover, sq = h && (h.kind === 'square' || h.kind === 'piece' || h.kind === 'trap') ? h.sq : -1;
+      if (sq >= 0 && this.wanted && this.wanted.has(sq)) {
+        const hp = new THREE.Mesh(this.markGeo || (this.markGeo = new THREE.PlaneGeometry(1, 1)), this.markMat('hot'));
+        const w = this.sqWorld(sq);
+        hp.rotation.x = -Math.PI / 2; hp.position.set(w.x, 0.016, w.z); hp.scale.set(0.98, 0.98, 1);
+        hp.raycast = () => {};
+        this.layers.marks.add(hp);
+        this.hotPlane = hp;
+      }
       if (this.selSq == null || this.selSq < 0 || !this.targets || !this.targets.has(sq)) return;
       const a = this.sqWorld(this.selSq), b = this.sqWorld(sq);
       const dx = b.x - a.x, dz = b.z - a.z, len = Math.hypot(dx, dz);

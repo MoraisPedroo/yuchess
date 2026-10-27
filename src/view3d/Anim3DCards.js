@@ -164,7 +164,7 @@
       b.decal(p.x, p.z, 'MAGIC_CIRCLE', { size: 1.05, life: 1.6, spin: 1.6 });
       b.text3D(p.x, 1.2, p.z, 'ARMADA!', c.theme.primary, 0.75);
       // mostra a carta ao lado da casa durante uns segundos (só tu a vês)
-      YC.CardZoom.show({ getBoundingClientRect: () => b.rect(trap.sq) }, trap.id, { delay: 0 });
+      YC.CardZoom.show({ getBoundingClientRect: () => b.rect(trap.sq) }, trap.id, { delay: 0, avoid: b.boardRect() });
       setTimeout(() => YC.CardZoom.hide(), 2600);
       await FX().wait(500);
     }

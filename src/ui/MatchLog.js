@@ -135,7 +135,7 @@
         const l = this.match.log[+row.dataset.i];
         if (!l) return;
         const w = this.logWhere(l);
-        const avoid = w && w.sq != null && this.board.rect ? this.board.rect(w.sq) : null;
+        const avoid = this.board.boardRect ? this.board.boardRect() : null;
         if (l.card && this.logKnown(l)) YC.CardZoom.show(row, l.card, { side: 'right', caption: w && w.text, width: 230, avoid });
         else YC.CardZoom.hide();
         if (this.board.dropMark && !this.dragging) this.board.dropMark(w && w.sq != null ? w.sq : -1, GOLD);

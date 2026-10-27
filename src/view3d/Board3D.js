@@ -143,6 +143,13 @@
 
     rect(sq) { const p = this.sqWorld(sq); return this.areaRect(p.x, p.z, 0.96, 0.96); }
 
+    /** Retângulo do tabuleiro no ecrã (com a altura das peças da fila de trás): as janelas não o tapam. */
+    boardRect() {
+      const a = this.areaRect(0, 0, 8.3, 8.3, 0), b = this.areaRect(0, 0, 8.3, 8.3, 1.2);
+      const left = Math.min(a.left, b.left), top = Math.min(a.top, b.top), right = Math.max(a.right, b.right), bottom = Math.max(a.bottom, b.bottom);
+      return { left, top, right, bottom, width: right - left, height: bottom - top };
+    }
+
     center(sq) {
       const p = this.sqWorld(sq), s = this.worldToScreen(p.x, 0.35, p.z), f = this.fx.getBoundingClientRect();
       return { x: ((s.x - f.left) / f.width) * 100, y: ((s.y - f.top) / f.height) * 100 };
@@ -158,15 +165,24 @@
       return this.raycaster.intersectObjects(this.pickables, true);
     }
 
-    /** O que está debaixo do rato: peça, casa, lugar da Zona ou pilha. */
+    /** O que está debaixo do rato: peça, casa, lugar da Zona ou pilha. Em perspetiva uma peça alta pode tapar a
+        casa de trás: se a casa debaixo do rato é um destino marcado (lance, equipar, armar…), ganha a casa. */
     target(e) {
+      let first = null, ground = null;
       for (const h of this.hits(e)) {
-        let o = h.object;
-        if (o.isInstancedMesh && o.userData.sqs) return { kind: 'square', sq: o.userData.sqs[h.instanceId] };
-        while (o && !o.userData.pick) o = o.parent;
-        if (o) return o.userData.pick;
+        let o = h.object, t = null;
+        if (o.isInstancedMesh && o.userData.sqs) t = { kind: 'square', sq: o.userData.sqs[h.instanceId] };
+        else { while (o && !o.userData.pick) o = o.parent; if (o) t = o.userData.pick; }
+        if (!t) continue;
+        if (!first) first = t;
+        if (t.kind === 'square') { ground = t; break; }
       }
-      return null;
+      const W = this.wanted;
+      if (first && ground && W && W.size && first.sq !== ground.sq && W.has(ground.sq) && first.sq !== this.selSq
+        && !((first.kind === 'piece' || first.kind === 'trap') && W.has(first.sq))) {
+        return this.pieceAtSq(ground.sq) ? { kind: 'piece', sq: ground.sq } : ground;
+      }
+      return first;
     }
 
     pick(e) { this.setHover(e ? this.target(e) : null); }

@@ -53,6 +53,7 @@
     rc(sq) { const r = sq >> 3, c = sq & 7; return this.flipped ? [7 - r, 7 - c] : [r, c]; }
     sqEl(sq) { return this.squares[this.flipped ? 63 - sq : sq]; }
     rect(sq) { return this.sqEl(sq).getBoundingClientRect(); }
+    boardRect() { return this.wrap.getBoundingClientRect(); }
     place(el, sq) { const [r, c] = this.rc(sq); el.style.left = `${c * 12.5}%`; el.style.top = `${r * 12.5}%`; el.dataset.sq = sq; }
     pctPos(sq) { const [r, c] = this.rc(sq); return { left: `${c * 12.5}%`, top: `${r * 12.5}%` }; }
 
