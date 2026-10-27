@@ -98,13 +98,13 @@
       b.innerHTML = `
         <div class="lobby-top">
           <div class="lobby-who"><label class="lbl">Nome</label><div class="row-btns tight"><input class="text-in" id="lobby-rename" maxlength="20" value="${esc(p.name)}"><button class="btn small" data-a="rename">Guardar</button></div>
-            <small>${p.guest ? 'Convidado · só salas privadas' : 'Conta Google'} · coleção ${YC.ProfileStore.cloud === 'ok' ? 'guardada na nuvem ☁' : 'a sincronizar…'}</small>
+            <small>${p.guest ? 'Convidado · só salas privadas' : 'Conta Google'} · coleção ${YC.ProfileStore.cloud === 'ok' ? 'guardada na nuvem' : 'a sincronizar…'}</small>
             ${p.guest ? '<button class="btn small teal" data-a="link">Converter em conta Google</button>' : ''}</div>
           <div class="lobby-rating"><b>${p.rating}</b><small>rating</small></div>
           <div class="lobby-record">${p.wins}V · ${p.losses}D · ${p.draws}E<small>${p.games} ranqueadas</small></div>
         </div>
         <div class="lobby-actions">
-          <button class="btn big pink" data-a="ranked" ${p.guest ? 'disabled title="Precisa de conta Google"' : ''}>⚔ Procurar ranqueada</button>
+          <button class="btn big pink" data-a="ranked" ${p.guest ? 'disabled title="Precisa de conta Google"' : ''}>${YC.Icon('swords', { size: 24 })}Procurar ranqueada</button>
           <button class="btn big violet" data-a="private">Criar sala privada</button>
           <div class="lobby-join"><label class="lbl">Código da sala</label><div class="row-btns tight"><input class="text-in code-in" id="lobby-code" maxlength="5" placeholder="ABCDE" autocomplete="off"><button class="btn" data-a="join">Entrar</button></div></div>
         </div>

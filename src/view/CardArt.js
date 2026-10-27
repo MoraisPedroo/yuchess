@@ -10,7 +10,7 @@
   const l = (d, col, w = 7) => `<path d="${d}" fill="none" stroke="${K}" stroke-width="${w + 5}" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
   const shine = (x, y, rx, ry, rot = -30) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="#fff" opacity=".55" transform="rotate(${rot} ${x} ${y})"/>`;
   const spark = (x, y, s, f = '#fff') => `<path d="M${x} ${y - s} Q${x + s * 0.18} ${y - s * 0.18} ${x + s} ${y} Q${x + s * 0.18} ${y + s * 0.18} ${x} ${y + s} Q${x - s * 0.18} ${y + s * 0.18} ${x - s} ${y} Q${x - s * 0.18} ${y - s * 0.18} ${x} ${y - s}Z" fill="${f}" stroke="${K}" stroke-width="2"/>`;
-  const txt = (x, y, s, t, f = '#fff') => `<text x="${x}" y="${y}" font-family="Fredoka, sans-serif" font-weight="700" font-size="${s}" text-anchor="middle" fill="${f}" stroke="${K}" stroke-width="2.5" paint-order="stroke">${t}</text>`;
+  const txt = (x, y, s, t, f = '#fff') => `<text x="${x}" y="${y}" font-family="Titan One, sans-serif" font-weight="400" font-size="${s}" text-anchor="middle" fill="${f}" stroke="${K}" stroke-width="2.5" paint-order="stroke">${t}</text>`;
   const coin = (x, y, r) => c(x, y, r, '#FCC934', 3.5) + `<circle cx="${x}" cy="${y}" r="${r * 0.62}" fill="none" stroke="#C99A0E" stroke-width="2.5"/>` + shine(x - r * 0.35, y - r * 0.35, r * 0.3, r * 0.18);
   const spring = (x, y1, y2, w, col, n = 4) => {
     let d = `M${x - w} ${y1}`;

@@ -108,7 +108,7 @@
         el.classList.toggle('checked', sq === checked);
         el.classList.toggle('morphed', !!p.morphUntil);
         if (p.morphUntil) el.querySelector('.squash').dataset.real = { n: 'C', b: 'B', r: 'T', q: 'D' }[p.morphFrom] || '';
-        if (frozen) el.querySelector('.freeze-badge').textContent = `❄${Math.ceil((p.frozenUntil - turn) / 2)}`;
+        if (frozen) el.querySelector('.freeze-badge').textContent = `${Math.ceil((p.frozenUntil - turn) / 2)}`;
         const key = p.equips.join(',');
         if (el.dataset.equips !== key) {
           el.dataset.equips = key;

@@ -33,8 +33,9 @@
       this.camera = new THREE.PerspectiveCamera(40, 16 / 9, 0.1, 120);
       this.composer = new A.EffectComposer(r);
       this.composer.addPass(new A.RenderPass(this.scene, this.camera));
-      this.bloom = new A.UnrealBloomPass(new THREE.Vector2(640, 360), 0.4, 0.15, 0.95);
-      this.bloomBase = 0.4;
+      // bloom fraco: só as faíscas e os efeitos (cores > 1) brilham; tabuleiro e HUD ficam mate
+      this.bloom = new A.UnrealBloomPass(new THREE.Vector2(640, 360), 0.28, 0.15, 0.95);
+      this.bloomBase = 0.28;
       this.composer.addPass(this.bloom);
       this.composer.addPass(new A.OutputPass());
 

@@ -11,9 +11,10 @@
   const templates = new Map();
   const geos = new Map();
 
+  // Brancas: vinil marfim frio; Pretas: vinil grafite azulado (nunca preto puro: o contorno escuro tem de se ver)
   const COLORS = {
-    w: { body: 0xE8E2D6, shade: 0xD2E3FC, mane: 0xFF7AA8, flag: 0xFF4F9A },
-    b: { body: 0x4A3A8C, shade: 0x7B42F6, mane: 0xE26DB4, flag: 0xFCC934 }
+    w: { body: 0xEEF2F7, shade: 0xCBD5E1, mane: 0xFF7AA8, flag: 0xD90429 },
+    b: { body: 0x2E3D57, shade: 0x64748B, mane: 0x00B4D8, flag: 0xFFB703 }
   };
   const GOLD = 0xFCC934;
 
@@ -296,10 +297,11 @@
       const THREE = T();
       const grp = new THREE.Group();
       grp.name = 'pedestal';
-      const glowMat = new THREE.MeshBasicMaterial({ map: T3().radial(hex), color: T3().glow(0xffffff, 0.5), transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending });
-      const disc = new THREE.Mesh(geo('disc', () => new THREE.PlaneGeometry(1.15, 1.15)), glowMat);
+      // base de vinil: sombra suave no chão + anel na cor da equipa, sem néon (só a seleção acende a aura)
+      const glowMat = new THREE.MeshBasicMaterial({ map: T3().radial(0x000000, 'pedShadow'), transparent: true, opacity: 0.45, depthWrite: false });
+      const disc = new THREE.Mesh(geo('disc', () => new THREE.PlaneGeometry(1.0, 1.0)), glowMat);
       disc.rotation.x = -Math.PI / 2; disc.position.y = 0.006;
-      const ringMat = T3().basic(hex, hex === T3().NEON.mine ? 2.1 : 4.2);
+      const ringMat = T3().basic(hex, 1);
       const outer = new THREE.Mesh(geo('ringO', () => new THREE.TorusGeometry(0.38, 0.022, 8, 40)), ringMat);
       outer.rotation.x = Math.PI / 2; outer.position.y = 0.02;
       const inner = new THREE.Mesh(geo('ringI', () => new THREE.TorusGeometry(0.29, 0.015, 8, 36)), ringMat);

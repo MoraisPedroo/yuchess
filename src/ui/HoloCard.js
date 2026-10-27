@@ -1,11 +1,13 @@
-/* HoloCard.js — carta 3D com inclinação holográfica (perspective 1000px, ±11°) e moldura por raridade:
-   Comum (mate cinzento), Rara (azul metálico), Épica (holográfica color-dodge), Lendária (folha dourada + partículas).
-   As variáveis --rx/--ry/--mx/--my/--hue seguem o rato e alimentam o CSS em styles/cards.css. */
+/* HoloCard.js — carta de "cartão laminado" (docs/DIRECAO-DE-ARTE.md) com inclinação 3D (±11°): chassis com aba
+   inferior na cor do tipo, janela da arte, medalhão de velocidade (V1 seta, V2 asas, V3 relâmpago), fita com nome
+   e tipo, caixa de regras rebaixada e placa de raridade com insígnias (● / ◆◆ / ✦✦✦ / coroa). Foil só nas Épicas e
+   Lendárias. As variáveis --rx/--ry/--mx/--my/--hue seguem o rato e alimentam o CSS em styles/cards.css. */
 (function (YC) {
   'use strict';
 
   const TILT = 11;
   const SS_LABEL = { 1: 'Velocidade 1', 2: 'Velocidade 2', 3: 'Velocidade 3' };
+  const SPEED_ICON = { 1: 'chevron', 2: 'wings', 3: 'bolt' };
 
   function esc(s) { return String(s).replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch])); }
 
@@ -16,13 +18,16 @@
     const video = vid ? `<video class="hc-video" muted loop playsinline preload="none" data-src="${vid}"></video>` : '';
     // nomes compridos ("Botas de Vento Supersónico") encolhem a letra em vez de ficarem cortados
     const len = card.name.length, fit = len > 25 ? ' n-xxl' : len > 21 ? ' n-xl' : len > 15 ? ' n-l' : '';
+    const ic = (n, o) => (YC.Icon ? YC.Icon(n, o) : '');
+    // insígnias de raridade (dupla codificação: forma e número, não só cor)
+    const gems = { COMMON: ic('gemCommon'), RARE: ic('gemRare'), EPIC: ic('gemEpic').repeat(3), LEGENDARY: ic('crown') }[card.rarity];
     return `<div class="hc-face">`
-      + `<div class="hc-head"><span class="hc-name${fit}">${esc(card.name)}</span><span class="hc-ss" title="${SS_LABEL[card.ss]}">${card.ss}</span></div>`
       + `<div class="hc-art" style="--c1:${card.theme.primary};--c2:${card.theme.secondary}"><div class="hc-rays"></div>${YC.ItemToken ? YC.ItemToken.cardArt(card) : YC.CardArt.svg(card)}${video}</div>`
-      + `<div class="hc-type"><span class="hc-kind k-${card.kind}">${YC.Cards.KIND_LABEL[card.kind]}</span><span class="hc-gem" title="${R.label}"></span></div>`
+      + `<div class="hc-speed s${card.ss}" title="${SS_LABEL[card.ss]}">${ic(SPEED_ICON[card.ss])}<b>${card.ss}</b></div>`
+      + `<div class="hc-ribbon"><span class="hc-name${fit}">${esc(card.name)}</span><span class="hc-kind">${YC.Cards.KIND_LABEL[card.kind]}</span></div>`
       + `<div class="hc-text">${esc(card.text)}</div>`
+      + `<div class="hc-rar" title="${R.label}">${gems}</div>`
       + `<div class="hc-holo"></div><div class="hc-glare"></div>`
-      + (card.rarity === 'LEGENDARY' ? '<div class="hc-sparkles"><i></i><i></i><i></i><i></i><i></i><i></i></div>' : '')
       + `</div>`;
   }
 

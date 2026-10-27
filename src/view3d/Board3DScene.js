@@ -1,6 +1,7 @@
-/* Board3DScene.js — constrói a arena 3D (acrescenta métodos ao Board3D): fundo de estádio, mesa com brilho,
-   moldura metálica com tubo néon (ciano à frente/esquerda, magenta atrás/direita), casas de vidro escuro,
-   grelha luminosa, círculo mágico rotativo ao centro (shader), Zonas de Armadilhas e pilhas de baralho/cemitério. */
+/* Board3DScene.js — constrói a arena 3D (acrescenta métodos ao Board3D): fundo de estádio desfocado, mesa de plástico
+   ABS mate (moldura de ardósia, contorno de tinta, friso dourado fino), casas mate claras/ardósia (docs/DIRECAO-DE-ARTE.md),
+   Zonas de Armadilhas (bandejas com friso da equipa) e pilhas de baralho/cemitério. A grelha néon e o círculo
+   mágico antigos ficam escondidos. */
 (function (YC) {
   'use strict';
 
@@ -61,16 +62,26 @@
     /** Estádio desenhado com o Gemini (assets/arena/stadium.jpg); até carregar fica o fundo feito em canvas. */
     loadStadium() {
       const THREE = T();
-      new THREE.TextureLoader().load(YC.asset('assets/arena/stadium.jpg'), (tex) => {
+      const img = new Image();
+      img.onload = () => {
+        // o estádio fica ambiente desfocado e pouco saturado (profundidade de campo): o tabuleiro e as peças mandam
+        const c = document.createElement('canvas');
+        c.width = 1280; c.height = Math.round(1280 * img.height / img.width);
+        const g = c.getContext('2d');
+        g.filter = 'saturate(.42) brightness(.62) blur(3px)';
+        g.drawImage(img, -8, -8, c.width + 16, c.height + 16);
+        g.filter = 'none';
+        g.fillStyle = 'rgba(15, 20, 28, .28)'; g.fillRect(0, 0, c.width, c.height);
+        const tex = new THREE.CanvasTexture(c);
         tex.colorSpace = THREE.SRGBColorSpace;
         this.bgTex = tex;
         this.scene.background = tex;
-        this.scene.backgroundIntensity = 0.8;
+        this.scene.backgroundIntensity = 0.9;
         // o chão passa a véu escuro: vê-se o estádio por baixo do tabuleiro
-        if (this.floor) { const m = this.floor.material; m.transparent = true; m.opacity = 0.3; m.depthWrite = false; m.needsUpdate = true; }
-        if (this.underGlow) this.underGlow.material.opacity = 0.4;
+        if (this.floor) { const m = this.floor.material; m.transparent = true; m.opacity = 0.45; m.depthWrite = false; m.needsUpdate = true; }
         this.fitBackground();
-      });
+      };
+      img.src = YC.asset('assets/arena/stadium.jpg');
     },
 
     /** "Cover": a imagem enche o ecrã sem deformar, em paisagem e no telemóvel na vertical. */
@@ -87,29 +98,30 @@
       scene.background = stadium();
       this.loadStadium();
 
-      const floor = this.floor = new THREE.Mesh(new THREE.PlaneGeometry(80, 50), new THREE.MeshStandardMaterial({ color: 0x080a22, roughness: 0.55, metalness: 0.35 }));
+      const floor = this.floor = new THREE.Mesh(new THREE.PlaneGeometry(80, 50), new THREE.MeshStandardMaterial({ color: 0x121925, roughness: 0.8, metalness: 0 }));
       floor.rotation.x = -Math.PI / 2; floor.position.y = -0.34;
-      const under = this.underGlow = new THREE.Mesh(new THREE.PlaneGeometry(18, 18), new THREE.MeshBasicMaterial({ map: T3().radial(0x7B42F6, 'floorGlow'), transparent: true, opacity: 0.75, depthWrite: false, blending: THREE.AdditiveBlending }));
+      // poça de luz quente do holofote por baixo da mesa (sem roxo)
+      const under = this.underGlow = new THREE.Mesh(new THREE.PlaneGeometry(16, 16), new THREE.MeshBasicMaterial({ map: T3().radial(0xFFD9A0, 'floorGlow'), transparent: true, opacity: 0.14, depthWrite: false, toneMapped: false }));
       under.rotation.x = -Math.PI / 2; under.position.y = -0.33;
       scene.add(floor, under);
 
-      // moldura metálica e laje
-      const frame = new THREE.Mesh(new THREE.BoxGeometry(8.75, 0.3, 8.75), new THREE.MeshStandardMaterial({ color: 0x121829, metalness: 0.85, roughness: 0.28 }));
+      // mesa de plástico ABS mate: moldura de ardósia, laje escura que faz as linhas entre as casas, contorno de tinta
+      const frame = new THREE.Mesh(new THREE.BoxGeometry(8.75, 0.3, 8.75), new THREE.MeshStandardMaterial({ color: 0x1E2636, metalness: 0, roughness: 0.72 }));
       frame.position.y = -0.17;
-      const slab = new THREE.Mesh(new THREE.BoxGeometry(8.08, 0.04, 8.08), new THREE.MeshStandardMaterial({ color: 0x02041a, roughness: 0.4 }));
+      const slab = new THREE.Mesh(new THREE.BoxGeometry(8.08, 0.04, 8.08), new THREE.MeshStandardMaterial({ color: 0x0F141C, roughness: 0.8 }));
       slab.position.y = -0.04;
       scene.add(frame, slab);
-      const tube = (len, x, z, rotY, hex, k = 2.4) => {
-        const m = new THREE.Mesh(new THREE.BoxGeometry(len, 0.07, 0.07), T3().basic(hex, k));
+      const tube = (len, x, z, rotY, hex, w = 0.09) => {
+        const m = new THREE.Mesh(new THREE.BoxGeometry(len, w, w), T3().basic(hex, 1));
         m.position.set(x, -0.0, z); m.rotation.y = rotY; scene.add(m);
       };
-      tube(8.75, 0, 4.34, 0, 0x00F0FF); tube(8.75, -4.34, 0, Math.PI / 2, 0x00F0FF);
-      tube(8.75, 0, -4.34, 0, 0xFF00AA, 4.5); tube(8.75, 4.34, 0, Math.PI / 2, 0xD900FF, 4.5);
+      for (const [x, z, r] of [[0, 4.38, 0], [0, -4.38, 0], [-4.38, 0, Math.PI / 2], [4.38, 0, Math.PI / 2]]) tube(8.85, x, z, r, 0x0F141C);
+      for (const [x, z, r] of [[0, 4.09, 0], [0, -4.09, 0], [-4.09, 0, Math.PI / 2], [4.09, 0, Math.PI / 2]]) tube(8.2, x, z, r, 0x8A6410, 0.035);
 
-      // casas (2 InstancedMesh) — matrizes em placeSquares()
+      // casas (2 InstancedMesh) — matrizes em placeSquares(). Mate acetinado: só as peças têm reflexo forte
       const sqGeo = new THREE.BoxGeometry(0.97, 0.05, 0.97);
-      const light = new THREE.MeshStandardMaterial({ color: 0x27307a, emissive: 0x2A1F6D, emissiveIntensity: 0.35, roughness: 0.42, metalness: 0.25, transparent: true, opacity: 0.9 });
-      const dark = new THREE.MeshStandardMaterial({ color: 0x070b20, roughness: 0.4, metalness: 0.3, transparent: true, opacity: 0.94 });
+      const light = new THREE.MeshStandardMaterial({ color: 0xC4CEDB, roughness: 0.78, metalness: 0 });
+      const dark = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.78, metalness: 0 });
       this.sqLight = new THREE.InstancedMesh(sqGeo, light, 32);
       this.sqDark = new THREE.InstancedMesh(sqGeo, dark, 32);
       this.sqLight.userData.sqs = []; this.sqDark.userData.sqs = [];
@@ -136,6 +148,7 @@
       gg.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
       const grid = new THREE.Mesh(gg, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide }));
       grid.raycast = () => {};
+      grid.visible = false;   // grelha néon antiga: as linhas entre as casas vêm agora da laje escura
       scene.add(grid);
 
       // círculo mágico central
@@ -146,6 +159,7 @@
       }));
       this.crest.rotation.x = -Math.PI / 2; this.crest.position.y = 0.004;
       this.crest.raycast = () => {};
+      this.crest.visible = false;   // círculo mágico néon: fora da direção de arte de vinil
       scene.add(this.crest);
 
       this.layers = { pieces: new THREE.Group(), marks: new THREE.Group(), traps: new THREE.Group(), sides: new THREE.Group() };
@@ -174,16 +188,16 @@
       const slotGeo = new THREE.PlaneGeometry(SLOT.w, SLOT.d), cardGeo = new THREE.PlaneGeometry(SLOT.w * 0.88, SLOT.d * 0.88);
       this.side = {};
       for (const rel of ['me', 'opp']) {
-        const color = rel === 'me' ? '#00E5FF' : '#FF1E42';
+        const color = rel === 'me' ? '#00B4D8' : '#D90429';
         const s = { slots: [], deck: null, gy: null };
         for (let i = 0; i < 3; i++) {
-          const mat = new THREE.MeshBasicMaterial({ map: T3().slot(color), color: T3().glow(0xffffff, 1.25), transparent: true, depthWrite: false });
+          const mat = new THREE.MeshBasicMaterial({ map: T3().slot(color), color: new THREE.Color(0xffffff), transparent: true, depthWrite: false });
           const base = flat(slotGeo, mat);
           base.position.y = 0.01;
           const card = flat(cardGeo, new THREE.MeshStandardMaterial({ map: T3().cardBack(), roughness: 0.4, metalness: 0.1, emissive: 0x000000 }));
           card.position.y = 0.03;
           card.visible = false;
-          const zz = new THREE.Sprite(new THREE.SpriteMaterial({ map: T3().label('zZ', '#C58AF9'), depthTest: false }));
+          const zz = new THREE.Sprite(new THREE.SpriteMaterial({ map: T3().label('zZ', '#94A3B8'), depthTest: false }));
           zz.scale.set(0.55, 0.28, 1); zz.position.y = 0.5; zz.visible = false;
           const grp = new THREE.Group();
           grp.add(base, card, zz);
@@ -194,17 +208,17 @@
         }
         const deck = new THREE.Group();
         const box = new THREE.Mesh(new THREE.BoxGeometry(SLOT.w * 0.88, 1, SLOT.d * 0.88), [
-          ...Array(2).fill(new THREE.MeshStandardMaterial({ color: 0x2a1a4a, roughness: 0.6 })),
-          new THREE.MeshStandardMaterial({ map: T3().cardBack(), roughness: 0.4, emissive: 0x1a0a40, emissiveIntensity: 0.4 }),
-          new THREE.MeshStandardMaterial({ color: 0x120820 }),
-          ...Array(2).fill(new THREE.MeshStandardMaterial({ color: 0x2a1a4a, roughness: 0.6 }))
+          ...Array(2).fill(new THREE.MeshStandardMaterial({ color: 0x232D3F, roughness: 0.7 })),
+          new THREE.MeshStandardMaterial({ map: T3().cardBack(), roughness: 0.5 }),
+          new THREE.MeshStandardMaterial({ color: 0x181F2C }),
+          ...Array(2).fill(new THREE.MeshStandardMaterial({ color: 0x232D3F, roughness: 0.7 }))
         ]);
         const deckCount = new THREE.Sprite(new THREE.SpriteMaterial({ depthTest: false }));
         deckCount.scale.set(0.6, 0.3, 1);
         deck.add(box, deckCount);
         deck.userData.pick = { kind: 'pile', pile: 'deck', rel };
         const gy = new THREE.Group();
-        const gyBase = flat(slotGeo, new THREE.MeshBasicMaterial({ map: T3().slot('#9D4EDD'), color: T3().glow(0xffffff, 1.1), transparent: true, depthWrite: false }));
+        const gyBase = flat(slotGeo, new THREE.MeshBasicMaterial({ map: T3().slot('#64748B'), color: new THREE.Color(0xffffff), transparent: true, depthWrite: false }));
         gyBase.position.y = 0.01;
         const gyCard = flat(cardGeo, new THREE.MeshStandardMaterial({ roughness: 0.5, color: 0xbbbbcc }));
         gyCard.position.y = 0.03; gyCard.visible = false;
@@ -218,7 +232,7 @@
         this.side[rel] = s;
       }
       const text = (t, color) => { const m = flat(new THREE.PlaneGeometry(2.4, 0.6), new THREE.MeshBasicMaterial({ map: T3().textLabel(t, color), transparent: true, depthWrite: false })); m.raycast = () => {}; this.layers.sides.add(m); return m; };
-      this.sideLabels = { zone: text('Zona de Armadilhas', '#59E1FF'), deck: text('Baralho', '#9FDFFF'), gy: text('Cemitério', '#C58AF9') };
+      this.sideLabels = { zone: text('Zona de Armadilhas', '#94A3B8'), deck: text('Baralho', '#94A3B8'), gy: text('Cemitério', '#94A3B8') };
     },
 
     /** Posições das zonas: dos lados do tabuleiro (paisagem) ou em filas por cima/baixo (telemóvel). */

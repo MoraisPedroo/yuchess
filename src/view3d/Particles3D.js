@@ -258,13 +258,13 @@
       this.fxInit();
       const THREE = T();
       const tex = T3().canvasTex(null, 512, 160, (g, w, h) => {
-        g.font = '900 104px Orbitron, "Chakra Petch", sans-serif';
+        // letras de brinquedo (Titan One): contorno grosso de tinta, sombra dura por baixo, cor do efeito
+        g.font = '96px "Titan One", sans-serif';
         g.textAlign = 'center'; g.textBaseline = 'middle';
         g.lineJoin = 'round';
-        g.lineWidth = 18; g.strokeStyle = '#0a0418'; g.strokeText(text, w / 2, h / 2);
-        g.shadowColor = color; g.shadowBlur = 26;
-        g.lineWidth = 6; g.strokeStyle = color; g.strokeText(text, w / 2, h / 2);
-        const grd = g.createLinearGradient(0, h * 0.2, 0, h * 0.8); grd.addColorStop(0, '#ffffff'); grd.addColorStop(1, color);
+        g.lineWidth = 20; g.strokeStyle = '#0F141C'; g.strokeText(text, w / 2, h / 2 + 7);
+        g.strokeText(text, w / 2, h / 2);
+        const grd = g.createLinearGradient(0, h * 0.2, 0, h * 0.8); grd.addColorStop(0, '#ffffff'); grd.addColorStop(0.45, color); grd.addColorStop(1, color);
         g.fillStyle = grd; g.fillText(text, w / 2, h / 2);
       });
       const m = new THREE.SpriteMaterial({ map: tex, color: new THREE.Color(1.12, 1.12, 1.12), transparent: true, depthTest: false });

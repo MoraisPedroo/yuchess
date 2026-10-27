@@ -39,7 +39,7 @@
       this.transport.onError = (err) => ui.toast(`Ligação: ${FB().explain(err)}`);
       this.session = new YC.LockstepSession({
         game, localTeam: this.team, transport: this.transport, localAgent: ui.createHumanAgent(this.team),
-        onDesync: (info) => { console.warn('[online] dessincronização', info); ui.toast('⚠ Os dois jogos divergiram. Vê a consola para detalhes.'); }
+        onDesync: (info) => { console.warn('[online] dessincronização', info); ui.toast('Os dois jogos divergiram. Vê a consola para detalhes.'); }
       }).attach();
       YC.Online.heartbeat(m.id, this.uid);
       this.hb = setInterval(() => YC.Online.heartbeat(m.id, this.uid), 20000);

@@ -9,18 +9,18 @@
   const texs = new Map();
   const glossy = [];
 
-  // Molduras por tipo de carta (relatório: Equip cobalto, Casa violeta, Reativa âmbar, Counter platina/vermelho)
+  // Molduras por tipo de carta (docs/DIRECAO-DE-ARTE.md; iguais às cartas HTML em styles/cards.css): [topo, base, texto do tipo]
   const KIND = {
-    EQUIP: ['#166D89', '#0B3547', '#5CE1E6'],
-    GRID: ['#7A1C7E', '#3A0B40', '#E066FF'],
-    REACTIVE: ['#B86B11', '#593105', '#FFD166'],
-    COUNTER: ['#3A3F58', '#171A26', '#FF3355'],
-    QUICK: ['#0F7A5C', '#073D2E', '#4DFFB8']
+    EQUIP: ['#3B82F6', '#1E40AF', '#BFDBFE'],
+    GRID: ['#F59E0B', '#B45309', '#FEF3C7'],
+    REACTIVE: ['#EF4444', '#B91C1C', '#FECACA'],
+    COUNTER: ['#8B5CF6', '#5B21B6', '#DDD6FE'],
+    QUICK: ['#10B981', '#047857', '#A7F3D0']
   };
 
   const T3 = {
     KIND,
-    NEON: { mine: 0x00E5FF, theirs: 0xFF1E42, cyan: 0x00F0FF, magenta: 0xD900FF, purple: 0xB537F2, gold: 0xFFD700 },
+    NEON: { mine: 0x00B4D8, theirs: 0xD90429, cyan: 0x00F0FF, magenta: 0xD900FF, purple: 0xB537F2, gold: 0xFFD700 },
 
     available() { return !!(window.THREE && window.THREE_ADDONS); },
 
@@ -111,38 +111,38 @@
       });
     },
 
-    label(text, color = '#00E5FF') {
+    /** Placa de plástico (docs/DIRECAO-DE-ARTE.md): ardósia com contorno escuro, friso na cor e número em Chakra Petch. */
+    label(text, color = '#00B4D8') {
       return T3.canvasTex(`label${text}${color}`, 128, 64, (g, w, h) => {
-        g.fillStyle = 'rgba(4, 10, 32, .88)';
-        roundRect(g, 4, 6, w - 8, h - 12, 12); g.fill();
-        g.lineWidth = 4; g.strokeStyle = color; g.stroke();
-        g.font = '900 34px Orbitron, "Chakra Petch", sans-serif';
+        g.fillStyle = '#232D3F';
+        roundRect(g, 5, 7, w - 10, h - 14, 12); g.fill();
+        g.lineWidth = 5; g.strokeStyle = '#0F141C'; g.stroke();
+        g.fillStyle = color; roundRect(g, 14, 9, w - 28, 5, 2); g.fill();
+        g.font = '700 32px "Chakra Petch", sans-serif';
         g.textAlign = 'center'; g.textBaseline = 'middle';
-        g.lineWidth = 6; g.strokeStyle = '#003554'; g.strokeText(text, w / 2, h / 2 + 2);
-        g.fillStyle = '#FFFFFF'; g.fillText(text, w / 2, h / 2 + 2);
+        g.lineWidth = 6; g.strokeStyle = '#0F141C'; g.strokeText(text, w / 2, h / 2 + 3);
+        g.fillStyle = '#F8FAFC'; g.fillText(text, w / 2, h / 2 + 3);
       });
     },
 
-    countLabel(n, color = '#C58AF9') { return T3.label(String(n), color); },
+    countLabel(n, color = '#94A3B8') { return T3.label(String(n), color); },
 
-    textLabel(text, color = '#9FDFFF') {
+    textLabel(text, color = '#94A3B8') {
       return T3.canvasTex(`txt${text}${color}`, 256, 64, (g, w, h) => {
-        g.font = '700 30px "Chakra Petch", sans-serif';
+        g.font = '800 24px "Plus Jakarta Sans", sans-serif';
         g.textAlign = 'center'; g.textBaseline = 'middle';
-        g.shadowColor = color; g.shadowBlur = 12;
+        g.lineWidth = 5; g.strokeStyle = '#0F141C'; g.strokeText(text.toUpperCase(), w / 2, h / 2);
         g.fillStyle = color; g.fillText(text.toUpperCase(), w / 2, h / 2);
       });
     },
 
-    /** Lugar da Zona de Armadilhas: moldura néon + anel energético ao centro. */
-    slot(color = '#00E5FF') {
+    /** Lugar da Zona de Armadilhas: bandeja rebaixada com friso na cor da equipa (sem néon). */
+    slot(color = '#00B4D8') {
       return T3.canvasTex(`slot${color}`, 160, 224, (g, w, h) => {
-        g.fillStyle = 'rgba(0, 40, 70, .35)'; roundRect(g, 6, 6, w - 12, h - 12, 14); g.fill();
-        g.shadowColor = color; g.shadowBlur = 14; g.lineWidth = 5; g.strokeStyle = color;
-        roundRect(g, 6, 6, w - 12, h - 12, 14); g.stroke();
-        g.lineWidth = 4; g.beginPath(); g.arc(w / 2, h / 2, 32, 0, Math.PI * 2); g.stroke();
-        g.lineWidth = 2; g.beginPath(); g.arc(w / 2, h / 2, 46, 0.3, Math.PI * 1.2); g.stroke();
-        g.beginPath(); g.arc(w / 2, h / 2, 46, Math.PI * 1.35, Math.PI * 2.2); g.stroke();
+        g.fillStyle = 'rgba(15, 20, 28, .62)'; roundRect(g, 6, 6, w - 12, h - 12, 14); g.fill();
+        g.lineWidth = 7; g.strokeStyle = '#0F141C'; roundRect(g, 6, 6, w - 12, h - 12, 14); g.stroke();
+        g.lineWidth = 3.5; g.strokeStyle = color; roundRect(g, 11, 11, w - 22, h - 22, 10); g.stroke();
+        g.lineWidth = 3; g.globalAlpha = 0.55; g.beginPath(); g.arc(w / 2, h / 2, 30, 0, Math.PI * 2); g.stroke(); g.globalAlpha = 1;
       });
     },
 
@@ -192,21 +192,26 @@
       const key = `face${id}`;
       if (texs.has(key)) return texs.get(key);
       const card = YC.Cards.get(id), [c1, c2, edge] = KIND[card.kind];
+      // a mesma anatomia das cartas HTML: chassis na cor do tipo com contorno de tinta, janela escura da arte,
+      // fita escura com nome e tipo, caixa rebaixada em baixo
       const draw = (g, w, h, img) => {
-        const grd = g.createLinearGradient(0, 0, w, h); grd.addColorStop(0, c1); grd.addColorStop(1, c2);
-        g.fillStyle = grd; roundRect(g, 0, 0, w, h, 14); g.fill();
-        g.lineWidth = 6; g.strokeStyle = edge; roundRect(g, 3, 3, w - 6, h - 6, 12); g.stroke();
-        g.fillStyle = 'rgba(0,0,0,.5)'; roundRect(g, 14, 14, w - 28, 44, 8); g.fill();
-        g.fillStyle = '#fff'; g.font = '700 19px "Chakra Petch", sans-serif'; g.textBaseline = 'middle';
-        g.fillText(card.name.length > 22 ? `${card.name.slice(0, 21)}…` : card.name, 22, 36, w - 44);
-        const ag = g.createRadialGradient(w / 2, 150, 10, w / 2, 150, 120);
-        ag.addColorStop(0, '#ffffff'); ag.addColorStop(0.35, card.theme.secondary); ag.addColorStop(1, card.theme.primary);
-        g.fillStyle = ag; g.fillRect(18, 66, w - 36, 170);
-        g.lineWidth = 3; g.strokeStyle = 'rgba(255,255,255,.6)'; g.strokeRect(18, 66, w - 36, 170);
-        if (img) g.drawImage(img, w / 2 - 75, 76, 150, 150);
-        g.fillStyle = edge; g.font = '700 16px "Chakra Petch", sans-serif';
-        g.fillText(`${YC.Cards.KIND_LABEL[card.kind].toUpperCase()} · VEL ${card.ss}`, 20, 258);
-        g.fillStyle = 'rgba(5,10,22,.82)'; roundRect(g, 14, 276, w - 28, h - 290, 8); g.fill();
+        const grd = g.createLinearGradient(0, 0, 0, h); grd.addColorStop(0, c1); grd.addColorStop(1, c2);
+        g.fillStyle = grd; roundRect(g, 3, 3, w - 6, h - 6, 18); g.fill();
+        g.lineWidth = 7; g.strokeStyle = '#0F141C'; g.stroke();
+        const ag = g.createRadialGradient(w / 2, 112, 10, w / 2, 112, 110);
+        ag.addColorStop(0, '#334158'); ag.addColorStop(0.6, '#1B2638'); ag.addColorStop(1, '#121925');
+        g.fillStyle = ag; roundRect(g, 16, 16, w - 32, 168, 12); g.fill();
+        g.lineWidth = 4; g.strokeStyle = '#0F141C'; g.stroke();
+        if (img) g.drawImage(img, w / 2 - 74, 26, 148, 148);
+        g.fillStyle = '#0F141C'; g.fillRect(4, 194, w - 8, 56);
+        g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.fillStyle = '#F8FAFC'; g.font = '800 20px "Plus Jakarta Sans", sans-serif';
+        g.fillText(card.name.length > 24 ? `${card.name.slice(0, 23)}…` : card.name, w / 2, 214, w - 24);
+        g.fillStyle = edge; g.font = '800 14px "Plus Jakarta Sans", sans-serif';
+        g.fillText(`${YC.Cards.KIND_LABEL[card.kind].toUpperCase()} · VEL ${card.ss}`, w / 2, 238, w - 24);
+        g.fillStyle = '#141A24'; roundRect(g, 16, 262, w - 32, h - 280, 10); g.fill();
+        g.lineWidth = 3; g.strokeStyle = '#0F141C'; g.stroke();
+        g.textAlign = 'left';
       };
       const tex = T3.canvasTex(key, 256, 358, (g, w, h) => draw(g, w, h, null));
       const img = new Image();

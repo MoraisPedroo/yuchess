@@ -179,10 +179,35 @@
     schedule();
   }
 
+  // renderer próprio (pequeno, fora do DOM) para os menus, quando não há tabuleiro 3D aberto
+  let own = null, ownEnv = null;
+  function makeOwn() {
+    if (own !== null) return own;
+    if (!(YC.T3 && YC.T3.available())) return null;
+    try {
+      const THREE = T(), A = window.THREE_ADDONS;
+      own = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      own.setSize(8, 8, false);
+      own.toneMapping = THREE.ACESFilmicToneMapping;
+      own.toneMappingExposure = 1.35;
+      if (A.RoomEnvironment) { const pm = new THREE.PMREMGenerator(own); ownEnv = pm.fromScene(new A.RoomEnvironment(), 0.04).texture; pm.dispose(); }
+    } catch (e) { own = false; console.warn('Sem renderer para as fotos das peças:', e); }
+    return own;
+  }
+
   const P3 = {
     SPR,
     /** O palco 3D regista o seu renderer ao nascer e retira-o ao sair. */
     attach(r) { renderer = r; P3.prefetch(); pump(); },
+
+    /** Menus sem tabuleiro: usa o renderer próprio (e o seu mapa de reflexos). Devolve false se não houver WebGL. */
+    useOwn() {
+      if (renderer && renderer !== own) return true;
+      const r = makeOwn();
+      if (!r) return false;
+      if (renderer !== r) { renderer = r; if (ownEnv) YC.T3.setEnv(ownEnv); P3.prefetch(); pump(); }
+      return true;
+    },
 
     /** Desenha as 12 fotos (e os bustos dos Reis) aos poucos, nos tempos mortos, para não haver solavanco
         na primeira captura de cada tipo de peça; depois as sprite sheets. */
@@ -197,7 +222,11 @@
       };
       setTimeout(step, 600);
     },
-    detach(r) { if (renderer === r) renderer = null; },
+    detach(r) {
+      if (renderer !== r) return;
+      renderer = own || null;
+      if (own && ownEnv) YC.T3.setEnv(ownEnv);
+    },
 
     url(type, color, bust = false) {
       const key = type + color + (bust ? 'B' : '');

@@ -110,7 +110,7 @@
         const badge = this.accessory(g, 'morph', !!p.morphUntil, () => new THREE.Sprite(new THREE.SpriteMaterial({ depthTest: false })));
         if (badge && p.morphUntil) { badge.material.map = T3().label(LETTER[p.morphFrom] || '?', '#81C995'); badge.material.needsUpdate = true; badge.scale.set(0.5, 0.25, 1); badge.position.set(-0.35, h + 0.2, 0); }
         const fz = this.accessory(g, 'freezeTag', frozen, () => new THREE.Sprite(new THREE.SpriteMaterial({ depthTest: false })));
-        if (fz && frozen) { fz.material.map = T3().label(`❄${Math.ceil((p.frozenUntil - turn) / 2)}`, '#8FD3FF'); fz.material.needsUpdate = true; fz.scale.set(0.55, 0.28, 1); fz.position.set(0.35, h + 0.2, 0); }
+        if (fz && frozen) { fz.material.map = T3().label(`${Math.ceil((p.frozenUntil - turn) / 2)}`, '#8FD3FF'); fz.material.needsUpdate = true; fz.scale.set(0.55, 0.28, 1); fz.position.set(0.35, h + 0.2, 0); }
         g.userData.h = h;
         g.userData.checked = sq === checked;
       });
@@ -199,15 +199,17 @@
       const THREE = T();
       this.markMats = this.markMats || {};
       if (this.markMats[kind]) return this.markMats[kind];
+      // legibilidade de xadrez (docs/DIRECAO-DE-ARTE.md): disco menta no lance (não se pinta a casa), cantoneiras
+      // vermelhas na captura, último lance amarelo a 28 %, seleção azul, moldura clara na casa do rato. Cores sólidas
+      // com contorno escuro e mistura normal (as casas já não são pretas: o aditivo lavava tudo de branco)
       const conf = {
-        last: [0xFCC934, 0.9, 0.32, 'sq'], sel: [0x00E5FF, 1.6, 0.45, 'sq'], move: [0x00E5FF, 1.8, 0.95, 'dot'],
-        // casa de destino acesa (as casas escuras do tabuleiro quase não deixavam ver o ponto) e a casa debaixo do rato
-        moveSq: [0x00E5FF, 1.3, 0.3, 'sq'], capSq: [0xFF1E42, 1.2, 0.26, 'sq'], hot: [0x9CFFF8, 1.9, 0.8, 'sq'],
-        cap: [0xFF1E42, 2, 0.95, 'ring'], lance: [0xFA903E, 2, 0.95, 'ring'], equip: [0xFFD700, 1.6, 0.6, 'sq'],
-        trap: [0xFF4F9A, 1.6, 0.5, 'sq'], pick: [0xFFD700, 1.6, 0.6, 'sq'], check: [0xFF0033, 1.6, 0.55, 'sq']
+        last: [0xFFB703, 0.3, 'fill'], sel: [0x00B4D8, 0.45, 'fill'], move: [0x2EC4B6, 1, 'disc'],
+        capSq: [0xD90429, 0.16, 'fill'], hot: [0xE2E8F0, 0.95, 'frame'],
+        cap: [0xD90429, 1, 'corners'], lance: [0xFB8500, 1, 'corners'], equip: [0xFFB703, 0.42, 'fill'],
+        trap: [0xD97706, 0.42, 'fill'], pick: [0xFFB703, 0.42, 'fill'], check: [0xD90429, 0.5, 'fill']
       }[kind];
-      const tex = conf[3] === 'dot' ? T3().radial(0xffffff, 'dotTex') : conf[3] === 'ring' ? ringTex() : sqTex();
-      this.markMats[kind] = new THREE.MeshBasicMaterial({ map: tex, color: T3().glow(conf[0], conf[1]), transparent: true, opacity: conf[2], depthWrite: false, blending: THREE.AdditiveBlending });
+      const tex = { disc: discTex, corners: cornersTex, frame: frameTex, fill: sqTex }[conf[2]]();
+      this.markMats[kind] = new THREE.MeshBasicMaterial({ map: tex, color: new THREE.Color(conf[0]), transparent: true, opacity: conf[1], depthWrite: false });
       return this.markMats[kind];
     },
 
@@ -230,11 +232,12 @@
       for (const mv of moves) {
         if (this.targets.has(mv.to)) continue;
         this.targets.set(mv.to, mv);
-        plane(mv.to, mv.captured ? 'capSq' : 'moveSq', 0.94, 0.011);
-        plane(mv.to, mv.captured ? (mv.flag === 'r' ? 'lance' : 'cap') : 'move', mv.captured ? 0.92 : 0.6, 0.014);
-        const lab = new THREE.Sprite(new THREE.SpriteMaterial({ map: T3().label(YC.Chess.sqName(mv.to).toUpperCase()), depthTest: false }));
+        if (mv.captured) plane(mv.to, 'capSq', 0.94, 0.011);
+        plane(mv.to, mv.captured ? (mv.flag === 'r' ? 'lance' : 'cap') : 'move', 0.96, 0.014);
+        const lab = new THREE.Sprite(new THREE.SpriteMaterial({ map: T3().label(YC.Chess.sqName(mv.to).toUpperCase(), mv.captured ? '#D90429' : '#2EC4B6'), depthTest: false }));
         const p = this.sqWorld(mv.to);
-        lab.scale.set(0.7, 0.35, 1); lab.position.set(p.x, 0.3, p.z + 0.12);
+        // etiqueta na borda de baixo da casa: o disco do lance fica visível ao centro
+        lab.scale.set(0.5, 0.25, 1); lab.position.set(p.x, 0.12, p.z + 0.36);
         layer.add(lab);
       }
       for (const sq of equip) plane(sq, 'equip');
@@ -304,21 +307,37 @@
         if (pillar && pillar.visible) pillar.material.opacity = 0.2 + 0.18 * (0.5 + 0.5 * Math.sin(t * 12));
       }
       for (const trap of this.layers.traps.children) { trap.userData.spin.rotation.y = t; trap.userData.spin.rotation.x = t * 0.6; trap.position.y = 0.38 + Math.sin(t * 2 + trap.userData.trapSq) * 0.05; }
-      if (this.side) for (const rel of ['me', 'opp']) for (const slot of this.side[rel].slots) slot.mat.color.setScalar(slot.respond ? 1.4 + Math.sin(t * 8) * 0.6 : 1.25);
+      if (this.side) for (const rel of ['me', 'opp']) for (const slot of this.side[rel].slots) slot.mat.color.setScalar(slot.respond ? 1.25 + Math.sin(t * 8) * 0.45 : 1);
     }
   });
 
+  // texturas das marcações: branco (a cor vem do material) com contorno de tinta #0F141C
+  const INK = '#0F141C';
   function sqTex() {
-    return T3().canvasTex('markSq', 128, 128, (g, w) => {
-      const grd = g.createRadialGradient(w / 2, w / 2, w * 0.1, w / 2, w / 2, w * 0.72);
-      grd.addColorStop(0, 'rgba(255,255,255,.35)'); grd.addColorStop(1, 'rgba(255,255,255,1)');
-      g.fillStyle = grd; g.fillRect(4, 4, w - 8, w - 8);
+    return T3().canvasTex('markFill', 128, 128, (g, w) => {
+      g.fillStyle = '#fff'; g.beginPath(); g.roundRect(5, 5, w - 10, w - 10, 10); g.fill();
     });
   }
-  function ringTex() {
-    return T3().canvasTex('markRing', 128, 128, (g, w) => {
-      g.strokeStyle = '#fff'; g.lineWidth = 12; g.shadowColor = '#fff'; g.shadowBlur = 10;
-      g.beginPath(); g.arc(w / 2, w / 2, w * 0.38, 0, Math.PI * 2); g.stroke();
+  function discTex() {
+    return T3().canvasTex('markDisc', 128, 128, (g, w) => {
+      g.beginPath(); g.arc(w / 2, w / 2, w * 0.17, 0, Math.PI * 2);
+      g.fillStyle = '#fff'; g.fill(); g.lineWidth = w * 0.06; g.strokeStyle = INK; g.stroke();
+    });
+  }
+  function cornersTex() {
+    return T3().canvasTex('markCorners', 128, 128, (g, w) => {
+      const a = w * 0.08, L = w * 0.3, b = w - a;
+      const path = () => { g.beginPath(); for (const [x, y, dx, dy] of [[a, a, 1, 1], [b, a, -1, 1], [a, b, 1, -1], [b, b, -1, -1]]) { g.moveTo(x, y + dy * L); g.lineTo(x, y); g.lineTo(x + dx * L, y); } };
+      g.lineCap = 'round'; g.lineJoin = 'round';
+      path(); g.lineWidth = w * 0.13; g.strokeStyle = INK; g.stroke();
+      path(); g.lineWidth = w * 0.07; g.strokeStyle = '#fff'; g.stroke();
+    });
+  }
+  function frameTex() {
+    return T3().canvasTex('markFrame', 128, 128, (g, w) => {
+      g.beginPath(); g.roundRect(w * 0.07, w * 0.07, w * 0.86, w * 0.86, 10);
+      g.lineWidth = w * 0.09; g.strokeStyle = INK; g.stroke();
+      g.lineWidth = w * 0.045; g.strokeStyle = '#fff'; g.stroke();
     });
   }
 })(typeof window !== 'undefined' ? (window.YC = window.YC || {}) : (globalThis.YC = globalThis.YC || {}));

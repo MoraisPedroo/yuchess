@@ -30,7 +30,7 @@
           </section>
           <section class="panel deck">
             <div class="deck-head">
-              <select class="deck-pick">${p.decks.map((x) => `<option value="${esc(x.id)}" ${x.id === d.id ? 'selected' : ''}>${esc(x.name)}${x.id === p.activeDeckId ? ' ★' : ''}</option>`).join('')}<option value="__new">+ Novo baralho</option></select>
+              <select class="deck-pick">${p.decks.map((x) => `<option value="${esc(x.id)}" ${x.id === d.id ? 'selected' : ''}>${esc(x.name)}${x.id === p.activeDeckId ? ' (em uso)' : ''}</option>`).join('')}<option value="__new">+ Novo baralho</option></select>
               <input class="text-in deck-name" maxlength="24" value="${esc(d.name)}">
             </div>
             <div class="deck-count ${d.cards.length === 12 ? 'ok' : ''}">${d.cards.length}/12</div>
@@ -38,7 +38,7 @@
             <ul class="deck-errors">${v.errors.slice(0, 3).map((e) => `<li>${esc(e)}</li>`).join('')}</ul>
             <div class="deck-btns">
               <button class="btn small green" data-a="save">Guardar</button>
-              <button class="btn small" data-a="use" ${v.ok ? '' : 'disabled'}>${p.activeDeckId === d.id ? '★ Em uso' : 'Usar nas partidas'}</button>
+              <button class="btn small" data-a="use" ${v.ok ? '' : 'disabled'}>${p.activeDeckId === d.id ? 'Em uso' : 'Usar nas partidas'}</button>
               <button class="btn small violet" data-a="auto">Auto-completar</button>
               <button class="btn small ghost" data-a="clear">Esvaziar</button>
               <button class="btn small red" data-a="del">Apagar</button>
@@ -72,7 +72,7 @@
           const cost = E().craftCost(c.id);
           const b = document.createElement('button');
           b.className = `btn small ${p.stardust >= cost ? 'violet' : 'ghost'}`;
-          b.innerHTML = `Criar · ${cost} ✨`;
+          b.innerHTML = `Criar · ${cost} ${YC.Icon('dust', { size: 18 })}`;
           b.disabled = p.stardust < cost;
           b.onclick = (e) => { e.stopPropagation(); View.craft(c.id); };
           cell.appendChild(b);

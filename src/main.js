@@ -41,7 +41,8 @@
     },
 
     /** Partida contra o bot com o baralho ativo. */
-    startBot(level = 'medium', clockMin = 10) {
+    async startBot(level = 'medium', clockMin = 10) {
+      if (App.starting) return;
       const p = YC.ProfileStore.profile, deck = YC.Economy.activeDeck(p);
       const v = YC.Economy.validateDeck(p, deck.cards);
       if (!v.ok) { YC.UI.toast(`Baralho inválido: ${v.errors[0]}`, true); YC.Hub.show('decks'); return; }
@@ -52,14 +53,21 @@
       const decks = { [me]: deck.cards.slice(), [bot]: botDeck };
       const names = { [me]: p.displayName, [bot]: BOT_NAMES[level] };
       const match = new YC.Match({ bus, seed: Math.floor(rng() * 2 ** 31), decks, names, mode: 'BOT' });
-      const ui = App.newUI();
-      App.match = match;
-      ui.mount({ match, viewer: me, clockMs: clockMin * 60000, labels: { [me]: 'Tu', [bot]: `Bot · ${YC.BotAI.LEVELS[level].label}` } });
-      match.agents[me] = ui.createHumanAgent(me);
-      match.agents[bot] = YC.BotAI.create({ team: bot, level, delay: 1500, seed: Math.floor(rng() * 1e6) });
-      ui.onGameOver = ({ winner }) => App.reward(winner, me, match);
-      ui.onRematch = () => App.startBot(level, clockMin);
-      YC.Hub.show('match');
+      const labels = { [me]: 'Tu', [bot]: `Bot · ${YC.BotAI.LEVELS[level].label}` };
+      const team = (t) => (t === 'w' ? 'Brancas' : 'Pretas');
+      App.starting = true;
+      // ecrã "VS": a partida monta-se por trás das placas fechadas
+      await YC.VS.run({ left: { name: names[me], sub: `${labels[me]} · ${team(me)}`, color: me }, right: { name: names[bot], sub: `${labels[bot]} · ${team(bot)}`, color: bot } }, () => {
+        const ui = App.newUI();
+        App.match = match;
+        ui.mount({ match, viewer: me, clockMs: clockMin * 60000, labels });
+        match.agents[me] = ui.createHumanAgent(me);
+        match.agents[bot] = YC.BotAI.create({ team: bot, level, delay: 1500, seed: Math.floor(rng() * 1e6) });
+        ui.onGameOver = ({ winner }) => App.reward(winner, me, match);
+        ui.onRematch = () => App.startBot(level, clockMin);
+        YC.Hub.show('match');
+      });
+      App.starting = false;
       YC.UI.toast(me === 'w' ? 'Jogas com as Brancas: começas tu!' : 'Jogas com as Pretas: o bot começa.');
       match.start().catch((err) => console.error('[partida]', err));
     },

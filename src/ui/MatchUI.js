@@ -36,7 +36,7 @@
           <div class="arena-bg"><i class="beam b1"></i><i class="beam b2"></i><i class="beam b3"></i><div class="stands"></div><div class="floor"></div></div>
           ${table}
           <header class="hud"><section class="hud-p opp" data-team="${opp}"></section>
-            <div class="hud-mid"><div class="jumbo left"></div><div class="hud-logo"><b>CHESS-GI-OH!</b><small>CARTOON EDITION</small></div><div class="jumbo right"></div></div>
+            <div class="hud-mid"><div class="jumbo left"></div><div class="hud-logo"><b>Chess-Gi-Oh!</b><small>Cartoon Edition</small></div><div class="jumbo right"></div></div>
             <section class="hud-p me" data-team="${viewer}"></section></header>
           <div class="feed"></div>
           <div class="opp-hand"></div>
@@ -46,7 +46,7 @@
           <div class="hand-dock"><div class="hand-row"></div></div>
           <div class="mascot"><div class="squash">${YC.PieceArt.svg('k', viewer)}</div></div>
           <div class="respond-bar" hidden></div>
-          <div class="log-drawer" hidden><header><b>Histórico</b><button class="btn small ghost" data-a="close-log">✕</button></header><ol class="log-list"></ol></div>
+          <div class="log-drawer" hidden><header><b>Histórico</b><button class="icon-btn" data-a="close-log" title="Fechar">${YC.Icon('close', { size: 18 })}</button></header><ol class="log-list"></ol></div>
           <div class="arena-fx"></div>
           <div class="chain-stage"></div>
         </div>`;
@@ -216,11 +216,12 @@
       else if (mine) { label = 'A TUA VEZ'; sub = s.actionsLeft > 0 ? `${s.actionsLeft} carta(s) + 1 lance` : 'Faz o teu lance'; cls = 'go'; }
       else { label = 'ESPERA'; sub = `${this.nameOf(s.active)} a pensar…`; }
       const fast = YC.FX.speed > YC.FX.NORMAL;
+      const I = (n) => YC.Icon(n, { size: 20 });
       box.innerHTML = `<button class="turn-btn ${cls}" ${act ? `data-act="${act}"` : 'disabled'}><b>${label}</b><small>${YC.HoloCard.esc(sub)}</small></button>
-        <button class="side-btn" data-act="log">HISTÓRICO</button>
-        ${m.over ? '<button class="side-btn" data-act="exit">MENU</button>' : '<button class="side-btn danger" data-act="resign">DESISTIR</button>'}
-        ${this.online ? '<button class="side-btn" data-act="forfeit" hidden>RECLAMAR VITÓRIA</button>' : ''}
-        <div class="mini-btns"><button data-act="speed" title="Velocidade das animações">${fast ? '⏩' : '▶'}</button><button data-act="mute" title="Som">${YC.Sound.muted ? '🔇' : '🔊'}</button><button data-act="exit" title="Sair para o menu">⏏</button></div>`;
+        <button class="side-btn" data-act="log">${I('scroll')}Histórico</button>
+        ${m.over ? `<button class="side-btn" data-act="exit">${I('rook')}Menu</button>` : `<button class="side-btn danger" data-act="resign">${I('flag')}Desistir</button>`}
+        ${this.online ? `<button class="side-btn" data-act="forfeit" hidden>${I('trophy')}Reclamar vitória</button>` : ''}
+        <div class="mini-btns"><button data-act="speed" title="${fast ? 'Animações rápidas' : 'Animações normais'}">${I(fast ? 'fast' : 'play')}</button><button data-act="mute" title="Som">${I(YC.Sound.muted ? 'soundOff' : 'soundOn')}</button><button data-act="exit" title="Sair para o menu">${I('exit')}</button></div>`;
       box.querySelectorAll('[data-act]').forEach((b) => b.addEventListener('click', () => this.onButton(b.dataset.act)));
       if (this.online) this.renderOnline();
     }
@@ -233,13 +234,13 @@
       bar.innerHTML = `<span>${hint || ''}</span>`;
       for (const [label, act, inst] of this.cardActs || []) {
         const b = document.createElement('button');
-        b.className = `btn small ${act === 'set' ? 'violet' : 'pink'}`;
+        b.className = `btn small ${act === 'set' ? 'secondary' : ''}`;
         b.textContent = label;
         b.onclick = () => this.cardAct(act, inst);
         bar.appendChild(b);
       }
       const c = document.createElement('button');
-      c.className = 'btn small ghost'; c.textContent = 'Cancelar';
+      c.className = 'btn small secondary'; c.textContent = 'Cancelar';
       c.onclick = () => this.cancelMode();
       bar.appendChild(c);
     }

@@ -9,7 +9,7 @@
   const FX = () => YC.FX;
   const S = (n) => YC.Sound && YC.Sound.play(n);
   const hold = (g) => g.children[0];
-  const BODY = { w: 0xF3EEE6, b: 0x4A3A8C };
+  const BODY = { w: 0xEEF2F7, b: 0x2E3D57 };
   // desenho (assets/fx) que acompanha cada balão de texto
   const TEXT_ART = { 'CLANG!': 'IMPACT', 'SPLOSH!': 'INK', 'FALHOU!': 'SMOKE', 'ÉGIDE!': 'SPARKLE', 'BOING!': 'SWOOSH', 'PUF!': 'SMOKE', 'XEQUE!': 'IMPACT',
     'ROUBADO!': 'ANGER', 'REVELADA!': 'MAGIC_CIRCLE', 'CACTO!': 'TOXIC', '+1 CARTA!': 'COIN', 'BLOQUEADO!': 'GLASS', 'IMUNE!': 'SPARKLE', 'BONECO!': 'SWOOSH' };
@@ -150,21 +150,22 @@
         .call(() => {
           S('capture');
           b.burst(V.x, 0.9, V.z, 'IMPACT', { size: 1.9, life: 0.8 });
-          b.text3D(V.x, 1.3, V.z, ['POW!', 'BAM!', 'KAPOW!', 'TOMA!'][Math.floor(Math.random() * 4)], '#FF4F9A', 1.25);
+          b.text3D(V.x, 1.3, V.z, ['POW!', 'BAM!', 'KAPOW!', 'TOMA!'][Math.floor(Math.random() * 4)], '#FFB703', 1.25);
           b.sparks(V.x, 0.6, V.z, 0xFFFFFF, { n: 16, speed: 3.6 });
           b.sparks(V.x, 0.6, V.z, hex, { n: 22, speed: 3 });
           b.lightFlash(V.x, 1, V.z, hex, 9, 0.7);
           b.shakeCam(0.18, 0.4);
           b.flash(2.6);
-          this.wave3D(capSq, 0xFF1E42, 1.2);
+          this.wave3D(capSq, 0xD90429, 1.2);
           this.knockOut(victim, captured, dx, dz);
         })
-        .to({}, { duration: 0.14 })
+        .to({}, { duration: 0.06 })   // hit-stop curto (60 ms) no impacto
         .to(g.position, { x: B.x, z: B.z, y: 0, duration: 0.4, ease: 'power2.out' })
         .to(h.rotation, { x: 0, z: 0, duration: 0.4 }, '<')
         .to(h.scale, { y: 0.75, x: 1.2, z: 1.2, duration: 0.1 });
       await tl;
-      FX().to(h.scale, { y: 1, x: 1, z: 1, duration: 0.7, ease: 'elastic.out(1.1, 0.32)' });
+      // assentar como vinil (ressalto curto), sem gelatina
+      FX().to(h.scale, { y: 1, x: 1, z: 1, duration: 0.32, ease: 'back.out(2)' });
       b.busy.delete(piece.id);
       g.userData.sq = to;
       await FX().wait(350);

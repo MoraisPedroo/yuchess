@@ -27,7 +27,7 @@
         card.style.setProperty('--cw', `${width}px`);
         wrap.style.width = `${width}px`;
         wrap.appendChild(card);
-        if (caption) wrap.insertAdjacentHTML('beforeend', `<div class="cz-cap">📍 ${YC.HoloCard.esc(caption)}</div>`);
+        if (caption) wrap.insertAdjacentHTML('beforeend', `<div class="cz-cap">${YC.Icon ? YC.Icon('pin', { size: 18 }) : ''}${YC.HoloCard.esc(caption)}</div>`);
         document.body.appendChild(wrap);
         const r = target.getBoundingClientRect(), w = width, h = w * 1.4 + (caption ? 50 : 0), gap = 18;
         let x;

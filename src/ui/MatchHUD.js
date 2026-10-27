@@ -49,7 +49,11 @@
       }
       const jl = this.q('.jumbo.left'), jr = this.q('.jumbo.right');
       if (jl) jl.innerHTML = `<div class="jb-bar"><span>TURNO</span><span>${Math.max(1, s.turnCount)}</span></div><div class="jb-title">${m.over ? 'FIM' : s.active === this.viewer ? 'A TUA VEZ' : 'ADVERSÁRIO'}</div>`;
-      if (jr) jr.innerHTML = `<div class="jb-bar"><span>${m.chain ? 'CHAIN' : 'ARENA'}</span><span>${m.chain ? `ELO ${m.chain.length}` : 'AO VIVO'}</span></div><div class="jb-title">${m.chain ? 'RESPOSTAS' : 'NEON<br>DUEL'}</div>`;
+      // 2 espaços de carta por turno (acendem-se os que ainda se podem usar antes do lance)
+      const max = YC.Cards.RULES.ACTIONS_PER_TURN, left = m.over ? 0 : s.actionsLeft;
+      if (jr) jr.innerHTML = m.chain
+        ? `<div class="jb-bar"><span>CHAIN</span><span>ELO ${m.chain.length}</span></div><div class="jb-title">RESPOSTAS</div>`
+        : `<div class="jb-bar"><span>CARTAS</span><span>${left}/${max}</span></div><div class="jb-pips">${Array.from({ length: max }, (_, i) => `<i class="${i < left ? 'on' : ''}"></i>`).join('')}</div>`;
       this.paintClocks();
     },
 

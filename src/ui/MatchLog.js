@@ -44,7 +44,7 @@
       const who = l.team ? `<b class="t-${l.team}">${esc(this.nameOf(l.team))}:</b> ` : '';
       const hot = l.card || l.pieceId != null || l.sq != null;
       const w = tag === 'li' ? this.logWhere(l) : null;
-      const where = w ? `<small class="lg-where">📍 ${esc(w.text)}</small>` : '';
+      const where = w ? `<small class="lg-where">${YC.Icon('pin', { size: 13 })}${esc(w.text)}</small>` : '';
       return `<${tag} class="lg${hot ? ' hot' : ''}" data-i="${i}"><span class="lg-ico">${this.logIcon(l)}</span><span class="lg-txt">${who}${esc(l.text)}${where}</span></${tag}>`;
     },
 
