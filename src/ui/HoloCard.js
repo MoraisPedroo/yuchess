@@ -24,7 +24,13 @@
       + `</div>`;
   }
 
-  const BACK = '<div class="hc-back"><div class="hc-back-inner"><div class="hc-back-logo">Chess<br>Gi-Oh!</div></div></div>';
+  // verso desenhado no Gemini (assets/cards/back.png); sem ele fica o verso em CSS com o logótipo
+  const BACK_CSS = '<div class="hc-back"><div class="hc-back-inner"><div class="hc-back-logo">Chess<br>Gi-Oh!</div></div></div>';
+  const backHTML = (solo) => {
+    const art = YC.ART && YC.ART.cardBack;
+    if (!art) return solo ? BACK_CSS.replace('hc-back', 'hc-back solo') : BACK_CSS;
+    return `<div class="hc-back art${solo ? ' solo' : ''}" style="background-image:url('${YC.asset(art)}')"></div>`;
+  };
 
   /** Cria o elemento de uma carta. opts: { size: 'sm'|'md'|'lg'|'xl', back, faceDown, static, uid } */
   function create(id, opts = {}) {
@@ -33,7 +39,7 @@
     el.className = `hcard r-${card.rarity} k-${card.kind} size-${opts.size || 'md'}${opts.faceDown ? ' face-down' : ''}`;
     el.dataset.id = id;
     if (opts.uid) el.dataset.uid = opts.uid;
-    el.innerHTML = `<div class="hc-tilt">${faceHTML(card, opts)}${BACK}</div>`;
+    el.innerHTML = `<div class="hc-tilt">${faceHTML(card, opts)}${backHTML(false)}</div>`;
     if (!opts.static) attachTilt(el);
     if (el.querySelector('.hc-video')) {
       if (opts.autoplay) playVideo(el);
@@ -62,7 +68,7 @@
   function back(size = 'sm') {
     const el = document.createElement('div');
     el.className = `hcard size-${size} only-back`;
-    el.innerHTML = `<div class="hc-tilt">${BACK.replace('hc-back', 'hc-back solo')}</div>`;
+    el.innerHTML = `<div class="hc-tilt">${backHTML(true)}</div>`;
     return el;
   }
 

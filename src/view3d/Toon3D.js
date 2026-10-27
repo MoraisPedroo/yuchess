@@ -159,6 +159,13 @@
         g.beginPath(); g.arc(w / 2, h / 2, 62, 0, Math.PI * 2); g.fillStyle = '#FCC934'; g.fill(); g.lineWidth = 5; g.strokeStyle = '#1a0b00'; g.stroke();
         g.fillStyle = '#7A1C7E'; g.font = '900 28px "Cinzel Decorative", serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
         g.fillText('CHESS', w / 2, h / 2 - 14); g.fillText('GI-OH!', w / 2, h / 2 + 18);
+        // por cima, o verso desenhado (quando carrega, substitui o de canvas)
+        const art = YC.ART && YC.ART.cardBack;
+        if (art) {
+          const img = new Image();
+          img.onload = () => { g.clearRect(0, 0, w, h); g.drawImage(img, 0, 0, w, h); const t = texs.get('cardBack'); if (t) t.needsUpdate = true; };
+          img.src = YC.asset(art);
+        }
       });
     },
 
