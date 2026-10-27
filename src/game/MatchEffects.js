@@ -18,7 +18,7 @@
         const inst = p.deck.shift();
         if (p.hand.length >= R().MAX_HAND) {
           p.gy.push(inst.id);
-          this.say(`Mão cheia: "${YC.Cards.get(inst.id).name}" foi queimada.`, team);
+          this.say(`Mão cheia: "${YC.Cards.get(inst.id).name}" foi queimada.`, team, { card: inst.id });
           await this.bus.emitAsync('card:burn', { team, inst });
         } else {
           p.hand.push(inst);

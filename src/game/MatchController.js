@@ -46,7 +46,9 @@
     trapAt(sq, owner) { return this.traps.find((t) => t.sq === sq && (!owner || t.owner === owner)) || null; }
     nextOwnTurn(team) { return this.state.active === team ? this.state.turnCount + 2 : this.state.turnCount + 1; }
     untilTurn(team, n) { return this.nextOwnTurn(team) + 2 * (n - 1) + 1; }
-    say(text, team) { this.log.push({ turn: this.state.turnCount, team, text }); this.bus.emit('log', { text, team }); }
+    /** Linha do histórico. `info` (opcional, só para o ecrã): card (id da carta), uid, secret (o adversário não a vê),
+        zone, sq (casa), pieceId, move { from, to, piece, capture }. Não entra no estado nem no stateHash. */
+    say(text, team, info) { this.log.push({ turn: this.state.turnCount, team, text, ...(info || {}) }); this.bus.emit('log', { text, team }); }
 
     // ───────────── ciclo da partida ─────────────
     async start() {
@@ -88,8 +90,8 @@
         }
       }
       await this.bus.emitAsync('turn:start', { team: s.active, turnCount: s.turnCount, own: s.ownTurns[s.active] });
-      const own = s.ownTurns[s.active];
-      if (own >= 3 && own % 2 === 1) await this.draw(s.active, 1, 'turn');
+      // compra 1 carta por turno; só as Brancas, no 1.º turno da partida, não compram (já começam a jogar)
+      if (s.turnCount > 1) await this.draw(s.active, 1, 'turn');
       this.evaluate();
       this.bus.emit('state:changed');
     }
@@ -221,19 +223,19 @@
             this.traps.splice(this.traps.indexOf(enemy), 1);
             this.players[enemy.owner].gy.push(enemy.id);
             p.gy.push(inst.id);
-            this.say('CLANG! Duas armadilhas na mesma casa destruíram-se.', a.team);
+            this.say('CLANG! Duas armadilhas na mesma casa destruíram-se.', a.team, { card: inst.id, sq: a.sq });
             return this.bus.emitAsync('trap:clang', { sq: a.sq, team: a.team, ids: [inst.id, enemy.id] });
           }
           const trap = { uid: inst.uid, id: inst.id, owner: a.team, sq: a.sq, setTurn: s.turnCount, revealed: false };
           this.traps.push(trap);
-          this.say('Escondeu uma Armadilha de Casa no tabuleiro.', a.team);
+          this.say('Escondeu uma Armadilha de Casa no tabuleiro.', a.team, { card: inst.id, uid: inst.uid, secret: true, sq: a.sq });
           return this.bus.emitAsync('trap:set', { trap, team: a.team, inst });
         }
         case 'SET_CARD': {
           s.actionsLeft--; p.stats.cards++;
           const inst = take(p.hand, a.uid);
           p.zone.push({ inst, setTurn: s.turnCount });
-          this.say('Virou uma carta para baixo na Zona de Armadilhas.', a.team);
+          this.say('Virou uma carta para baixo na Zona de Armadilhas.', a.team, { card: inst.id, uid: inst.uid, secret: true, zone: true });
           return this.bus.emitAsync('card:set', { team: a.team, inst, slot: p.zone.length - 1 });
         }
         case 'ACTIVATE': {

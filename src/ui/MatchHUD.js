@@ -96,29 +96,7 @@
       }
     },
 
-    // ───────────── histórico ─────────────
-    renderLog() {
-      if (!this.stage) return;
-      const log = this.match.log;
-      const line = (l) => `<span class="t-${l.team || 'x'}">${l.team ? `${esc(this.nameOf(l.team))}:` : ''}</span> ${esc(l.text)}`;
-      const feed = this.q('.feed');
-      feed.innerHTML = log.slice(-2).map((l) => `<p>${line(l)}</p>`).join('');
-      if (window.gsap && feed.lastChild) window.gsap.fromTo(feed.lastChild, { x: -16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.3 });
-      const list = this.q('.log-list');
-      if (!this.q('.log-drawer').hidden) {
-        list.innerHTML = log.map((l) => `<li><em>${l.turn || '–'}</em>${line(l)}</li>`).join('');
-        list.scrollTop = list.scrollHeight;
-      }
-    },
-
-    toggleLog(open) {
-      const d = this.q('.log-drawer');
-      d.hidden = open === undefined ? !d.hidden : !open;
-      if (!d.hidden) {
-        this.renderLog();
-        if (window.gsap) window.gsap.fromTo(d, { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.28, ease: 'back.out(1.6)' });
-      }
-    },
+    // o histórico (feed + gaveta) está em MatchLog.js
 
     renderOnline() {
       if (!this.online || !this.stage) return;

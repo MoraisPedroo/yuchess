@@ -8,7 +8,7 @@ Jogo no ar: <https://yuchess.vercel.app/> (a partir da branch `main`).
 
 ## Como se joga
 
-- **Baralho de 12 cartas**, 3 na mão inicial (máximo 5; a carta comprada com a mão cheia é queimada). Compras 1 carta nos teus turnos 3, 5, 7… e 1 carta sempre que perdes um Cavalo, Bispo, Torre ou Dama. Baralho vazio não faz perder.
+- **Baralho de 12 cartas**, 3 na mão inicial (máximo 5; a carta comprada com a mão cheia é queimada). Compras 1 carta no início de cada turno (só as Brancas não compram no 1.º turno da partida) e 1 carta sempre que perdes um Cavalo, Bispo, Torre ou Dama. Baralho vazio não faz perder.
 - **Turno**: até 2 ações de carta e depois 1 lance de xadrez.
 - **Equipamentos** (Velocidade 1): ficam na peça (máx. 2). Ex.: Espada da Ganância (compra ao capturar), Mola Canguru (salta 1 peça), Cetro (Peão anda como Rei + Escudo), Lança (captura a 2 casas sem sair do sítio).
 - **Armadilhas de Casa** (máx. 3, filas 3–6, escondidas do adversário): disparam quando uma peça inimiga acaba o lance nessa casa. Se armares onde o adversário já tem uma, as duas destroem-se (CLANG!).

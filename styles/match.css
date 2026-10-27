@@ -77,12 +77,14 @@
 .drag-ghost.ok .hc-face { box-shadow: 0 0 0 3px #7CFF9B, 0 0 30px rgba(124, 255, 155, .95), 0 26px 34px rgba(0, 0, 0, .5); }
 .drag-ghost.bad .hc-face { box-shadow: 0 0 0 3px #FF3355, 0 0 26px rgba(255, 51, 85, .9), 0 26px 34px rgba(0, 0, 0, .5); }
 .card-zoom { position: fixed; z-index: 95; pointer-events: none; transform-origin: 50% 50%; filter: drop-shadow(0 18px 30px rgba(0, 0, 0, .55)); }
+.cz-cap { margin-top: 10px; padding: 7px 10px; text-align: center; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 14px; color: #FFE58A;
+  background: rgba(5, 11, 26, .94); border: 1.5px solid #FFD700; border-radius: 8px; box-shadow: 0 0 14px rgba(255, 215, 0, .4); }
 
 /* inspetor de peça */
 .piece-insp { position: fixed; z-index: 94; width: 300px; pointer-events: none; border-radius: 18px; overflow: hidden; color: #E8F4FF;
   background: linear-gradient(180deg, rgba(20, 26, 90, .97), rgba(9, 12, 46, .97)); border: 2px solid #59E1FF; box-shadow: 0 0 30px rgba(89, 225, 255, .45), 0 18px 40px rgba(0, 0, 0, .5); }
 .piece-insp.b { border-color: #FF4F9A; box-shadow: 0 0 30px rgba(255, 79, 154, .45), 0 18px 40px rgba(0, 0, 0, .5); }
-.pi-stage { position: relative; height: 150px; display: grid; place-items: center; overflow: hidden;
+.pi-stage { position: relative; height: 200px; display: grid; place-items: end center; padding-bottom: 10px; overflow: hidden;
   background: radial-gradient(ellipse at 50% 85%, rgba(89, 225, 255, .45), transparent 60%), repeating-conic-gradient(from 0deg at 50% 100%, rgba(255, 255, 255, .06) 0 6deg, transparent 6deg 14deg); }
 .piece-insp.b .pi-stage { background: radial-gradient(ellipse at 50% 85%, rgba(255, 79, 154, .45), transparent 60%), repeating-conic-gradient(from 0deg at 50% 100%, rgba(255, 255, 255, .06) 0 6deg, transparent 6deg 14deg); }
 .pi-disc { position: absolute; left: 50%; bottom: 14px; width: 120px; height: 26px; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(rgba(255, 255, 255, .6), transparent 70%); }
@@ -91,6 +93,10 @@
 .pi-figure .piece-svg { width: 100%; height: 100%; filter: drop-shadow(0 6px 0 rgba(0, 0, 0, .3)); }
 .pi-figure .p3d { transform: scale(1.22); transform-origin: 50% 88%; filter: drop-shadow(0 8px 10px rgba(0, 0, 0, .5)); }
 .pi-figure .shield-dome { inset: 0 4% 4%; }
+/* sprite sheet (Portraits3D): o mesmo zoom da foto; a origem desce porque o quadro é 35 % mais alto */
+.pi-figure .squash.play { animation: none; }
+.pi-figure .p3d-spr { transform: scale(1.22); transform-origin: 50% 91.1%; }
+.pi-figure .p3d-spr img { filter: drop-shadow(0 8px 10px rgba(0, 0, 0, .5)); }
 @keyframes insp-idle { 0%, 100% { transform: translateY(0) scale(1, 1); } 40% { transform: translateY(-10px) scale(.96, 1.05); } 55% { transform: translateY(0) scale(1.06, .94); } 70% { transform: translateY(0) scale(1, 1); } }
 .pi-body { padding: 10px 14px 14px; }
 .pi-title { display: flex; flex-direction: column; margin-bottom: 8px; }
@@ -106,7 +112,7 @@
 .pi-eq { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .pi-eq li { display: flex; gap: 8px; align-items: center; padding: 6px; border-radius: 10px; background: rgba(255, 255, 255, .06); border: 1px solid var(--c1); }
 .pi-eq-ico { width: 38px; height: 38px; flex: none; border-radius: 9px; background: radial-gradient(circle, #fff, var(--c2) 60%, var(--c1)); border: 2px solid var(--ink); }
-.pi-eq-ico svg { width: 100%; height: 100%; }
+.pi-eq-ico svg, .pi-eq-ico img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .pi-eq b { display: block; font-family: var(--font-head); font-size: .9rem; }
 .pi-eq small { display: block; font-size: .72rem; line-height: 1.25; opacity: .85; }
 .pi-none { margin: 0; font-size: .8rem; opacity: .6; }

@@ -14,7 +14,7 @@
     async execute(m, mv) {
       const s = m.state, piece = mv.piece, team = piece.color, enemy = m.other(team);
       s.phase = 'RESOLVE';
-      m.say(C().moveLabel(mv), team);
+      m.say(C().moveLabel(mv), team, { move: { from: mv.from, to: mv.to, piece: piece.type, capture: !!mv.captured }, pieceId: piece.id });
       let move = mv;
       if (mv.captured) {
         const done = await MR.declareCapture(m, mv);
@@ -27,7 +27,7 @@
       s.movedThisTurn = true;
       await m.bus.emitAsync('piece:move', { move, piece, from: move.from, to: move.to, captured: target, capSq, team });
       if (move.promo) {
-        m.say(`Promoção: ${YC.PIECE_NAME[move.promo]}!`, team);
+        m.say(`Promoção: ${YC.PIECE_NAME[move.promo]}!`, team, { sq: move.to, pieceId: piece.id });
         await m.bus.emitAsync('piece:promote', { piece, sq: move.to });
       }
       if (target) await MR.onCapture(m, piece, target, capSq);

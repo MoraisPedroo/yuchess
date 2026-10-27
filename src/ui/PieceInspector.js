@@ -44,7 +44,7 @@
       }
       const equips = p.equips.map((id) => {
         const c = YC.Cards.get(id);
-        return `<li style="--c1:${c.theme.primary};--c2:${c.theme.secondary}"><span class="pi-eq-ico">${YC.CardArt.svg(c)}</span><span><b>${esc(c.name)}</b><small>${esc(c.text)}</small></span></li>`;
+        return `<li style="--c1:${c.theme.primary};--c2:${c.theme.secondary}"><span class="pi-eq-ico">${YC.ItemToken ? YC.ItemToken.cardArt(c) : YC.CardArt.svg(c)}</span><span><b>${esc(c.name)}</b><small>${esc(c.text)}</small></span></li>`;
       }).join('');
       const states = ['equipped', 'shielded', 'frozen', 'checked'].filter((k) => anchor.classList.contains(k)).join(' ');
       const el = document.createElement('div');
@@ -56,6 +56,8 @@
         ${equips ? `<ul class="pi-eq">${equips}</ul>` : '<p class="pi-none">Sem equipamentos.</p>'}</div>`;
       document.body.appendChild(el);
       Insp.el = el;
+      // a peça dá um salto com pirueta (sprite sheet feita da peça 3D) enquanto o rato está em cima
+      if (YC.Portraits3D && ui.use3D) YC.Portraits3D.play(el.querySelector('.pi-figure .squash'), p.type, p.color, 'loop');
       const r = anchor.getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight, gap = 16;
       let x = r.right + gap;
       if (x + w > innerWidth - 8) x = r.left - gap - w;

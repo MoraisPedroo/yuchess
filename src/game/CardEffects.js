@@ -170,11 +170,11 @@
       const def = l.def, team = l.team, enemy = m.other(team);
       if (l.kind === 'EQUIP') {
         const piece = m.pieceById(l.target && l.target.pieceId);
-        if (!E.canEquip(def, piece, team)) { m.say(`${def.name} falhou: a peça já não serve.`, team); return; }
+        if (!E.canEquip(def, piece, team)) { m.say(`${def.name} falhou: a peça já não serve.`, team, { card: def.id }); return; }
         piece.equips.push(def.id);
         l.keep = true;
         const sq = m.sqOf(piece);
-        m.say(`${def.name} equipada: ${name(piece)} em ${sqName(sq)}.`, team);
+        m.say(`${def.name} equipada: ${name(piece)} em ${sqName(sq)}.`, team, { card: def.id, sq, pieceId: piece.id });
         await m.bus.emitAsync('equip:attach', { piece, sq, card: def, inst: l.inst, team });
         if (def.shield) await m.giveShield(piece, def.id);
         return;
@@ -186,12 +186,12 @@
         if (!t || t.negated) return;
         t.negated = true;
         if (def.toDeck) t.toDeck = true;
-        m.say(`${def.name} anulou "${t.def.name}"!`, team);
+        m.say(`${def.name} anulou "${t.def.name}"!`, team, { card: def.id });
         await m.bus.emitAsync('chain:negate', { link: t, by: l });
         if (def.draw) await m.draw(team, def.draw, 'card');
         if (def.reveal) {
           const hidden = m.traps.find((x) => x.owner === enemy && !x.revealed);
-          if (hidden) { hidden.revealed = true; m.say(`Armadilha inimiga revelada em ${sqName(hidden.sq)}.`, team); await m.bus.emitAsync('trap:reveal', { trap: hidden }); }
+          if (hidden) { hidden.revealed = true; m.say(`Armadilha inimiga revelada em ${sqName(hidden.sq)}.`, team, { card: hidden.id, uid: hidden.uid, sq: hidden.sq }); await m.bus.emitAsync('trap:reveal', { trap: hidden }); }
         }
         if (def.freeze && t.event && t.event.target && m.sqOf(t.event.target) >= 0) await m.freeze(t.event.target, 1, def.id);
         return;
@@ -203,7 +203,7 @@
       const ev = l.event, piece = ev.piece, id = l.def.id;
       const sq = m.sqOf(piece);
       if (sq < 0) return;
-      m.say(`${l.def.name} apanhou ${YC.PIECE_FEM[piece.type] ? 'a' : 'o'} ${name(piece)} em ${sqName(sq)}!`, l.team);
+      m.say(`${l.def.name} apanhou ${YC.PIECE_FEM[piece.type] ? 'a' : 'o'} ${name(piece)} em ${sqName(sq)}!`, l.team, { card: id, uid: l.inst && l.inst.uid, sq, pieceId: piece.id });
       switch (id) {
         case 'gt_mina_repulsora':
           if (piece.type === 'p') return m.removeOrFreeze(piece, id);
@@ -281,7 +281,7 @@
         if (!eq) return;
         from.equips.splice(from.equips.indexOf(eq), 1);
         to.equips.push(eq);
-        m.say(`Íman! Roubou ${YC.Cards.get(eq).name}.`, team);
+        m.say(`Íman! Roubou ${YC.Cards.get(eq).name}.`, team, { card: eq, sq: l.target.to, pieceId: to.id });
         return m.bus.emitAsync('equip:steal', { from: l.target.from, to: l.target.to, id: eq, team });
       }
       if (id === 'ct_emp_cartoon') {
@@ -293,7 +293,7 @@
           m.players[t.owner].gy.push(t.id);
           await m.bus.emitAsync('trap:destroy', { sq: t.sq, trap: t, cause: 'emp' });
         }
-        m.say(hits.length ? `Pulso EMP destruiu ${hits.length} armadilha(s).` : 'O Pulso EMP não encontrou armadilhas.', team);
+        m.say(hits.length ? `Pulso EMP destruiu ${hits.length} armadilha(s).` : 'O Pulso EMP não encontrou armadilhas.', team, { card: id, sq: l.target.sq });
         return;
       }
       if (id === 'ct_quebra_escudo') {
@@ -302,7 +302,7 @@
           const p = m.pos.board[sq];
           if (p && p.color === enemy && p.shield) { p.shield = false; await m.bus.emitAsync('shield:shatter', { piece: p, sq, cause: id }); }
         }
-        m.say('Britadeira! Escudos inimigos furados.', team);
+        m.say('Britadeira! Escudos inimigos furados.', team, { card: id });
       }
     }
   };

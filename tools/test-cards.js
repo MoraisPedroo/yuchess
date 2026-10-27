@@ -43,6 +43,19 @@ const at = (m, s) => m.pieceAt(sq(s));
 const move = (m, t, from, to, extra = {}) => m.dispatch({ type: 'MOVE', team: t, from: sq(from), to: sq(to), ...extra });
 const nextTurn = (m) => { m.state.phase = 'END_PHASE'; return m.beginTurn(); };
 
+test('Compra: 3 cartas no início e 1 por turno (as Brancas não compram no 1.º)', async () => {
+  const m = new YC.Match({ seed: 5, decks: { w: FILL, b: FILL } });
+  for (const t of ['w', 'b']) await m.draw(t, YC.Cards.RULES.START_HAND, 'start');
+  await m.beginTurn();
+  eq(m.players.w.hand.length, 3, 'Brancas no turno 1');
+  await nextTurn(m);
+  eq(m.players.b.hand.length, 4, 'Pretas no turno 2');
+  await nextTurn(m);
+  eq(m.players.w.hand.length, 4, 'Brancas no turno 3');
+  await nextTurn(m);
+  eq(m.players.b.hand.length, 5, 'Pretas no turno 4');
+});
+
 test('Espada da Ganância: capturar compra 1 carta', async () => {
   const m = setup('4k3/8/8/3p4/8/8/8/3QK3 w - - 0 1', { hand: { w: ['eq_espada_ganancia'] } });
   await m.dispatch({ type: 'EQUIP', team: 'w', uid: uid(m, 'w', 'eq_espada_ganancia'), sq: sq('d1') });

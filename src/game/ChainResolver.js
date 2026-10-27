@@ -66,10 +66,18 @@
       return { uid: resp.uid, target: resp.target || null };
     },
 
+    /** Linha do histórico de cada elo (o Equipamento e a Armadilha de Casa escrevem a sua ao resolver). */
+    logLink(m, l) {
+      if (l.index === 1 && (l.kind === 'EQUIP' || l.kind === 'GRID')) return;
+      const text = l.index > 1 ? `Respondeu com "${l.def.name}" (elo ${l.index}).` : `Ativou "${l.def.name}".`;
+      m.say(text, l.team, { card: l.def.id, uid: l.inst.uid });
+    },
+
     async run(m, first) {
       const chain = [first];
       m.chain = chain;
       first.index = 1;
+      Chain.logLink(m, first);
       await m.bus.emitAsync('chain:link', { link: first, chain });
       let responder = m.other(first.team);
       while (chain.length < Cards().RULES.CHAIN_MAX && !m.over) {
@@ -83,6 +91,7 @@
         next.targetLink = top;
         next.index = chain.length + 1;
         chain.push(next);
+        Chain.logLink(m, next);
         await m.bus.emitAsync('chain:link', { link: next, chain });
         responder = m.other(responder);
       }

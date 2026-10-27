@@ -69,7 +69,14 @@
         });
       }
       this.board.setFlipped(viewer === 'b');
-      if (this.use3D) this.q('.mascot .squash').innerHTML = YC.pieceHTML('k', viewer);
+      if (this.use3D) {
+        // mascote: o Rei dá saltos com pirueta (sprite sheet) enquanto o rato está em cima e uma vez no início da tua vez
+        const box = this.q('.mascot .squash'), P = YC.Portraits3D;
+        box.innerHTML = YC.pieceHTML('k', viewer);
+        this.mascotJump = (mode) => P && viewer && P.play(box, 'k', viewer, mode);
+        this.q('.mascot').addEventListener('pointerenter', () => this.mascotJump('loop'));
+        this.q('.mascot').addEventListener('pointerleave', () => this.mascotJump('stop'));
+      }
       this.animator = new YC.MatchAnimator({ bus: this.bus, board: this.board, ui: this });
       this.q('[data-a="close-log"]').onclick = () => this.toggleLog(false);
       this.offs = [
@@ -77,6 +84,7 @@
         this.bus.on('log', () => this.renderLog()),
         this.bus.on('ui:invalid', ({ message }) => { if (YC.Sound) YC.Sound.play('error'); this.toast(message, true); }),
         this.bus.on('piece:move', ({ move }) => { this.lastMove = { from: move.from, to: move.to }; YC.PieceInspector.hide(); }),
+        this.bus.on('turn:start', ({ team }) => { if (team === viewer && this.mascotJump) this.mascotJump('once'); }),
         this.bus.on('game:over', (p) => { this.stopClock(); setTimeout(() => this.showEnd(p), 1100); })
       ];
       this.onResize = () => { this.board.fx._unit = this.board.unit(); };

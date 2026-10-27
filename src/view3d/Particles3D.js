@@ -150,7 +150,8 @@
       }
       const g = this.dropM;
       if (sq == null || sq < 0) { g.visible = false; return; }
-      const p = this.sqWorld(sq), hex = ok ? 0x7CFF9B : 0xFF3355;
+      // ok: true (verde), false (vermelho) ou uma cor (o histórico marca a dourado onde está a carta)
+      const p = this.sqWorld(sq), hex = typeof ok === 'number' ? ok : ok ? 0x7CFF9B : 0xFF3355;
       g.position.set(p.x, 0, p.z);
       g.visible = true;
       g.userData.ring.material.color.copy(T3().glow(hex, 2.2));
