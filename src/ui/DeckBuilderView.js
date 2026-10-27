@@ -1,5 +1,5 @@
 /* DeckBuilderView.js — Baralhos: coleção (com filtros e oficina de criação com Poeira Estelar)
-   à esquerda e o baralho de 22 à direita. Validação: 22 cartas, máx. 2 cópias (1 Lendária), máx. 2 Lendárias. */
+   à esquerda e o baralho de 22 à direita. Validação: 22 cartas, máx. 2 cópias (1 Lendária), máx. 3 Lendárias. */
 (function (YC) {
   'use strict';
 
@@ -7,9 +7,13 @@
   const SIZE = () => YC.Cards.RULES.DECK_SIZE;
   const esc = (s) => YC.HoloCard.esc(s);
   const KINDS = [['ALL', 'Todas'], ['EQUIP', 'Equipamentos'], ['GRID', 'Armadilhas de Casa'], ['REACTIVE', 'Reativas'], ['COUNTER', 'Counter-Traps'], ['QUICK', 'Magias Rápidas']];
+  const NEW = () => View.newSet || (View.newSet = new Set((YC.CARDS_NEW || []).map((n) => n[0])));
+  const FAMS = [['ALL', 'Todas as famílias'], ['classic', 'Clássicas'], ['gelo', 'Criogenia'], ['oficina', 'Oficina'], ['circo', 'Circo'], ['lab', 'Laboratório'], ['tribunal', 'Tribunal'], ['sucata', 'Sucata & Piratas'], ['policia', 'Polícia']];
 
   const View = {
     filter: 'ALL',
+    fam: 'ALL',
+    mine: false,
     draft: null,
 
     load() {
@@ -28,6 +32,7 @@
           <section class="panel coll">
             <div class="coll-head"><h2>Coleção</h2><span class="coin-pill dust"><i></i>${p.stardust}</span></div>
             <div class="filters">${KINDS.map(([k, l]) => `<button class="chip ${View.filter === k ? 'on' : 'dark'}" data-f="${k}">${l}</button>`).join('')}</div>
+            <div class="filters fams">${FAMS.map(([k, l]) => `<button class="chip ${View.fam === k ? 'on' : 'dark'}" data-fam="${k}">${l}</button>`).join('')}<button class="chip ${View.mine ? 'on' : 'dark'}" data-mine="1">Só as minhas</button></div>
             <div class="coll-grid"></div>
           </section>
           <section class="panel deck">
@@ -51,6 +56,8 @@
       View.fillDeck();
       const r = View.root;
       r.querySelectorAll('[data-f]').forEach((b) => b.onclick = () => { View.filter = b.dataset.f; View.render(); });
+      r.querySelectorAll('[data-fam]').forEach((b) => b.onclick = () => { View.fam = b.dataset.fam; View.render(); });
+      r.querySelector('[data-mine]').onclick = () => { View.mine = !View.mine; View.render(); };
       r.querySelector('.deck-pick').onchange = (e) => View.pick(e.target.value);
       r.querySelector('.deck-name').oninput = (e) => { View.draft.name = e.target.value; };
       r.querySelectorAll('[data-a]').forEach((b) => b.onclick = () => View.act(b.dataset.a));
@@ -59,7 +66,9 @@
     fillCollection(p) {
       const grid = View.root.querySelector('.coll-grid');
       const order = YC.Cards.RARITY;
-      const list = YC.Cards.LIST.filter((c) => View.filter === 'ALL' || c.kind === View.filter)
+      const list = YC.Cards.LIST.filter((c) => (View.filter === 'ALL' || c.kind === View.filter)
+        && (View.fam === 'ALL' || (View.fam === 'classic' ? !NEW().has(c.id) : c.family === View.fam))
+        && (!View.mine || E().owned(p, c.id) > 0))
         .sort((a, b) => order[a.rarity].order - order[b.rarity].order || a.kind.localeCompare(b.kind));
       for (const c of list) {
         const owned = E().owned(p, c.id), inDeck = View.draft.cards.filter((x) => x === c.id).length;
@@ -108,7 +117,7 @@
       if (d.cards.length >= SIZE()) return YC.UI.toast(`O baralho já tem ${SIZE()} cartas.`, true);
       if (n >= E().owned(p, id)) return YC.UI.toast(E().owned(p, id) ? 'Não tens mais cópias desta carta.' : 'Ainda não tens esta carta: abre pacotes ou cria-a.', true);
       if (n >= E().cap(id)) return YC.UI.toast(`Máximo ${E().cap(id)} cópia(s) por baralho.`, true);
-      if (c.rarity === 'LEGENDARY' && d.cards.filter((x) => YC.Cards.get(x).rarity === 'LEGENDARY').length >= YC.Cards.RULES.MAX_LEGENDARIES) return YC.UI.toast('Máximo 2 Lendárias por baralho.', true);
+      if (c.rarity === 'LEGENDARY' && d.cards.filter((x) => YC.Cards.get(x).rarity === 'LEGENDARY').length >= YC.Cards.RULES.MAX_LEGENDARIES) return YC.UI.toast(`Máximo ${YC.Cards.RULES.MAX_LEGENDARIES} Lendárias por baralho.`, true);
       d.cards.push(id);
       YC.Sound.play('card_flip');
       View.render();

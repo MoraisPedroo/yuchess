@@ -3,12 +3,14 @@
 Uso:
   python tools/slice-items.py folha-a.png A        # 16 objetos da folha A
   python tools/slice-items.py folha-b.png B        # 16 objetos da folha B
+  python tools/slice-items.py folha-c.png C        # folhas C a H: as 89 cartas da expansão (a H tem 9)
   python tools/slice-items.py bota.png WIND_BOOTS  # uma imagem com um só objeto
 
 Gera assets/items/<icone em minúsculas>.png (256x256) e reescreve src/ui/ItemArtList.js com a lista dos
 ícones que têm imagem. O fundo é retirado por "balde de tinta" a partir das bordas de cada célula (o contorno
 escuro dos objetos impede que o branco de dentro seja apagado). Precisa do Pillow.
 """
+import json
 import os
 import sys
 from collections import deque
@@ -28,6 +30,11 @@ SHEETS = {
     'FX': ['SPARKLE', 'IMPACT', 'EXPLOSION', 'SMOKE', 'INK', 'LIGHTNING', 'ICE', 'COIN',
            'MAGIC_CIRCLE', 'GLASS', 'BUBBLEGUM', 'TOXIC', 'SWOOSH', 'ANGER', 'CONFETTI', 'CROWN'],
 }
+# folhas C a H: as 89 cartas da expansão pela ordem de docs/cartas-novas.json (prompts em docs/ART-PROMPTS.md)
+with open(os.path.join(ROOT, 'docs', 'cartas-novas.json'), encoding='utf-8') as _f:
+    _NEW = [c['icon'] for c in json.load(_f)]
+for _i, _letter in enumerate('CDEFGH'):
+    SHEETS[_letter] = _NEW[_i * 16:(_i + 1) * 16]
 FX_OUT = os.path.join(ROOT, 'assets', 'fx')
 FX_JS = os.path.join(ROOT, 'src', 'view3d', 'FxArtList.js')
 TOL = 38      # distância de cor (0–441) até onde um píxel ainda conta como fundo

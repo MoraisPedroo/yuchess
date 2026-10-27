@@ -15,16 +15,35 @@ function countCards(m) {
   let n = 0;
   for (const t of ['w', 'b']) {
     const p = m.players[t];
-    n += p.deck.length + p.hand.length + p.zone.length + p.gy.length;
+    n += p.deck.length + p.hand.length + p.zone.length + p.gy.length + p.banished.length;
   }
   n += m.traps.length;
   for (const p of m.pos.board) if (p) n += p.equips.length;
   return n;
 }
 
+/** Baralhos que percorrem a coleção toda (todas as cópias baralhadas, 22 de cada vez), para todas as cartas
+    aparecerem em várias partidas. */
+const POOL = (() => {
+  const pool = [];
+  for (const c of YC.Cards.LIST) for (let k = 0; k < YC.Economy.cap(c.id); k++) pool.push(c.id);
+  YC.mulberry32(42).shuffle(pool);
+  return pool;
+})();
+function coverDeck(d) {
+  const R = YC.Cards.RULES, deck = [];
+  let legends = 0;
+  for (let k = d * R.DECK_SIZE; deck.length < R.DECK_SIZE; k++) {
+    const id = POOL[k % POOL.length];
+    if (deck.filter((x) => x === id).length >= YC.Economy.cap(id)) continue;
+    if (YC.Cards.get(id).rarity === 'LEGENDARY') { if (legends >= R.MAX_LEGENDARIES) continue; legends++; }
+    deck.push(id);
+  }
+  return deck;
+}
+
 async function playOne(i) {
-  const rng = YC.mulberry32(1000 + i);
-  const decks = { w: YC.Economy.randomDeck(rng), b: YC.Economy.randomDeck(rng) };
+  const decks = { w: coverDeck(2 * i), b: coverDeck(2 * i + 1) };
   const m = new YC.Match({ seed: 5000 + i, decks });
   const levels = ['easy', 'medium'];
   m.agents.w = YC.BotAI.create({ team: 'w', level: levels[i % 2], delay: 0, seed: 11 + i });
@@ -35,6 +54,8 @@ async function playOne(i) {
   const seen = { chain: 0, traps: 0, equips: 0, negates: 0, cards: {} };
   m.bus.on('chain:link', ({ link }) => { seen.chain++; seen.cards[link.def.id] = (seen.cards[link.def.id] || 0) + 1; });
   m.bus.on('chain:negate', () => seen.negates++);
+  // uma Armadilha de Casa armada conta como usada (o efeito ao ser pisada tem o seu teste em tools/tests/)
+  m.bus.on('trap:set', ({ trap }) => { seen.cards[trap.id] = (seen.cards[trap.id] || 0) + 1; });
   m.bus.on('trap:trigger', () => seen.traps++);
   m.bus.on('equip:attach', () => seen.equips++);
   let snapped = false;

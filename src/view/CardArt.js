@@ -58,7 +58,8 @@
   /** SVG completo de uma carta (usado na arte da carta e nas medalhas das peças). */
   function svg(card, cls = 'card-icon') {
     const t = card.theme, draw = ICONS[t.icon];
-    return `<svg class="${cls}" viewBox="0 0 100 100" aria-hidden="true">${draw ? draw(t.primary, t.secondary) : ''}</svg>`;
+    const body = draw ? draw(t.primary, t.secondary) : YC.CardArtFallback ? YC.CardArtFallback(card) : '';
+    return `<svg class="${cls}" viewBox="0 0 100 100" aria-hidden="true">${body}</svg>`;
   }
 
   YC.CardArt = { svg, ICONS };

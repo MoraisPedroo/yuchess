@@ -24,7 +24,7 @@
       const inventory = {};
       for (const id of Cards().STARTER_DECK) inventory[id] = (inventory[id] || 0) + 1;
       return {
-        version: 2, displayName: name, gold: Economy.START_GOLD, stardust: Economy.START_DUST, inventory,
+        version: 3, displayName: name, gold: Economy.START_GOLD, stardust: Economy.START_DUST, inventory,
         decks: [{ id: 'inicial', name: 'Baralho Inicial', cards: Cards().STARTER_DECK.slice() }],
         activeDeckId: 'inicial', pityEpic: 0, pityLegendary: 0,
         stats: { wins: 0, losses: 0, draws: 0, packs: 0 }, updatedAt: 0
@@ -39,17 +39,24 @@
       out.decks = Array.isArray(out.decks) && out.decks.length ? out.decks : base.decks;
       if (!out.decks.find((d) => d.id === out.activeDeckId)) out.activeDeckId = out.decks[0].id;
       if (!(out.version >= 2)) Economy.migrate22(out);
+      if (!(out.version >= 3)) Economy.giveStarter(out);
       return out;
     },
 
     /** Perfis da versão 1 (baralhos de 12): oferece as cartas do baralho inicial novo que faltem
         e completa cada baralho até 22 com cartas da coleção. Pode correr mais de uma vez sem dar nada a mais. */
     migrate22(p) {
+      Economy.giveStarter(p);
+      p.decks = p.decks.map((d) => ({ ...d, cards: Economy.fillDeck(p, (d.cards || []).filter((id) => Cards().get(id))) }));
+      p.version = 2;
+    },
+
+    /** Versão 3 (expansão de 120 cartas): oferece as cartas do baralho inicial novo que faltem (sem duplicar). */
+    giveStarter(p) {
       const need = {};
       for (const id of Cards().STARTER_DECK) need[id] = (need[id] || 0) + 1;
       for (const [id, n] of Object.entries(need)) if (Economy.owned(p, id) < n) p.inventory[id] = n;
-      p.decks = p.decks.map((d) => ({ ...d, cards: Economy.fillDeck(p, (d.cards || []).filter((id) => Cards().get(id))) }));
-      p.version = 2;
+      p.version = Math.max(p.version || 1, 3);
     },
 
     /** Completa um baralho até ao tamanho certo com cartas da coleção (raridade primeiro, mistura de tipos). */
@@ -96,7 +103,9 @@
       if (p.gold < Economy.PACK_COST) throw new Error('Ouro insuficiente: precisas de 100 moedas.');
       p.gold -= Economy.PACK_COST;
       const cards = Economy.rollRarities(p, rng).map((rarity) => {
-        const pool = Cards().byRarity(rarity);
+        // Épicas e Lendárias: primeiro as que ainda não tens no máximo (proteção contra duplicados)
+        const all = Cards().byRarity(rarity), fresh = all.filter((c) => Economy.owned(p, c.id) < Economy.cap(c.id));
+        const pool = (rarity === 'EPIC' || rarity === 'LEGENDARY') && fresh.length ? fresh : all;
         const def = pool[Math.floor(rng() * pool.length)];
         const have = Economy.owned(p, def.id);
         const res = { id: def.id, rarity, isNew: have === 0, dupe: false, dust: 0 };
@@ -126,7 +135,7 @@
       p.inventory[id] = Economy.owned(p, id) + 1;
     },
 
-    /** Exatamente 22 (RULES.DECK_SIZE), cartas que tens, máx. 2 cópias (1 se Lendária) e máx. 2 Lendárias. */
+    /** Exatamente 22 (RULES.DECK_SIZE), cartas que tens, máx. 2 cópias (1 se Lendária) e máx. 3 Lendárias. */
     validateDeck(p, cards, { ignoreOwnership = false } = {}) {
       const R = Cards().RULES, errors = [], count = {};
       for (const id of cards) count[id] = (count[id] || 0) + 1;

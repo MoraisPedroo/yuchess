@@ -57,7 +57,7 @@ test('Compra: 3 cartas no início e 1 por turno (as Brancas não compram no 1.º
 });
 
 test('Espada da Ganância: capturar compra 1 carta', async () => {
-  const m = setup('4k3/8/8/3p4/8/8/8/3QK3 w - - 0 1', { hand: { w: ['eq_espada_ganancia'] } });
+  const m = setup('4k3/8/8/3p4/8/8/8/3RK3 w - - 0 1', { hand: { w: ['eq_espada_ganancia'] } });
   await m.dispatch({ type: 'EQUIP', team: 'w', uid: uid(m, 'w', 'eq_espada_ganancia'), sq: sq('d1') });
   eq(at(m, 'd1').equips[0], 'eq_espada_ganancia', 'equipada');
   await move(m, 'w', 'd1', 'd5');
@@ -322,6 +322,11 @@ test('Peças congeladas sem lances: passa a vez (não é afogamento)', async () 
   eq(m.state.mustPass, true, 'passa');
   eq(m.state.winner, null, 'sem fim');
 });
+
+// testes das cartas da expansão (um por carta), em tools/tests/
+const fs = require('fs');
+const H = { test, setup, uid, at, move, nextTurn, eq, YC, C, sq, FILL };
+for (const f of fs.readdirSync(path.join(__dirname, 'tests')).sort()) require(path.join(__dirname, 'tests', f))(H);
 
 (async () => {
   for (const t of tests) {

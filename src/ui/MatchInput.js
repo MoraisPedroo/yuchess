@@ -27,10 +27,51 @@
       const def = this.selCard && YC.Cards.get(this.selCard.id);
       if (this.mode === 'equip' && def) out.equip = E().equipTargets(m, this.viewer, def);
       if (this.mode === 'trap') out.trap = E().trapSquares(m, this.viewer);
-      if (this.mode === 'target-sq' || this.mode === 'r-target-sq') out.trap = m.pos.board.map((_, i) => i);
-      if (this.mode === 'steal-from' || this.mode === 'r-steal-from') out.pick = [...new Set(E().stealPairs(m, this.viewer).map((p) => p.from))];
-      if (this.mode === 'steal-to' || this.mode === 'r-steal-to') out.pick = E().stealPairs(m, this.viewer).filter((p) => p.from === this.stealFrom).map((p) => p.to);
+      const spec = this.tgtSpec();
+      if (spec) {
+        const second = this.mode.endsWith('tgt2');
+        out[spec.mark === 'trap' && !second ? 'trap' : 'pick'] = second ? spec.second(this.tgtFrom) : spec.first;
+        if (second) out.sel = this.tgtFrom;
+      }
       return out;
+    },
+
+    /** Alvos da carta que está a ser usada (modos tgt1/tgt2 e as respostas r-tgt1/r-tgt2). */
+    tgtSpec() {
+      if (!this.mode || !this.mode.includes('tgt')) return null;
+      const id = this.mode.startsWith('r-') ? this.respondPick && this.respondPick.id : this.selCard && this.selCard.id;
+      return id ? YC.CardEffects2.targetSpec(this.match, this.viewer, YC.Cards.get(id)) : null;
+    },
+
+    /** Texto de ajuda para escolher o alvo (passo 1 ou 2). */
+    tgtHint(def, second) {
+      const H = {
+        ct_ima_equipamento: ['Escolhe a peça inimiga equipada.', 'Agora a tua peça que recebe o equipamento.'],
+        ct_emp_cartoon: ['Escolhe a casa central da explosão.'],
+        qs_intimacao_urgente: ['Escolhe a casa vazia a bloquear.'],
+        qs_cambalhota_maluca: ['Escolhe a primeira peça a trocar.', 'Agora a peça ao lado com que troca.'],
+        qs_cabo_aco_voador: ['Escolhe a peça que vai na tirolesa.', 'Agora a borda para onde desliza.'],
+        qs_helicoptero_apoio: ['Escolhe a peça a resgatar.', 'Agora a casa de chegada (1.ª ou 2.ª fila).']
+      }[def.id];
+      if (H) return H[second ? 1 : 0] || H[0];
+      return def.target === 'ENEMY_PIECE' ? 'Escolhe a peça inimiga (as marcadas).' : 'Escolhe a tua peça (as marcadas).';
+    },
+
+    /** Clique numa casa durante a escolha de alvo; `done(target)` envia a ação ou a resposta. */
+    tgtClick(sq, done) {
+      const spec = this.tgtSpec(), def = YC.Cards.get(this.mode.startsWith('r-') ? this.respondPick.id : this.selCard.id);
+      if (!spec) return;
+      const r = this.mode.startsWith('r-') ? 'r-' : '';
+      if (this.mode.endsWith('tgt2')) {
+        if (spec.second(this.tgtFrom).includes(sq)) return done({ from: this.tgtFrom, to: sq });
+        if (spec.first.includes(sq)) { this.tgtFrom = sq; return this.renderSoft(); }
+        return this.toast(this.tgtHint(def, true));
+      }
+      if (!spec.first.includes(sq)) return this.toast(this.tgtHint(def, false));
+      if (!spec.two) return done({ sq });
+      this.tgtFrom = sq; this.mode = `${r}tgt2`;
+      this.toast(this.tgtHint(def, true));
+      return this.renderSoft();
     },
 
     cardUsable(inst) {
@@ -42,7 +83,7 @@
     },
 
     cancelMode() {
-      this.mode = null; this.selSq = -1; this.selCard = null; this.stealFrom = -1; this.cardActs = null;
+      this.mode = null; this.selSq = -1; this.selCard = null; this.tgtFrom = -1; this.cardActs = null;
       if (this.stage) this.renderSoft();
     },
 
@@ -83,8 +124,7 @@
     cardAct(act, inst) {
       const def = YC.Cards.get(inst.id);
       if (act === 'set') return this.send({ type: 'SET_CARD', uid: inst.uid });
-      if (def.target === 'SQUARE') { this.mode = 'target-sq'; this.selCard = inst; this.renderSoft(); return; }
-      if (def.target === 'STEAL') { this.mode = 'steal-from'; this.selCard = inst; this.renderSoft(); return; }
+      if (def.target) { this.mode = 'tgt1'; this.selCard = inst; this.cardActs = null; this.toast(this.tgtHint(def, false)); this.renderSoft(); return; }
       return this.send({ type: 'ACTIVATE', uid: inst.uid });
     },
 
@@ -115,15 +155,7 @@
         if (E().trapSquares(m, this.viewer).includes(sq)) return this.send({ type: 'SET_TRAP', uid: this.selCard.uid, sq });
         return this.toast('Só em casas vazias das filas 3 a 6.');
       }
-      if (this.mode === 'target-sq') return this.send({ type: 'ACTIVATE', uid: this.selCard.uid, target: { sq } });
-      if (this.mode === 'steal-from') {
-        if (E().stealPairs(m, this.viewer).some((p) => p.from === sq)) { this.stealFrom = sq; this.mode = 'steal-to'; return this.renderSoft(); }
-        return this.toast('Escolhe uma peça inimiga com equipamento.');
-      }
-      if (this.mode === 'steal-to') {
-        if (E().stealPairs(m, this.viewer).some((p) => p.from === this.stealFrom && p.to === sq)) return this.send({ type: 'ACTIVATE', uid: this.selCard.uid, target: { from: this.stealFrom, to: sq } });
-        return this.toast('Essa peça não pode usar esse equipamento.');
-      }
+      if (this.mode === 'tgt1' || this.mode === 'tgt2') return this.tgtClick(sq, (target) => this.send({ type: 'ACTIVATE', uid: this.selCard.uid, target }));
       if (m.state.mustPass) return this.toast('Não tens lances: carrega em "Passar a vez".');
       if (this.mode === 'piece' && this.selSq >= 0) {
         const moves = C().legalMovesFrom(m.pos, this.selSq, { turn: m.state.turnCount }).filter((mv) => mv.to === sq);
@@ -241,21 +273,14 @@
       if (!o) return;
       if (!o.needsTarget) return this.finishResponse({ uid });
       this.respondPick = o;
-      this.mode = o.def.target === 'SQUARE' ? 'r-target-sq' : 'r-steal-from';
-      this.toast(o.def.target === 'SQUARE' ? 'Escolhe a casa central.' : 'Escolhe a peça inimiga equipada.');
+      this.mode = 'r-tgt1';
+      this.toast(this.tgtHint(o.def, false));
       this.renderSoft();
     },
 
     respondTarget(sq) {
-      const o = this.respondPick, m = this.match;
-      if (this.mode === 'r-target-sq') return this.finishResponse({ uid: o.uid, target: { sq } });
-      if (this.mode === 'r-steal-from') {
-        if (E().stealPairs(m, this.viewer).some((p) => p.from === sq)) { this.stealFrom = sq; this.mode = 'r-steal-to'; this.renderSoft(); }
-        return;
-      }
-      if (this.mode === 'r-steal-to' && E().stealPairs(m, this.viewer).some((p) => p.from === this.stealFrom && p.to === sq)) {
-        this.finishResponse({ uid: o.uid, target: { from: this.stealFrom, to: sq } });
-      }
+      const o = this.respondPick;
+      return this.tgtClick(sq, (target) => this.finishResponse({ uid: o.uid, target }));
     },
 
     finishResponse(resp) {

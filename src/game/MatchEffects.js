@@ -11,6 +11,7 @@
     async draw(team, n, reason) {
       const p = this.players[team];
       for (let i = 0; i < n; i++) {
+        if (!p.deck.length) await this.recycleDeck(team);
         if (!p.deck.length) {
           if (!p.deckWarned) { p.deckWarned = true; await this.bus.emitAsync('deck:empty', { team }); }
           return;
@@ -29,9 +30,9 @@
 
     realType(piece) { return piece.morphUntil ? piece.morphFrom : piece.type; },
 
-    /** Morte de uma peça já retirada do tabuleiro (captura ou efeito). */
-    async afterDeath(piece, sq, cause) {
-      const owner = this.players[piece.color];
+    /** Morte de uma peça já retirada do tabuleiro (captura ou efeito). `by` = quem a capturou. */
+    async afterDeath(piece, sq, cause, by) {
+      const owner = this.players[piece.color], equips = piece.equips.slice();
       owner.stats.lost++;
       owner.lostTypes.push(this.realType(piece));
       for (const id of piece.equips) owner.gy.push(id);
@@ -43,7 +44,7 @@
         await this.bus.emitAsync('trap:destroy', { sq, trap: covered, cause: 'crushed' });
       }
       if ('nbrq'.includes(this.realType(piece))) await this.draw(piece.color, 1, 'catchup');
-      this.pending.push({ type: 'DESTROYED', team: piece.color, piece, sq, cause });
+      this.pending.push({ type: 'DESTROYED', team: piece.color, piece, sq, cause, by: by || null, equips });
     },
 
     async destroyPiece(piece, cause) {
@@ -81,8 +82,10 @@
 
     canRelocate(piece, to) {
       const from = this.sqOf(piece);
-      if (from < 0 || to < 0 || this.pos.board[to]) return false;
-      return !C().exposesKing(this.pos, piece.color, (b) => { b[from] = null; b[to] = piece; });
+      if (from < 0 || to < 0 || this.pos.board[to] || C().isBlocked(this.pos, to)) return false;
+      const mut = (b) => { b[from] = null; b[to] = piece; };
+      // nem o dono da peça fica em xeque, nem (fora da vez dele) o Rei de quem está a jogar
+      return !C().exposesKing(this.pos, piece.color, mut) && (piece.color === this.state.active || !C().exposesKing(this.pos, this.state.active, mut));
     },
 
     async relocate(piece, to, style) {

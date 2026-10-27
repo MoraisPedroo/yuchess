@@ -21,10 +21,12 @@
       this.uidSeq = 0;
       this.players = {};
       for (const t of TEAMS) {
-        this.players[t] = { team: t, name: names[t] || LABEL[t], deck: (decks[t] || []).map((id) => this.newInst(id, t)), hand: [], gy: [], zone: [], lostTypes: [], stats: { captures: 0, cards: 0, lost: 0 } };
+        this.players[t] = { team: t, name: names[t] || LABEL[t], deck: (decks[t] || []).map((id) => this.newInst(id, t)), hand: [], gy: [], zone: [], banished: [], lostTypes: [], stats: { captures: 0, cards: 0, lost: 0 } };
       }
+      this.pos.board.forEach((p, sq) => { if (p) p.home = sq; });
+      this.pos.blocked = [];
       this.traps = [];
-      this.state = { active: 'w', turnCount: 0, phase: 'SETUP', actionsLeft: 0, winner: null, reason: '', mustPass: false, movedThisTurn: false, shieldLock: { w: 0, b: 0 }, ownTurns: { w: 0, b: 0 } };
+      this.state = { active: 'w', turnCount: 0, phase: 'SETUP', actionsLeft: 0, winner: null, reason: '', mustPass: false, movedThisTurn: false, shieldLock: { w: 0, b: 0 }, ownTurns: { w: 0, b: 0 }, blocks: [], actionMod: { w: 0, b: 0 } };
       this.agents = {};
       this.chain = null;
       this.pending = [];
@@ -79,21 +81,25 @@
       this.pos.turn = s.active;
       s.ownTurns[s.active]++;
       s.phase = 'PREP';
-      s.actionsLeft = R().ACTIONS_PER_TURN;
+      s.actionsLeft = this.actionsFor(s.active);
       s.mustPass = false;
       s.movedThisTurn = false;
-      for (let sq = 0; sq < 64; sq++) {
-        const p = this.pos.board[sq];
-        if (p && p.morphUntil && p.morphUntil <= s.turnCount) {
-          p.type = p.morphFrom; p.morphUntil = 0; p.morphFrom = null;
-          await this.bus.emitAsync('piece:unmorph', { piece: p, sq });
-        }
-      }
+      await this.tickStatuses();
       await this.bus.emitAsync('turn:start', { team: s.active, turnCount: s.turnCount, own: s.ownTurns[s.active] });
       // compra 1 carta por turno; só as Brancas, no 1.º turno da partida, não compram (já começam a jogar)
       if (s.turnCount > 1) await this.draw(s.active, 1, 'turn');
+      await YC.CardEffects3.turnStart(this, s.active);
       this.evaluate();
       this.bus.emit('state:changed');
+    }
+
+    /** Ações de carta do turno: 2 ± as cartas que as mudaram (0 a 4); com a Balança do adversário, no máximo 1. */
+    actionsFor(team) {
+      const s = this.state;
+      let n = Math.max(0, Math.min(R().MAX_ACTIONS, R().ACTIONS_PER_TURN + s.actionMod[team]));
+      s.actionMod[team] = 0;
+      if (this.pos.board.some((p) => p && p.color !== team && C().has(p, 'eq_balanca_justica'))) n = Math.min(n, 1);
+      return n;
     }
 
     /** Xeque-mate, afogamento, ou "passa a vez" quando só as peças congeladas teriam lances. */
@@ -111,6 +117,7 @@
       const s = this.state;
       s.phase = 'END_PHASE';
       if (!s.movedThisTurn) this.pos.ep = -1;
+      for (const p of this.pos.board) if (p && p.color === s.active) { p.dash = false; p.trapProof = false; }
       const key = C().positionKey(this.pos) + this.other(s.active);
       const n = (this.repetition.get(key) || 0) + 1;
       this.repetition.set(key, n);
@@ -162,12 +169,12 @@
       if (a.type === 'MOVE') return s.mustPass ? 'Não tens lances: passa a vez.' : this.findMove(a) ? null : 'Lance ilegal.';
       if (a.type === 'PASS') return s.mustPass ? null : 'Ainda tens lances possíveis.';
       if (a.type === 'AUTO_MOVE') return null;
-      if (s.actionsLeft <= 0) return 'Já usaste as 2 ações de carta deste turno.';
+      if (s.actionsLeft <= 0) return 'Já usaste as ações de carta deste turno.';
       const fromZone = a.type === 'ACTIVATE' && p.zone.find((z) => z.inst.uid === a.uid);
       const inst = fromZone ? fromZone.inst : p.hand.find((c) => c.uid === a.uid);
       if (!inst) return 'Essa carta não está disponível.';
       const def = YC.Cards.get(inst.id);
-      if (a.type === 'EQUIP') return def.kind === 'EQUIP' && E.canEquip(def, this.pieceAt(a.sq), a.team) ? null : 'Não dá para equipar essa peça.';
+      if (a.type === 'EQUIP') return def.kind === 'EQUIP' && E.canEquip(def, this.pieceAt(a.sq), a.team, a.sq) ? null : 'Não dá para equipar essa peça.';
       if (a.type === 'SET_TRAP') {
         if (def.kind !== 'GRID') return 'Essa carta não é uma Armadilha de Casa.';
         if (this.traps.filter((t) => t.owner === a.team).length >= R().MAX_GRID_TRAPS) return 'Já tens 3 armadilhas no tabuleiro.';

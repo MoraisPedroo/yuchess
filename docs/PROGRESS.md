@@ -9,7 +9,7 @@
 
 **Funciona e está testado**
 - Xadrez completo (`src/game/ChessRules.js`): lances legais, xeque, xeque-mate, afogamento, roque, en passant, promoção, 50 lances, repetição tripla, material insuficiente. Contagens *perft* de referência certas (início, Kiwipete, posições 3–5).
-- 31 cartas do relatório com efeitos, Chain de Velocidade 1/2/3, janelas de resposta (captura, destruição, xeque), Zona de Armadilhas com "enjoo", Armadilhas de Casa escondidas (máx. 3), escudos, congelar, metamorfose, teletransporte, etc. 31 testes de cenário a passar.
+- **120 cartas** (31 originais + 89 da expansão em 7 famílias, 2026-10-27) com efeitos, Chain de Velocidade 1/2/3, janelas de resposta (captura, destruição, xeque), Zona de Armadilhas com "enjoo", Armadilhas de Casa escondidas (máx. 3), escudos, congelar, metamorfose, teletransporte, casas bloqueadas, peças silenciadas, trocas, peões novos, roubo e descarte de cartas, etc. 125 testes de cenário a passar (um por carta + regras).
 - Bot (Fácil/Médio/Difícil) e simulações: 30/30 partidas bot vs bot sem quebrar invariantes; todas as cartas chegam a ser usadas.
 - Economia: pacotinhos de 5 cartas com raridades, pity épico/lendário, duplicados → Poeira Estelar, criação de cartas, validação de baralhos, recompensas. **Baralhos de 22 cartas** desde 2026-10-27 (perfis antigos de 12 são convertidos sozinhos: `Economy.migrate22`).
 - Interface cartoon nova (peças com expressões, cartas holográficas, animações GSAP, confetes, sons sintetizados): Arena, Loja com abertura em 4 atos, Baralhos, partida contra o bot com respostas da Chain, layout de telemóvel. Testado no navegador (partidas inteiras bot vs bot no ecrã sem erros; equipar, virar carta, lance e resposta com a Égide feitos à mão).
@@ -30,11 +30,11 @@
 
 - O Pedro está a testar a versão publicada e vai enviar os erros que encontrar (sobretudo: velocidade das animações, arrastar cartas no telemóvel, legibilidade do zoom).
 - Falta publicar o `firestore.rules` no Firebase (ver "Configuração pendente") para o online funcionar. As regras aceitam agora baralhos de 22 (e de 12, para clientes antigos em cache).
-- **Cartas novas (31 → 120)**: o Pedro vai correr o prompt `docs/DEEP-RESEARCH-CARTAS.md` no Gemini Deep Research e trazer o relatório. Depois: dados em `Cards.js`, efeitos em `CardEffects.js` (provavelmente um motor de "receitas" genérico, porque o relatório devolve cada efeito em primitivas), ícones/arte, um teste por carta, baralho inicial e baralhos do bot de 22.
+- **Arte das 89 cartas novas**: falta gerar no Gemini as folhas C a H (prompts no fim de `docs/ART-PROMPTS.md`) e recortá-las com `python tools/slice-items.py folha.png C` (… H). Até lá as cartas novas mostram o emblema da família (`src/view/CardArtFamilies.js`). Vídeos das 9 Lendárias novas também por fazer (prompts no mesmo ficheiro).
 
 ## Próximos passos (por prioridade)
 
-00. **Expandir para 120 cartas** com o relatório do Deep Research (ver "Em curso").
+00. ~~Expandir para 120 cartas~~ (feito a 2026-10-27). A seguir: arte C–H e vídeos (ver "Em curso"); propostas de economia do relatório ainda por fazer — pacote de boas-vindas (5 pacotes + 1 Lendária à escolha), missões diárias, bónus de 1.ª vitória do dia, trocar 1 carta da mão inicial (mulligan); estatística de vitórias por carta para equilibrar as 120.
 0. ~~Redesenho da estética~~ (feito a 2026-10-27 com o relatório do Gemini; ver `docs/DIRECAO-DE-ARTE.md`). Continuar com a lista "Por fazer" desse ficheiro: sons novos, modo daltónico, calha da Chain, Frame Break, câmara 3D nos menus, missões, ecrã VS no online.
 1. Teste real online + corrigir o que as regras recusarem.
 2. Visual: aplicar o estilo néon/3D ao menu, loja e baralhos (os retratos 3D podem entrar lá com `YC.pieceHTML` se houver um renderer); fundo de estádio gerado por IA (prompts no relatório do Gemini, secção 5). Os modelos GLB deixaram de ser precisos: as peças de vinil feitas por código substituem-nos.
@@ -53,6 +53,17 @@
 - Num separador escondido o navegador quase para as animações (requestAnimationFrame); o motor espera no máximo 4 s por animação, por isso o jogo nunca bloqueia, só fica lento.
 
 ## Registo de sessões
+
+### 2026-10-27 (noite, 3) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Pedido do Pedro**: aplicar o relatório do Deep Research das cartas (conversa "Prompt para Expansão de Cartas" no Gemini do Pedro) para ter pelo menos 120 cartas.
+- **Relatório**: copiado do Chrome do Pedro (o "Copiar" do Gemini trava com 150 mil caracteres; passei o texto por `postMessage` para um recetor local temporário). Texto em `docs/RELATORIO-CARTAS.md`, as 89 cartas em JSON em `docs/cartas-novas.json`, prompts de arte e vídeo no fim de `docs/ART-PROMPTS.md`.
+- **Cartas**: 89 novas em `src/game/CardsNew.js` (35 C, 28 R, 17 É, 9 L; 24 Equipamentos, 20 Armadilhas de Casa, 18 Reativas, 10 Counter-Traps, 17 Magias Rápidas) em 7 famílias. Cerca de 25 textos foram afinados ao implementar: o relatório tinha cartas iguais a outras (ex.: Gás Sonífero = Jaula, Prensa = Pântano), uma Comum que anulava tudo (Cartão Vermelho passou a anular só Equipamentos), alvos ambíguos ("a peça ativa") e escolhas que pediam menus (Saque, Transmutação, Papagaio, Canhão passaram a automáticas). Ajustes do relatório às originais: Espada (sem Dama, máx. 1 carta por turno), Lança (só Peão/Cavalo), Bigorna (também congela as inimigas à volta), Seguro de Vida (só Cavalo/Bispo/Torre/Dama).
+- **Motor**: regras de movimento novas no `ChessRules` (Patins, Exoesqueleto, Sapatos, Braço, Sirene, Colete, Broca, Escudo de Choque, casas bloqueadas, peças silenciadas/sem captura, arranque da Escolta); estados, bloqueios, empurrões, trocas, peões novos, descartes, roubos, ações extra e reciclagem do baralho em `MatchStatus.js`; efeitos em `CardEffects2.js` (Magias Rápidas, Counter-Traps, alvos), `CardReactives.js` e `CardEffects3.js` (Armadilhas de Casa, poderes dos Equipamentos); `perft`/notação passaram para `ChessNotation.js`. Correção importante: `exposesKing` substituía o array do tabuleiro (baralhava ciclos que percorrem as peças); agora repõe no próprio array. Regra nova: um efeito fora da vez de quem joga não pode pôr o Rei de quem joga em xeque.
+- **Regras do baralho (relatório, secção A)**: até 3 Lendárias por baralho, até 4 ações de carta num turno (com cartas), baralho vazio recicla o cemitério uma vez (sem Lendárias). Mão inicial 3 / máx. 5 e catch-up iguais.
+- **Economia**: baralho inicial novo "Patrulha da Oficina" (14 C + 8 R); perfis passam à versão 3 e recebem as cartas desse baralho que faltem (`Economy.giveStarter`); proteção contra duplicados nas Épicas e Lendárias dos pacotes. Bot: baralhos temáticos do relatório (`YC.Cards.BOT_DECKS`, usados em 60 % das partidas) e regras para as cartas novas (`BotCards.js`).
+- **Ecrã**: escolha de alvos genérica (1 casa, ou peça + destino) por clique, arrasto e nas respostas da Chain; a barra de ação desce para baixo do tabuleiro quando o tapava e, ao escolher alvo, só mostra "Cancelar"; casas bloqueadas com barreira de listras no 3D (`Board3DStatus.js`) e no CSS; etiquetas e chips de estado (desligada, sem ataque, presa); Baralhos com filtro por família e "Só as minhas"; emblema da família como arte de reserva.
+- **Testes**: `tools/tests/` com um teste por carta nova + regras (125/125); `simulate.js` usa baralhos que percorrem a coleção toda e conta as Armadilhas de Casa armadas como usadas (30/30, nenhuma carta por usar); online 8/8.
+- **Como testar**: os 4 comandos; Baralhos → filtros das famílias; partida → usar Intimação (casa bloqueada), Brisa Polar (peça inimiga) e Helicóptero (peça + casa), por clique e a arrastar.
 
 ### 2026-10-27 (noite, 2) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Pedido do Pedro**: usar outra vez o Deep Research para chegar a pelo menos 120 cartas; baralho passa a 22 cartas; nos Baralhos, mostrar a carta grande ao passar o rato.

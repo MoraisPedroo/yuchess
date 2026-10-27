@@ -111,6 +111,7 @@
         if (badge && p.morphUntil) { badge.material.map = T3().label(LETTER[p.morphFrom] || '?', '#81C995'); badge.material.needsUpdate = true; badge.scale.set(0.5, 0.25, 1); badge.position.set(-0.35, h + 0.2, 0); }
         const fz = this.accessory(g, 'freezeTag', frozen, () => new THREE.Sprite(new THREE.SpriteMaterial({ depthTest: false })));
         if (fz && frozen) { fz.material.map = T3().label(`${Math.ceil((p.frozenUntil - turn) / 2)}`, '#8FD3FF'); fz.material.needsUpdate = true; fz.scale.set(0.55, 0.28, 1); fz.position.set(0.35, h + 0.2, 0); }
+        if (this.syncStatus) this.syncStatus(g, p, h);
         g.userData.h = h;
         g.userData.checked = sq === checked;
       });
@@ -120,6 +121,7 @@
       this.pickables = this.pickables.filter((o) => !o.userData.pick || o.userData.pick.kind !== 'piece');
       for (const g of this.pieceEls.values()) this.pickables.push(g);
       this.syncTraps(m, viewer);
+      if (this.syncBlocks) this.syncBlocks(m);
       this.syncSides(m, viewer);
     },
 

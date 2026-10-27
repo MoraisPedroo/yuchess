@@ -1,4 +1,5 @@
-/* Cards.js — as 31 cartas do Chess-Gi-Oh! (dados puros; os efeitos estão em CardEffects.js).
+/* Cards.js — as 120 cartas do Chess-Gi-Oh!: as 31 originais aqui e as 89 da expansão em CardsNew.js (dados puros;
+   os efeitos estão em CardEffects.js e CardEffects2.js).
    kind: EQUIP (Velocidade 1, da mão para uma peça) · GRID (armadilha escondida numa casa)
          REACTIVE (armadilha virada para baixo na Zona, reage a captura/destruição/xeque)
          COUNTER (Counter-Trap Velocidade 3, virada para baixo na Zona) · QUICK (Magia Rápida Velocidade 2). */
@@ -17,8 +18,8 @@
 
   // [id, nome, tipo, kind, raridade, velocidade, extra, texto, [cor1, cor2, ícone, som]]
   const RAW = [
-    ['eq_espada_ganancia', 'Espada da Ganância Voraz', 'EQUIPMENT', 'EQUIP', 'EPIC', 1, { pieces: 'pnbrq' },
-      'Equipa uma peça aliada. Sempre que ela capturar uma peça inimiga, compras 1 carta.', ['#F538A0', '#FCC934', 'GREED_SWORD', 'sword_draw']],
+    ['eq_espada_ganancia', 'Espada da Ganância Voraz', 'EQUIPMENT', 'EQUIP', 'EPIC', 1, { pieces: 'pnbr', family: 'sucata' },
+      'Equipa um Peão, Cavalo, Bispo ou Torre. Quando ela capturar uma peça inimiga, compras 1 carta (máx. 1 por turno).', ['#F538A0', '#FCC934', 'GREED_SWORD', 'sword_draw']],
     ['eq_botas_vento', 'Botas de Vento Supersónico', 'EQUIPMENT', 'EQUIP', 'COMMON', 1, { pieces: 'p' },
       'Equipa um Peão. Pode avançar 2 casas em qualquer turno, se o caminho estiver livre.', ['#12B5CB', '#FFFFFF', 'WIND_BOOTS', 'spring_jump']],
     ['eq_mola_canguru', 'Mola de Salto Canguru', 'EQUIPMENT', 'EQUIP', 'RARE', 1, { pieces: 'rb' },
@@ -29,8 +30,8 @@
       'Equipa um Peão. Passa a mover-se e a capturar como um Rei e recebe 1 Escudo.', ['#FCC934', '#D93025', 'ROYAL_SCEPTER', 'magic_zap']],
     ['eq_armadura_espinhos', 'Armadura de Cacto Explosivo', 'EQUIPMENT', 'EQUIP', 'RARE', 1, { pieces: 'pnbr' },
       'Se a peça equipada for capturada, a peça atacante (exceto o Rei) é destruída com ela.', ['#81C995', '#111111', 'SPIKE_ARMOR', 'explosion_bam']],
-    ['eq_lanca_telescopica', 'Lança Telescópica de Mola', 'EQUIPMENT', 'EQUIP', 'EPIC', 1, { pieces: 'pnr' },
-      'Uma vez por partida, captura uma peça inimiga até 2 casas em linha sem sair da sua casa.', ['#D93025', '#FA903E', 'SPRING_SPEAR', 'sword_draw']],
+    ['eq_lanca_telescopica', 'Lança Telescópica de Mola', 'EQUIPMENT', 'EQUIP', 'EPIC', 1, { pieces: 'pn', family: 'oficina' },
+      'Equipa um Peão ou Cavalo. Uma vez por partida, captura uma peça inimiga até 2 casas em linha sem sair da sua casa.', ['#D93025', '#FA903E', 'SPRING_SPEAR', 'sword_draw']],
     ['eq_capa_magnetica', 'Capa de Repulsão Magnética', 'EQUIPMENT', 'EQUIP', 'COMMON', 1, { pieces: 'nbrq' },
       'Os Peões inimigos não podem capturar a peça equipada.', ['#C58AF9', '#1A73E8', 'MAGNET_CAPE', 'shield_clang']],
 
@@ -39,7 +40,7 @@
     ['gt_jaula_estatica', 'Jaula de Choque Cartoon', 'GRID_TRAP', 'GRID', 'COMMON', 2, {},
       'Escondida numa casa. A peça inimiga que a pise fica congelada durante 2 turnos.', ['#FCC934', '#1A73E8', 'ELECTRIC_CAGE', 'ice_freeze']],
     ['gt_guilhotina_bigorna', 'Bigorna de 100 Toneladas', 'GRID_TRAP', 'GRID', 'LEGENDARY', 2, {},
-      'Escondida numa casa. Cai uma bigorna gigante e destrói a peça inimiga que a pise (exceto o Rei).', ['#111111', '#D93025', 'HEAVY_ANVIL', 'explosion_bam']],
+      'Escondida numa casa. Cai uma bigorna gigante: destrói a peça inimiga que a pise (exceto o Rei) e congela 1 turno as inimigas à volta.', ['#111111', '#D93025', 'HEAVY_ANVIL', 'explosion_bam']],
     ['gt_pantano_chiclete', 'Pântano de Chiclete Rosa', 'GRID_TRAP', 'GRID', 'COMMON', 2, {},
       'Escondida numa casa. Destrói os Equipamentos da peça inimiga que a pise e congela-a 1 turno.', ['#F538A0', '#FFFFFF', 'BUBBLEGUM_SWAMP', 'ice_freeze']],
     ['gt_mola_retorno', 'Trampolim de Ejeção', 'GRID_TRAP', 'GRID', 'RARE', 2, {},
@@ -61,8 +62,8 @@
       'Quando uma Dama, Torre, Bispo ou Cavalo aliado seria capturado: destrói um Peão aliado no lugar dele e cancela o ataque.', ['#FA903E', '#FFFFFF', 'DUMMY_DOLL', 'spring_jump']],
     ['rt_alarme_real', 'Guarda-Costas do Rei', 'REACTIVE_TRAP', 'REACTIVE', 'RARE', 2, { trigger: 'CHECK' },
       'Quando o teu Rei fica em xeque: congela 2 turnos a peça que deu xeque e compras 1 carta.', ['#FCC934', '#1A73E8', 'ROYAL_SIREN', 'shield_clang']],
-    ['rt_vampiro_energia', 'Seguro de Vida de Sucata', 'REACTIVE_TRAP', 'REACTIVE', 'COMMON', 2, { trigger: 'DESTROYED' },
-      'Quando uma peça aliada é capturada ou destruída: compras 2 cartas.', ['#81C995', '#FCC934', 'PIGGY_BANK', 'magic_zap']],
+    ['rt_vampiro_energia', 'Seguro de Vida de Sucata', 'REACTIVE_TRAP', 'REACTIVE', 'COMMON', 2, { trigger: 'DESTROYED', majorOnly: true, family: 'sucata' },
+      'Quando um Cavalo, Bispo, Torre ou Dama teu é capturado ou destruído: compras 2 cartas.', ['#81C995', '#FCC934', 'PIGGY_BANK', 'magic_zap']],
     ['rt_cupula_dupla', 'Gerador de Bolhas Gémeas', 'REACTIVE_TRAP', 'REACTIVE', 'EPIC', 2, { trigger: 'DESTROYED', shieldCard: true },
       'Quando uma peça aliada é destruída: dá um Escudo às 2 peças aliadas mais valiosas sem escudo.', ['#12B5CB', '#F538A0', 'TWIN_BUBBLES', 'shield_clang']],
 
@@ -85,26 +86,37 @@
   ];
 
   const CARDS = {};
-  const LIST = RAW.map(([id, name, type, kind, rarity, ss, extra, text, [primary, secondary, icon, sfx]]) => {
+  const LIST = RAW.concat(YC.CARDS_NEW || []).map(([id, name, type, kind, rarity, ss, extra, text, [primary, secondary, icon, sfx]]) => {
     const c = { id, name, type, kind, rarity, ss, text, theme: { primary, secondary, icon, sfx }, ...extra };
     if (c.pieces) c.pieces = c.pieces.split('');
     CARDS[id] = c;
     return c;
   });
 
-  // 22 cartas: 6 Equipamentos, 7 Armadilhas de Casa, 5 Reativas, 2 Counter-Traps e 2 Magias Rápidas
+  // Baralho inicial "Patrulha da Oficina" (relatório, secção F): 14 Comuns e 8 Raras, ensina os 5 tipos de carta
   const STARTER_DECK = [
-    'eq_espada_ganancia', 'eq_botas_vento', 'eq_botas_vento', 'eq_capa_magnetica', 'eq_capa_magnetica', 'eq_mola_canguru',
-    'gt_jaula_estatica', 'gt_jaula_estatica', 'gt_bomba_tinta', 'gt_bomba_tinta', 'gt_pantano_chiclete', 'gt_pantano_chiclete',
-    'gt_mina_repulsora',
-    'rt_escudo_divino', 'rt_fumaca_ninja', 'rt_fumaca_ninja', 'rt_vampiro_energia', 'rt_vampiro_energia',
-    'ct_tesoura_corta_fio', 'ct_tesoura_corta_fio', 'ct_quebra_escudo', 'ct_quebra_escudo'
+    'eq_botas_vento', 'eq_botas_vento', 'eq_colete_balas', 'eq_colete_balas', 'eq_mola_canguru', 'eq_mola_canguru',
+    'gt_jaula_estatica', 'gt_jaula_estatica', 'gt_mola_retorno', 'gt_mola_retorno',
+    'rt_fumaca_ninja', 'rt_fumaca_ninja', 'rt_alarme_real', 'rt_alarme_real',
+    'ct_tesoura_corta_fio', 'ct_tesoura_corta_fio', 'ct_desmancha_prazeres', 'ct_desmancha_prazeres',
+    'qs_escolta_armada', 'qs_escolta_armada', 'qs_helicoptero_apoio', 'qs_helicoptero_apoio'
   ];
 
-  const RULES = { DECK_SIZE: 22, START_HAND: 3, MAX_HAND: 5, MAX_GRID_TRAPS: 3, ZONE_SLOTS: 3, ACTIONS_PER_TURN: 2, MAX_EQUIPS: 2, CHAIN_MAX: 8, MAX_COPIES: 2, MAX_LEGENDARIES: 2 };
+  // Baralhos do bot (secção F): Fácil "Circo no Gelo", Médio "Engenharia Mutante", Difícil "Supremo Tribunal"
+  const x2 = (...ids) => ids.flatMap((id) => [id, id]);
+  const BOT_DECKS = {
+    easy: [...x2('eq_patins_gelo', 'eq_capa_magnetica', 'eq_cubo_armadura', 'gt_poca_escorregadia', 'gt_bomba_tinta', 'gt_alcapao_palco',
+      'rt_congelamento_defesa', 'rt_buzina_estridente', 'ct_varinha_truque', 'qs_sopro_invernal', 'qs_arremesso_ancora')],
+    medium: [...x2('eq_broca_perfuradora', 'eq_chassi_reforcado', 'eq_aura_glacial', 'gt_prensa_hidraulica', 'gt_lodo_radioativo',
+      'rt_troca_pecas_express', 'rt_reacao_quimica_cadeia', 'ct_cartao_vermelho', 'ct_descontaminador', 'qs_transmutacao_peao', 'qs_soro_crescimento')],
+    hard: [...x2('eq_balanca_justica', 'eq_sirene_perseguicao', 'gt_cela_detencao', 'gt_tubarao_mar', 'rt_habeas_corpus', 'rt_reciclagem_turbo',
+      'ct_cartao_vermelho', 'ct_julgamento_cartoon', 'qs_saque_rapido'), 'eq_escudo_choque', 'rt_injuncao_suprema', 'ct_clausula_rescisao', 'qs_inspecao_tributaria']
+  };
+
+  const RULES = { DECK_SIZE: 22, START_HAND: 3, MAX_HAND: 5, MAX_GRID_TRAPS: 3, ZONE_SLOTS: 3, ACTIONS_PER_TURN: 2, MAX_EQUIPS: 2, CHAIN_MAX: 8, MAX_COPIES: 2, MAX_LEGENDARIES: 3, MAX_ACTIONS: 4 };
 
   YC.Cards = {
-    RARITY, TYPE_LABEL, KIND_LABEL, CARDS, LIST, STARTER_DECK, RULES,
+    RARITY, TYPE_LABEL, KIND_LABEL, CARDS, LIST, STARTER_DECK, BOT_DECKS, RULES,
     get: (id) => CARDS[id],
     byRarity: (r) => LIST.filter((c) => c.rarity === r),
     kindLabel: (c) => KIND_LABEL[c.kind]

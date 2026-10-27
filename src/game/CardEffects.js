@@ -1,5 +1,6 @@
-/* CardEffects.js — condições e efeitos das 31 cartas. Os dados estão em Cards.js;
-   aqui decide-se quando cada carta pode ser usada e o que faz ao resolver na Chain. */
+/* CardEffects.js — condições e efeitos das 31 cartas originais (as da expansão estão em CardEffects2.js e
+   CardEffects3.js, chamados daqui). Os dados estão em Cards.js / CardsNew.js; aqui decide-se quando cada carta
+   pode ser usada e o que faz ao resolver na Chain. */
 (function (YC) {
   'use strict';
 
@@ -12,21 +13,22 @@
   const E = {
     VAL,
 
-    canEquip(def, piece, team) {
+    canEquip(def, piece, team, sq) {
       return !!piece && !!def && def.kind === 'EQUIP' && (!team || piece.color === team) && piece.type !== 'k'
-        && def.pieces.includes(piece.type) && piece.equips.length < R().MAX_EQUIPS && !piece.equips.includes(def.id);
+        && def.pieces.includes(piece.type) && piece.equips.length < R().MAX_EQUIPS && !piece.equips.includes(def.id)
+        && (sq == null || YC.CardEffects3.canEquip(def, piece, sq));
     },
 
     equipTargets(m, team, def) {
       const out = [];
-      for (let sq = 0; sq < 64; sq++) if (E.canEquip(def, m.pos.board[sq], team)) out.push(sq);
+      for (let sq = 0; sq < 64; sq++) if (E.canEquip(def, m.pos.board[sq], team, sq)) out.push(sq);
       return out;
     },
 
-    /** Casas vazias das filas 3 a 6 sem armadilha própria. */
+    /** Casas vazias (e não bloqueadas) das filas 3 a 6 sem armadilha própria. */
     trapSquares(m, team) {
       const out = [];
-      for (let sq = 16; sq < 48; sq++) if (!m.pos.board[sq] && !m.trapAt(sq, team)) out.push(sq);
+      for (let sq = 16; sq < 48; sq++) if (!m.pos.board[sq] && !m.trapAt(sq, team) && !C().isBlocked(m.pos, sq)) out.push(sq);
       return out;
     },
 
@@ -63,18 +65,15 @@
 
     validTarget(m, team, def, target) {
       if (!def.target) return true;
-      if (!target) return false;
-      if (def.target === 'SQUARE') return Number.isInteger(target.sq) && target.sq >= 0 && target.sq < 64;
-      if (def.target === 'STEAL') return E.stealPairs(m, team).some((p) => p.from === target.from && p.to === target.to);
-      return false;
+      return YC.CardEffects2.validTarget(m, team, def, target);
     },
 
     /** Magia Rápida ativada na própria preparação: só se fizer alguma coisa. */
     canActivate(m, team, def) {
       if (def.target === 'STEAL') return E.stealPairs(m, team).length > 0;
-      if (def.target === 'SQUARE') return m.traps.length > 0;
+      if (def.id === 'ct_emp_cartoon') return m.traps.length > 0;
       if (def.id === 'ct_quebra_escudo') return E.enemyShields(m, team) > 0;
-      return false;
+      return !!YC.CardEffects2.canActivate(m, team, def);
     },
 
     canRespondToLink(m, team, def, top) {
@@ -92,9 +91,9 @@
         case 'rt_fumaca_ninja': return ev.target.color === team && E.dodgeSquare(m, ev) >= 0;
         case 'rt_troca_dubles': return ev.target.color === team && 'nbrq'.includes(ev.target.type) && !!E.substitutePawn(m, team);
         case 'rt_alarme_real': return ev.team === team && ev.checkers.length > 0;
-        case 'rt_vampiro_energia': return ev.team === team && m.players[team].deck.length > 0;
+        case 'rt_vampiro_energia': return ev.team === team && m.players[team].deck.length > 0 && (!def.majorOnly || 'nbrq'.includes(m.realType(ev.piece)));
         case 'rt_cupula_dupla': return ev.team === team && !lock && E.shieldCandidates(m, team).length > 0;
-        default: return false;
+        default: return YC.CardEffects2.canRespondToEvent(m, team, def, ev);
       }
     },
 
@@ -116,7 +115,7 @@
         if (moves) { pos.board[ev.from] = null; pos.board[ev.to] = attacker; }
         const legal = !C().inCheck(pos, piece.color) && !C().inCheck(pos, enemy);
         const safe = legal && !C().isAttacked(pos, to, enemy);
-        pos.board = saved;
+        saved.forEach((q, i) => { pos.board[i] = q; });
         if (safe) return to;
         if (legal && fallback < 0) fallback = to;
       }
@@ -170,12 +169,13 @@
       const def = l.def, team = l.team, enemy = m.other(team);
       if (l.kind === 'EQUIP') {
         const piece = m.pieceById(l.target && l.target.pieceId);
-        if (!E.canEquip(def, piece, team)) { m.say(`${def.name} falhou: a peça já não serve.`, team, { card: def.id }); return; }
+        if (!E.canEquip(def, piece, team, m.sqOf(piece))) { m.say(`${def.name} falhou: a peça já não serve.`, team, { card: def.id }); return; }
         piece.equips.push(def.id);
         l.keep = true;
         const sq = m.sqOf(piece);
         m.say(`${def.name} equipada: ${name(piece)} em ${sqName(sq)}.`, team, { card: def.id, sq, pieceId: piece.id });
         await m.bus.emitAsync('equip:attach', { piece, sq, card: def, inst: l.inst, team });
+        await YC.CardEffects3.onEquip(m, piece, def);
         if (def.shield) await m.giveShield(piece, def.id);
         return;
       }
@@ -194,7 +194,7 @@
           if (hidden) { hidden.revealed = true; m.say(`Armadilha inimiga revelada em ${sqName(hidden.sq)}.`, team, { card: hidden.id, uid: hidden.uid, sq: hidden.sq }); await m.bus.emitAsync('trap:reveal', { trap: hidden }); }
         }
         if (def.freeze && t.event && t.event.target && m.sqOf(t.event.target) >= 0) await m.freeze(t.event.target, 1, def.id);
-        return;
+        return YC.CardEffects2.counterExtra(m, l, t);
       }
       return E.resolveQuick(m, l);
     },
@@ -210,7 +210,12 @@
           await E.pushBack(m, piece, ev);
           return m.freeze(piece, 1, id);
         case 'gt_jaula_estatica': return m.freeze(piece, 2, id);
-        case 'gt_guilhotina_bigorna': return m.removeOrFreeze(piece, id);
+        case 'gt_guilhotina_bigorna': {
+          const near = YC.CardEffects3.around(m, sq, l.team);
+          await m.removeOrFreeze(piece, id);
+          for (const q of near) if (m.sqOf(q) >= 0) await m.freeze(q, 1, id);
+          return;
+        }
         case 'gt_pantano_chiclete': {
           if (piece.equips.length) {
             const ids = piece.equips.splice(0);
@@ -233,6 +238,7 @@
         case 'gt_bomba_tinta':
           await E.pushBack(m, piece, ev);
           return m.draw(l.team, 1, 'card');
+        default: return YC.CardEffects3.resolveGrid(m, l);
       }
     },
 
@@ -269,6 +275,7 @@
         case 'rt_cupula_dupla':
           for (const p of E.shieldCandidates(m, team).slice(0, 2)) await m.giveShield(p, id);
           return;
+        default: return YC.CardEffects2.resolveReactive(m, l);
       }
     },
 
@@ -303,7 +310,9 @@
           if (p && p.color === enemy && p.shield) { p.shield = false; await m.bus.emitAsync('shield:shatter', { piece: p, sq, cause: id }); }
         }
         m.say('Britadeira! Escudos inimigos furados.', team, { card: id });
+        return;
       }
+      return YC.CardEffects2.resolveQuick(m, l);
     }
   };
 

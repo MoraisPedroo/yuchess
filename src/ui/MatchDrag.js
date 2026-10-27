@@ -56,7 +56,7 @@
       this.cancelMode();
       this.selCard = inst;
       this.mode = def.kind === 'EQUIP' ? 'equip' : def.kind === 'GRID' ? 'trap'
-        : def.kind === 'QUICK' && def.target === 'SQUARE' ? 'target-sq' : def.kind === 'QUICK' && def.target === 'STEAL' ? 'steal-from' : 'card';
+        : def.kind === 'QUICK' && def.target ? 'tgt1' : 'card';
       // parte da carta tal como está desenhada na mão (talvez ampliada)
       const r0 = (el.querySelector('.hc-tilt') || el).getBoundingClientRect();
       const ghost = document.createElement('div');
@@ -173,7 +173,7 @@
     dragIdleText(def) {
       if (def.kind === 'GRID') return 'Posiciona numa casa vazia (filas 3 a 6). Fica escondida do adversário.';
       if (def.kind === 'EQUIP') return `Equipa ${this.equipWho(def)}.`;
-      if (def.kind === 'QUICK') return def.target === 'SQUARE' ? 'Larga na casa central da explosão.' : def.target === 'STEAL' ? 'Larga na peça inimiga equipada.' : 'Larga no tabuleiro para ativar, ou na Zona para guardar.';
+      if (def.kind === 'QUICK') return def.target ? this.tgtHint(def, false).replace(/^Escolhe a /, 'Larga na ').replace(/^Escolhe o /, 'Larga no ') : 'Larga no tabuleiro para ativar, ou na Zona para guardar.';
       return 'Larga na tua Zona de Armadilhas: fica virada para baixo.';
     },
 
@@ -187,11 +187,11 @@
     },
 
     dragOkText(def, act, sq) {
-      if (act.steal != null) return `Roubar o equipamento da peça em ${SQ(sq)}.`;
+      if (act.pick1 != null) return def.target === 'STEAL' ? `Roubar o equipamento da peça em ${SQ(sq)}.` : `Escolher a peça em ${SQ(sq)}.`;
       if (act.type === 'SET_TRAP') return `Esconder em ${SQ(sq)}.`;
       if (act.type === 'EQUIP') { const p = this.match.pieceAt(sq), f = YC.PIECE_FEM[p.type]; return `Equipar ${f ? 'a' : 'o'} ${YC.PIECE_NAME[p.type]} em ${SQ(sq)}.`; }
       if (act.type === 'SET_CARD') return 'Virar na tua Zona.';
-      if (act.target && act.target.sq != null) return `Explodir em ${SQ(sq)}.`;
+      if (act.target && act.target.sq != null) return def.id === 'ct_emp_cartoon' ? `Explodir em ${SQ(sq)}.` : `Usar em ${SQ(sq)}.`;
       return 'Ativar agora.';
     },
 
@@ -212,7 +212,7 @@
         return `${YC.PIECE_FEM[p.type] ? 'Esta' : 'Este'} ${YC.PIECE_NAME[p.type]} não pode usar isto.`;
       }
       if (!E().canActivate(m, me, def)) return 'Agora não teria efeito.';
-      return def.target === 'STEAL' ? 'Escolhe uma peça inimiga com equipamento.' : 'Aqui não dá.';
+      return def.target ? this.tgtHint(def, false) : 'Aqui não dá.';
     },
 
     async dragEnd(e) {
@@ -226,12 +226,12 @@
       // a partir daqui o GSAP anima o fantasma: parte de onde a mola o deixou
       if (g) { g.set(d.ghost, { x: d.x, y: d.y }); g.to([d.tilt, d.sway].filter(Boolean), { rotationX: 0, rotationY: 0, rotation: 0, duration: 0.3, ease: 'power2.out' }); }
       const act = this.dropAction(d.inst, this.dropTarget(e));
-      if (act && act.steal != null) {
-        // Íman: a peça de onde se rouba já está escolhida; falta a tua peça que recebe
+      if (act && act.pick1 != null) {
+        // carta de 2 alvos (Íman, Malabarismo, Tirolesa, Helicóptero): o 1.º já está escolhido, falta o 2.º
         d.ghost.remove(); d.el.classList.remove('dragging');
-        this.selCard = d.inst; this.stealFrom = act.steal; this.mode = 'steal-to';
+        this.selCard = d.inst; this.tgtFrom = act.pick1; this.mode = 'tgt2';
         this.renderSoft();
-        return this.toast('Agora escolhe a tua peça que recebe o equipamento.');
+        return this.toast(this.tgtHint(YC.Cards.get(d.inst.id), true));
       }
       if (act) {
         const vis = d.form === 'item' ? d.item : d.cardWrap.querySelector('.hcard'), r = vis.getBoundingClientRect();
@@ -295,8 +295,11 @@
       if (t.kind === 'zone') return canSet ? { type: 'SET_CARD', uid: inst.uid } : null;
       if (def.kind !== 'QUICK') return canSet ? { type: 'SET_CARD', uid: inst.uid } : null;
       if (!E().canActivate(m, me, def)) return null;
-      if (def.target === 'SQUARE') return { type: 'ACTIVATE', uid: inst.uid, target: { sq } };
-      if (def.target === 'STEAL') return E().stealPairs(m, me).some((p) => p.from === sq) ? { steal: sq } : null;
+      if (def.target) {
+        const spec = YC.CardEffects2.targetSpec(m, me, def);
+        if (!spec || sq < 0 || !spec.first.includes(sq)) return null;
+        return spec.two ? { pick1: sq } : { type: 'ACTIVATE', uid: inst.uid, target: { sq } };
+      }
       return { type: 'ACTIVATE', uid: inst.uid };
     },
 

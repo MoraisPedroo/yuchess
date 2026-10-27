@@ -64,3 +64,161 @@ Row 4: 29) an orange jackhammer with red details; 30) a purple wind-up alarm clo
 
 - **Vídeos curtos (Veo) só para as Lendárias** (Cetro, Bigorna, Espelho, Apito): 4 s em ciclo, o objeto a rodar num pedestal néon, convertido para WebM pequeno (`ffmpeg -i in.mp4 -vf scale=360:-2 -c:v libvpx-vp9 -b:v 0 -crf 38 -an out.webm`) e mostrado na carta ampliada. Para as 31 cartas ficaria pesado demais (dezenas de MB).
 - **Folhas de animação (sprite sheets)**: a IA não mantém os quadros consistentes entre si; explosões, faíscas e fumo continuam a ser feitos por código (`Particles3D`).
+
+
+## Folhas C a H — as 89 cartas da expansão (relatório de 27/10/2026)
+
+Mesmo fluxo das folhas A e B: colar cada prompt no Gemini (modelo de imagem), descarregar em tamanho original e correr `python tools/slice-items.py folha-c.png C` (… até H). A ordem dos objetos é a de `docs/cartas-novas.json`, que o `slice-items.py` já conhece; a folha H só tem 9 objetos (as outras 7 células ficam em branco). Enquanto não houver imagem, as cartas novas mostram o emblema da família (`src/view/CardArtFamilies.js`).
+
+### Prompt C (Cartas 1 a 16)
+
+```
+A 4x4 grid sheet of 16 distinct game item icons, glossy 3D vinyl toy look (Pixar / Supercell quality), chunky rounded shapes, thick dark slate outline (#0F141C) like a sticker, soft studio light from the top-left, small white specular highlights, saturated candy colors, slight 3/4 view, cute cartoon but readable at small size, pure white background, no text.
+Row 1, left to right: 1) A pair of shiny turquoise ice skates with gleaming silver blades and tiny cartoon snowflakes. 2) A chunky semi-translucent blue ice cube helmet with frosted white edges and frosty breath vapor. 3) A futuristic cartoon leaf-blower made of frosted turquoise metal blasting swirling cyan snowflakes. 4) A regal vinyl bobsled throne carved from crystalline glacier ice with shiny platinum runners.
+Row 2, left to right: 5) A puddle of sleek turquoise ice with tiny comic friction lines and a miniature yellow warning sign. 6) A spiky vinyl iceberg popping out of a square hatch with cartoon frost cracks. 7) A chunky blue and white snow-cannon emerging from a trapdoor with a giant snowball loaded. 8) A round frosted vanity mirror reflecting a comical blue icicle ray.
+Row 3, left to right: 9) A high-tech cryo-capsule chamber with frosted glass windows and liquid nitrogen frost. 10) A row of three sharp glossy turquoise icicles pointed downwards with an icy cyan aura. 11) A frozen mechanical stamp with ice-gears that shatters translucent shields upon impact. 12) A swirl of baby-blue cartoon wind carrying tiny smiling ice crystals and snowflake confetti.
+Row 4, left to right: 13) An aerosol spray can colored icy blue with a frost nozzle spraying a wide fan of frozen fog. 14) A chunky cartoon orange screwdriver with a spiral chrome head and floating tiny brass screws. 15) A vibrant yellow handheld industrial drill with spiral hazard stripes and metal sparks. 16) A heavy-duty yellow construction frame with chunky hazard chevrons and dual steel rivets.
+```
+
+### Prompt D (Cartas 17 a 32)
+
+```
+A 4x4 grid sheet of 16 distinct game item icons, glossy 3D vinyl toy look (Pixar / Supercell quality), chunky rounded shapes, thick dark slate outline (#0F141C) like a sticker, soft studio light from the top-left, small white specular highlights, saturated candy colors, slight 3/4 view, cute cartoon but readable at small size, pure white background, no text.
+Row 1, left to right: 1) A giant chunky red and yellow mech suit cockpit sized perfectly for a tiny cartoon pawn. 2) A miniature industrial conveyor belt with black rubber treads and bright orange guide rails. 3) A heavy cast-iron pneumatic press stamper poised over an oily industrial steel base. 4) A metal hopper box with spinning jagged spiky cogs devouring nuts, bolts, and tin cans.
+Row 2, left to right: 5) A cartoon pit-stop toolbox that opens wide to reveal spare mechanical robotic arms. 6) A red miniature crucible furnace melting chrome gears into a shiny liquid gold ingot. 7) A hefty blue-handled adjustable wrench snapping shut aggressively with a golden spark. 8) A classic red tin oil can with a curved thin spout dripping a single golden glowing droplet.
+Row 3, left to right: 9) A pulsing energy capacitor glowing bright crimson and amber with crackling sparks. 10) A compact yellow workstation bench loaded with automated robotic screwdrivers and blueprints. 11) Enormous squeaky red and yellow vinyl clown shoes with round bulbous toes and starry laces. 12) A quirky tall vinyl unicycle with a glittering chrome wheel and a rainbow clown saddle.
+Row 4, left to right: 13) A vibrant crimson circus cannon with gold stars and decorative smoking barrel rings. 14) A cartoon tin pie plate loaded with a mountain of fluffy white cream and a shiny red cherry on top. 15) A polished wooden circus stage trapdoor bursting open with glittering gold magic sparks. 16) A fiery circus ring made of sculpted cartoon flames on a glossy striped circus stand.
+```
+
+### Prompt E (Cartas 33 a 48)
+
+```
+A 4x4 grid sheet of 16 distinct game item icons, glossy 3D vinyl toy look (Pixar / Supercell quality), chunky rounded shapes, thick dark slate outline (#0F141C) like a sticker, soft studio light from the top-left, small white specular highlights, saturated candy colors, slight 3/4 view, cute cartoon but readable at small size, pure white background, no text.
+Row 1, left to right: 1) A bright red bulbous squeeze horn with an oversized brass horn bell producing sound waves. 2) A tri-fold carnival funhouse mirror showing warped miniature duplicate cartoon reflections. 3) A velvet magician top hat with golden stars and a white dove emerging with cartoon sparkles. 4) A bright red novelty laughing box with yellow grin marks and little audio sound-waves.
+Row 2, left to right: 5) A black magician wand with a white tip that pops out a colorful fabric bouquet of daisies. 6) Three glossy juggling clubs colored red, teal, and yellow spinning in a dynamic airborne arc. 7) A steel zip-line pulley with colorful circus striped handles and tiny flying sparks. 8) A bubbling conical glass laboratory flask filled with radioactive neon-green effervescent liquid.
+Row 3, left to right: 9) A segmented teal mechanical robot arm with a three-pronged claw holding an Erlenmeyer flask. 10) A golden syringe filled with swirling rainbow plasma equipped with glowing pressure meters. 11) A brass laboratory canister venting a thick cloud of purple sleeping vapor with floating Zzz letters. 12) A twin glass tube pod filled with bubbling cyan gel with electrical sparks jumping between them.
+Row 4, left to right: 13) A glowing toxic radioactive green puddle melting the checkerboard floor with rising bubbles. 14) A chunky white and red emergency auto-injector pen releasing a soothing turquoise mist. 15) A chemical beaker bursting with pink and cyan atomic spark particles and fizzing bubbles. 16) A flexible pink and teal rubberized skin membrane patch stretching outwards with bounce lines.
+```
+
+### Prompt F (Cartas 49 a 64)
+
+```
+A 4x4 grid sheet of 16 distinct game item icons, glossy 3D vinyl toy look (Pixar / Supercell quality), chunky rounded shapes, thick dark slate outline (#0F141C) like a sticker, soft studio light from the top-left, small white specular highlights, saturated candy colors, slight 3/4 view, cute cartoon but readable at small size, pure white background, no text.
+Row 1, left to right: 1) A sterile stainless steel dome with a glowing cyan laser ring that disintegrates trap wires. 2) A corked glass potion bottle filled with swirling violet and golden sparkling liquid. 3) A retro-futuristic teal and yellow ray gun with concentric rings around the muzzle. 4) A massive bubbling syringe loaded with glowing orange growth hormone and metallic needles.
+Row 2, left to right: 5) A polished silver star badge with a cartoon engraved gavel in the center and blue ribbon. 6) A classic golden justice scale tilting comically with small legal books balancing on brass pans. 7) A cute speed camera on a tripod with a giant cartoon flash bulb flashing white light. 8) A miniature iron prison cell with thick black vertical bars and a comical padlock on the door.
+Row 3, left to right: 9) A rolled up parchment paper scroll tied with a red ribbon and stamped with a wax seal. 10) A heavy wooden courtroom judge gavel banging down on a circular sound block with sparks. 11) A golden judge gavel encased in divine purple comic lightning striking a shattered rulebook. 12) A bright red plastic referee penalty card held high with yellow whistle hanging on a lanyard.
+Row 4, left to right: 13) A legal folder stamped with a giant red REJECTED emblem emitting shockwaves. 14) A burning legal contract parchment tearing in half with glowing orange embers and falling sparks. 15) A yellow police line tape barrier blocking a checkered square with plastic traffic cones. 16) A magnifying glass with a bright blue LED light scanning through an invisible blueprint grid.
+```
+
+### Prompt G (Cartas 65 a 80)
+
+```
+A 4x4 grid sheet of 16 distinct game item icons, glossy 3D vinyl toy look (Pixar / Supercell quality), chunky rounded shapes, thick dark slate outline (#0F141C) like a sticker, soft studio light from the top-left, small white specular highlights, saturated candy colors, slight 3/4 view, cute cartoon but readable at small size, pure white background, no text.
+Row 1, left to right: 1) A shiny steel pirate hook with a gold skull emblem on a leather cuff and a miniature rope coil. 2) A colorful vinyl green and scarlet macaw parrot perched on a tiny wooden pirate peg. 3) A bulging canvas burlap sack overflowing with shiny golden dubloons and glittering gems. 4) An ornate golden navigational compass with a spinning cyan crystal needle pointing at an X.
+Row 2, left to right: 5) A wooden grooved powder keg with black metal hoops and a sizzling cartoon fuse on top. 6) An old worn treasure map roll with a bright red X mark and miniature gold palm trees. 7) A trapdoor with water splashes revealing a cartoon blue hammerhead shark with smiling teeth. 8) A sturdy iron-banded wooden treasure chest slightly cracked open with glowing green light.
+Row 3, left to right: 9) A row of three miniature bronze pirate ship cannons firing simultaneously with black smoke puffs. 10) A giant horseshoe magnet encrusted with cartoon barnacles pulling floating gears and coins. 11) A round glass rum bottle with a flaming rag cork ready to burst like a pirate molotov. 12) A messy cartoon pile of wooden planks, coiled ropes, rusted anchor, and empty brass tankards.
+Row 4, left to right: 13) A massive black cast-iron ship anchor dropping with heavy comic impact dust clouds. 14) A puffy dark blue tactical vest with bright yellow police padding and cartoon straps. 15) A white and blue electronic bullhorn megaphone emitting yellow lightning bolt sound waves. 16) A flashing red and blue dual revolving police beacon with chrome base and glossy plastic domes.
+```
+
+### Prompt H (Cartas 81 a 89)
+
+```
+A 4x4 grid sheet of 9 distinct game item icons in the first 9 slots and 7 empty pure white slots, glossy 3D vinyl toy look (Pixar / Supercell quality), chunky rounded shapes, thick dark slate outline (#0F141C) like a sticker, soft studio light from the top-left, small white specular highlights, saturated candy colors, slight 3/4 view, cute cartoon but readable at small size, pure white background, no text.
+Row 1, left to right: 1) A heavy polycarbonate transparent riot shield with reinforced blue metal bars and double grips. 2) A deployable metal spike strip unrolled on the tiles with glossy silver hollow spikes. 3) A bright orange rubber traffic cone with dual white reflective stripes and a black heavy base. 4) A spring-loaded canister opening to deploy a heavy weighted nylon net with brass weights.
+Row 2, left to right: 5) A pair of shiny chrome cartoon handcuffs with a linked chain and tiny keyhole details. 6) A striped yellow and black sawn barricade with blinking yellow safety lights on each post. 7) A cute rounded blue and white cartoon police squad car with glowing headlights and lightbar. 8) A portable foldable blue steel tactical barrier with bright yellow reflector strips.
+Row 3, left to right: 9) A chunky blue police helicopter with spinning twin yellow rotors and searchlight beam. 10) Pure white empty background. 11) Pure white empty background. 12) Pure white empty background.
+Row 4, left to right: 13) Pure white empty background. 14) Pure white empty background. 15) Pure white empty background. 16) Pure white empty background.
+```
+
+## Vídeos das 9 Lendárias novas (Veo)
+
+Texto do relatório (tabela copiada tal como veio). Gravar em `assets/video/<icone em minúsculas>.mp4` e acrescentar o ícone a `ItemToken.VIDEO`.
+
+```
+2. Prompts de Vídeo Curto (Veo, 4–6 s, Loop, Fundo Neutro) para as 9 Lendárias Novas
+
+Para conferir destaque visual às 9 cartas Lendárias novas na interface de inspeção e abertura de pacotes, a tabela seguinte apresenta os prompts de geração de vídeo curto (4 a 6 segundos, loop contínuo sobre fundo neutro #F8FAFC) otimizados para o modelo Veo.   
+
+#	ID e Nome da Carta Lendária	Família	Prompt Completo para Vídeo Veo (4–6 s, Seamless Loop, Neutral Background)
+1	
+
+eq_trono_glaciar
+
+Trineu Glaciar Zero
+
+Criogenia Cartoon
+
+	"4-second seamless loop animation, glossy 3D vinyl toy style, slight 3/4 view on a neutral light slate studio background (#F8FAFC): a regal crystalline cyan ice bobsled throne gently hovering on platinum runners, pulsing an expanding ring of cartoon frost mist and orbiting sparkling snowflakes, no text."
+2	
+
+eq_exoesqueleto_tita
+
+Exoesqueleto Robô Mecânico
+
+Oficina Maluca
+
+	"5-second seamless loop animation, glossy 3D vinyl toy style, slight 3/4 view on a neutral studio background (#F8FAFC): a chunky red and yellow toy mech-suit flexing its hydraulic pincer claws as its chest core glows bright amber and vents tiny puffs of white cartoon steam, no text."
+3	
+
+eq_canhao_homem_bala
+
+Canhão de Circo Triunfal
+
+Grande Circo Trapalhão
+
+	"4-second seamless loop animation, glossy 3D vinyl toy style, slight 3/4 view on a neutral studio background (#F8FAFC): a crimson and gold circus cannon rocking back and forth on chunky wheels with a sizzling fuse, puffing a ring of star-shaped cartoon smoke from the barrel, no text."
+4	
+
+rt_truque_desaparecer
+
+Truque de Desaparecimento
+
+Grande Circo Trapalhão
+
+	"5-second seamless loop animation, glossy 3D vinyl toy style, slight 3/4 view on a neutral studio background (#F8FAFC): a purple velvet magician top hat tipping open in mid-air as a swirl of golden magic sparkles and a cute vinyl white dove circle out and dive back inside, no text."
+5	
+
+eq_elixir_mutacao_total
+
+Soro da Mutação Alfa
+
+Laboratório Mutante
+
+	"4-second seamless loop animation, glossy 3D vinyl toy style, slight 3/4 view on a neutral studio background (#F8FAFC): a chunky golden laboratory syringe floating and vibrating slightly while rainbow plasma bubbles swirl inside the glass barrel and pressure gauges bounce, no text."
+6	
+
+rt_injuncao_suprema
+
+Veto do Supremo Tribunal
+
+Tribunal da Batota
+
+	"5-second seamless loop animation, glossy 3D vinyl toy style, slight 3/4 view on a neutral studio background (#F8FAFC): a heavy golden judge gavel crackling with purple cartoon lightning, slamming down onto a wooden block to emit a circular shockwave before rising back up, no text."
+7	
+
+ct_clausula_rescisao
+
+Rescisão Judicial Unilateral
+
+Tribunal da Batota
+
+	"4-second seamless loop animation, glossy 3D vinyl toy style, slight 3/4 view on a neutral studio background (#F8FAFC): a rolled parchment contract with a red wax seal snapping in half in mid-air with bright orange cartoon flames and reforming seamlessly in a loop, no text."
+8	
+
+eq_bussola_tesouro
+
+Bússola Dourada Caraíbas
+
+Banco de Sucata & Pirataria
+
+	"5-second seamless loop animation, glossy 3D vinyl toy style, slight 3/4 view on a neutral studio background (#F8FAFC): an ornate pirate gold compass opening its lid as a glowing cyan crystal needle spins rapidly and projects a holographic red treasure X above the dial, no text."
+9	
+
+eq_escudo_choque
+
+Escudo Tático Antitumulto
+
+Força Policial
+
+	"4-second seamless loop animation, glossy 3D vinyl toy style, slight 3/4 view on a neutral studio background (#F8FAFC): a chunky blue and transparent polycarbonate riot shield projecting a hexagonal cyan energy barrier that deflects a bouncing cartoon spark, no text."
+```

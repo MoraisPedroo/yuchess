@@ -125,6 +125,8 @@
       }
       this.renderTraps(m, viewer);
       this.squares.forEach((s) => s.classList.toggle('check', Number(s.dataset.sq) === checked));
+      const blocked = m.pos.blocked || [];
+      this.squares.forEach((s) => s.classList.toggle('blocked', blocked.includes(Number(s.dataset.sq))));
     }
 
     renderTraps(m, viewer) {

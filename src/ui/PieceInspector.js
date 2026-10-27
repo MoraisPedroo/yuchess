@@ -34,7 +34,12 @@
       const turnsLeft = (until) => Math.max(1, Math.ceil((until - turn) / 2));
       if (p.shield) chips.push(['shield', 'shield', 'Escudo: a próxima captura falha']);
       if (p.frozenUntil > turn) chips.push(['ice', 'snow', `Congelada · ${turnsLeft(p.frozenUntil)} turno(s)`]);
-      if (p.morphUntil) chips.push(['morph', 'potion', `Encolhida · volta a ${YC.PIECE_NAME[p.morphFrom]} em ${turnsLeft(p.morphUntil)} turno(s)`]);
+      if (p.morphUntil) chips.push(['morph', 'potion', `Transformada · volta a ${YC.PIECE_NAME[p.morphFrom]} em ${turnsLeft(p.morphUntil)} turno(s)`]);
+      if (p.silenced) chips.push(['morph', 'no', `Equipamentos desligados · ${turnsLeft(p.silencedUntil)} turno(s)`]);
+      if (p.noCap) chips.push(['danger', 'no', `Não pode capturar · ${turnsLeft(p.noCapUntil)} turno(s)`]);
+      if (p.untargetable) chips.push(['ice', 'lock', `Presa: não pode ser alvo de cartas · ${turnsLeft(p.untargetableUntil)} turno(s)`]);
+      if (p.dash) chips.push(['info', 'arrow', 'Pode avançar 2 casas neste lance']);
+      if (p.trapProof) chips.push(['info', 'shield', 'Não ativa armadilhas neste turno']);
       if (p.type === 'k' && YC.Chess.inCheck(m.pos, p.color)) chips.push(['danger', 'warn', 'Em xeque!']);
       if (p.type === 'k') chips.push(['info', 'crown', 'Imune a congelar e a ser destruído por cartas']);
       if (YC.Chess.has(p, 'eq_lanca_telescopica')) chips.push(['info', 'spear', p.lanceUsed ? 'Lança já usada' : 'Lança pronta (1 uso)']);

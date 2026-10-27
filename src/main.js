@@ -48,7 +48,8 @@
       if (!v.ok) { YC.UI.toast(`Baralho inválido: ${v.errors[0]}`, true); YC.Hub.show('decks'); return; }
       const rng = YC.mulberry32((Date.now() ^ (Math.random() * 1e9)) >>> 0);
       const me = rng() < 0.5 ? 'w' : 'b', bot = YC.other(me);
-      const botDeck = YC.Economy.randomDeck(rng, { maxRarity: BOT_RARITY[level] });
+      // baralho temático do nível (relatório, secção F) ou, às vezes, um baralho ao acaso para variar
+      const botDeck = rng() < 0.6 ? YC.Cards.BOT_DECKS[level].slice() : YC.Economy.randomDeck(rng, { maxRarity: BOT_RARITY[level] });
       const bus = new YC.EventBus();
       const decks = { [me]: deck.cards.slice(), [bot]: botDeck };
       const names = { [me]: p.displayName, [bot]: BOT_NAMES[level] };

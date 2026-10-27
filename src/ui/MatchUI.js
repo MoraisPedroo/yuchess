@@ -243,6 +243,10 @@
       c.className = 'btn small secondary'; c.textContent = 'Cancelar';
       c.onclick = () => this.cancelMode();
       bar.appendChild(c);
+      // a barra não pode tapar o tabuleiro (a fila de baixo é muitas vezes o alvo): desce para logo abaixo dele
+      bar.style.bottom = '';
+      const br = this.board.boardRect && this.board.boardRect(), r = bar.getBoundingClientRect();
+      if (br && r.top < br.bottom && r.bottom > br.top) bar.style.bottom = `${Math.max(6, innerHeight - br.bottom - r.height - 6)}px`;
     }
 
     modeHint() {
@@ -250,9 +254,10 @@
       switch (this.mode) {
         case 'equip': return 'Clica numa peça brilhante para a equipar.';
         case 'trap': return 'Escolhe uma casa vazia (filas 3–6) para esconder a armadilha.';
-        case 'target-sq': case 'r-target-sq': return 'Escolhe a casa central da explosão.';
-        case 'steal-from': case 'r-steal-from': return 'Escolhe a peça inimiga equipada.';
-        case 'steal-to': case 'r-steal-to': return 'Agora a tua peça que recebe o equipamento.';
+        case 'tgt1': case 'tgt2': case 'r-tgt1': case 'r-tgt2': {
+          const id = this.mode.startsWith('r-') ? this.respondPick && this.respondPick.id : this.selCard && this.selCard.id;
+          return id ? this.tgtHint(YC.Cards.get(id), this.mode.endsWith('tgt2')) : '';
+        }
         case 'card': return 'O que queres fazer com esta carta?';
         default: return '';
       }

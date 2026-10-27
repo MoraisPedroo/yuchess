@@ -174,7 +174,7 @@
           for (const sq of E().equipTargets(m, team, def)) cands.push({ score: this.equipScore(m, def, m.pieceAt(sq), sq), act: { type: 'EQUIP', uid: inst.uid, sq } });
         } else if (def.kind === 'GRID') {
           if (m.traps.filter((t) => t.owner === team).length >= Cards().RULES.MAX_GRID_TRAPS) continue;
-          const sq = this.bestTrapSquare(m);
+          const sq = this.bestTrapSquare(m, def);
           if (sq >= 0) cands.push({ score: 34 + (def.rarity === 'LEGENDARY' ? 12 : 0), act: { type: 'SET_TRAP', uid: inst.uid, sq } });
         } else {
           if (def.kind === 'QUICK') {
@@ -221,14 +221,15 @@
           const pawnHit = C().attackersOf(m.pos, sq, C().other(piece.color)).some((a) => m.pieceAt(a).type === 'p');
           return (pawnHit ? 55 : 10) + base / 4;
         }
-        default: return base;
+        default: return this.equipScore2(m, def, piece, sq, base, attacked);
       }
     }
 
-    bestTrapSquare(m) {
+    bestTrapSquare(m, def) {
       const team = this.team, enemy = C().other(team);
       const heat = new Array(64).fill(0);
-      for (const mv of C().pseudoMoves(m.pos, enemy, {})) if (!m.pos.board[mv.to]) heat[mv.to] += 3 + PV[mv.piece.type] / 300;
+      // o X Assinala Tesouro é para as próprias peças pisarem
+      for (const mv of C().pseudoMoves(m.pos, def && def.allyStep ? team : enemy, {})) if (!m.pos.board[mv.to]) heat[mv.to] += 3 + PV[mv.piece.type] / 300;
       let best = -1, bestScore = -1;
       for (const sq of E().trapSquares(m, team)) {
         const r = sq >> 3, c = sq & 7;
@@ -251,11 +252,11 @@
         const pair = this.bestSteal(m);
         return pair ? { score: 30 + pair.value, act: { type: 'ACTIVATE', uid, target: { from: pair.from, to: pair.to } } } : null;
       }
-      if (def.target === 'SQUARE') {
+      if (def.id === 'ct_emp_cartoon') {
         const known = m.traps.filter((t) => t.owner !== team && t.revealed);
         return known.length ? { score: 48, act: { type: 'ACTIVATE', uid, target: { sq: known[0].sq } } } : null;
       }
-      return null;
+      return this.quickPlay2(m, def, uid);
     }
 
     bestSteal(m) {
@@ -289,11 +290,11 @@
       } else if (ctx.window === 'CHECK') {
         o = pick(['rt_alarme_real']);
       } else if (ctx.window === 'LINK') {
-        o = this.linkResponse(m, ctx, pick, val);
+        o = this.linkResponse(m, ctx, pick, val) || this.counterNew(ctx);
       }
+      if (!o && ctx.window !== 'LINK') o = this.pickNew(ctx);
       if (!o) return null;
-      if (o.def.target === 'STEAL') { const pr = this.bestSteal(m); return pr ? { uid: o.uid, target: { from: pr.from, to: pr.to } } : null; }
-      if (o.def.target === 'SQUARE') return null;
+      if (o.def.target) { const tg = this.targetFor(m, o.def); return tg ? { uid: o.uid, target: tg } : null; }
       return { uid: o.uid };
     }
 

@@ -1,0 +1,3566 @@
+[
+ {
+  "id": "eq_patins_gelo",
+  "name": "Patins de Gelo Rápido",
+  "kind": "EQUIP",
+  "rarity": "COMMON",
+  "family": "Criogenia Cartoon",
+  "pieces": "pn",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa um Peão ou Cavalo. Ao mover-se, desliza: pode avançar 1 casa extra na mesma direção se a casa estiver livre.",
+  "recipe": {
+   "when": "MOVE_RULE",
+   "if": [
+    "isForwardClear"
+   ],
+   "do": [
+    {
+     "op": "grantMoveRule",
+     "who": "self",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação se tiveres Peão ou Cavalo sem 2 equipamentos.",
+  "newPrimitives": [
+   "grantMoveRule"
+  ],
+  "botHint": "Equipa num Peão central para acelerar o avanço e pressionar o centro.",
+  "test": "Peão em e2 com patins avança para e3 e desliza para e4 se e4 estiver livre.",
+  "colors": [
+   "#00B4D8",
+   "#F8FAFC"
+  ],
+  "icon": "PATINS_GELO",
+  "sfx": "ice_freeze",
+  "item": "A pair of shiny turquoise ice skates with gleaming silver blades and tiny cartoon snowflakes."
+ },
+ {
+  "id": "eq_cubo_armadura",
+  "name": "Cubo de Gelo Protetor",
+  "kind": "EQUIP",
+  "rarity": "RARE",
+  "family": "Criogenia Cartoon",
+  "pieces": "rb",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa uma Torre ou Bispo. Recebe 1 Escudo. Quando o Escudo estilhaça, congela o atacante durante 1 turno.",
+  "recipe": {
+   "when": "ON_EQUIP",
+   "if": [],
+   "do": [
+    {
+     "op": "shield",
+     "who": "self",
+     "n": 1
+    }
+   ],
+   "onShieldBreak": [
+    {
+     "op": "freeze",
+     "who": "attacker",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação se tiveres Torre ou Bispo sem 2 equipamentos.",
+  "newPrimitives": [],
+  "botHint": "Equipa numa peça maior atacada para dissuadir trocas e imobilizar o agressor.",
+  "test": "Bispo em c4 com Cubo sofre ataque; Escudo absorve e atacante recua congelado 1 turno.",
+  "colors": [
+   "#00B4D8",
+   "#2563EB"
+  ],
+  "icon": "CUBO_ARMADURA",
+  "sfx": "shield_clang",
+  "item": "A chunky semi-translucent blue ice cube helmet with frosted white edges and frosty breath vapor."
+ },
+ {
+  "id": "eq_soprador_nevada",
+  "name": "Soprador de Nevasca Turbo",
+  "kind": "EQUIP",
+  "rarity": "EPIC",
+  "family": "Criogenia Cartoon",
+  "pieces": "rq",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa uma Dama ou Torre. No início do turno, congela 1 peça inimiga adjacente (exceto o Rei) durante 1 turno.",
+  "recipe": {
+   "when": "TURN_START",
+   "if": [
+    "hasAdjacentEnemyNonKing"
+   ],
+   "do": [
+    {
+     "op": "freeze",
+     "who": "adjEnemyNonKing",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação se tiveres Torre ou Dama viva.",
+  "newPrimitives": [
+   "TURN_START"
+  ],
+  "botHint": "Equipa numa Dama ou Torre avançada para paralisar defensores perto do Rei adversário.",
+  "test": "Dama em d5 no início do turno congela Cavalo inimigo em d6 durante 1 turno.",
+  "colors": [
+   "#00B4D8",
+   "#7C3AED"
+  ],
+  "icon": "SOPRADOR_NEVADA",
+  "sfx": "ice_freeze",
+  "item": "A futuristic cartoon leaf-blower made of frosted turquoise metal blasting swirling cyan snowflakes."
+ },
+ {
+  "id": "eq_trono_glaciar",
+  "name": "Trineu Glaciar Zero",
+  "kind": "EQUIP",
+  "rarity": "LEGENDARY",
+  "family": "Criogenia Cartoon",
+  "pieces": "nbrq",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa uma peça aliada. Peças inimigas a 1 casa ficam congeladas permanentemente enquanto estiverem adjacentes.",
+  "recipe": {
+   "when": "AFTER_MOVE",
+   "if": [
+    "hasAdjacentEnemies"
+   ],
+   "do": [
+    {
+     "op": "freeze",
+     "who": "allAdjacentEnemyNonKing",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação com peça bem posicionada no campo adversário.",
+  "newPrimitives": [],
+  "botHint": "Equipa numa peça avançada no centro para criar uma barreira intransponível de gelo.",
+  "test": "Cavalo em d5 equipado; Peões pretos em c6 e e6 ficam congelados enquanto o Cavalo ali permanecer.",
+  "colors": [
+   "#00B4D8",
+   "#0F141C"
+  ],
+  "icon": "TRINEU_GLACIAR",
+  "sfx": "ice_freeze",
+  "item": "A regal vinyl bobsled throne carved from crystalline glacier ice with shiny platinum runners."
+ },
+ {
+  "id": "gt_poca_escorregadia",
+  "name": "Poça de Gelo Escorregadio",
+  "kind": "GRID",
+  "rarity": "COMMON",
+  "family": "Criogenia Cartoon",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Escondida numa casa. A peça inimiga que a pise escorrega 1 casa na mesma direção e perde a vez de agir.",
+  "recipe": {
+   "when": "STEP",
+   "if": [],
+   "do": [
+    {
+     "op": "pushBack",
+     "who": "stepper",
+     "n": 1
+    },
+    {
+     "op": "freeze",
+     "who": "stepper",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação, escolhe uma casa vazia entre as filas 3 e 6.",
+  "newPrimitives": [],
+  "botHint": "Arma nas colunas abertas centrais (d4, e4, d5, e5) para desestabilizar invasões.",
+  "test": "Cavalo preto salta para e5 (armadilha); é empurrado de volta para trás e congelado 1 turno.",
+  "colors": [
+   "#00B4D8",
+   "#2EC4B6"
+  ],
+  "icon": "POCA_GELO",
+  "sfx": "ice_freeze",
+  "item": "A puddle of sleek turquoise ice with tiny comic friction lines and a miniature yellow warning sign."
+ },
+ {
+  "id": "gt_iceberg_surpresa",
+  "name": "Mina de Granizo Compacto",
+  "kind": "GRID",
+  "rarity": "RARE",
+  "family": "Criogenia Cartoon",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Escondida numa casa. A peça inimiga que a pise congela 2 turnos e a casa fica bloqueada durante 1 turno.",
+  "recipe": {
+   "when": "STEP",
+   "if": [],
+   "do": [
+    {
+     "op": "freeze",
+     "who": "stepper",
+     "n": 2
+    },
+    {
+     "op": "blockSquare",
+     "who": "sq",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação em casa vazia das filas 3 a 6.",
+  "newPrimitives": [
+   "blockSquare"
+  ],
+  "botHint": "Arma numa casa chave de bloqueio para imobilizar uma peça importante e fechar a casa.",
+  "test": "Bispo pisa d4; fica congelado por 2 turnos e d4 fica bloqueada a outras passagens por 1 turno.",
+  "colors": [
+   "#00B4D8",
+   "#64748B"
+  ],
+  "icon": "ICEBERG_SURPRESA",
+  "sfx": "glass",
+  "item": "A spiky vinyl iceberg popping out of a square hatch with cartoon frost cracks."
+ },
+ {
+  "id": "gt_avalancha_neve",
+  "name": "Canhão de Neve Oculto",
+  "kind": "GRID",
+  "rarity": "EPIC",
+  "family": "Criogenia Cartoon",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Escondida numa casa. Ao pisar, a peça congela 2 turnos e todas as peças inimigas adjacentes congelam 1 turno.",
+  "recipe": {
+   "when": "STEP",
+   "if": [],
+   "do": [
+    {
+     "op": "freeze",
+     "who": "stepper",
+     "n": 2
+    },
+    {
+     "op": "freeze",
+     "who": "adjEnemyNonKing",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação em casa central de passagem frequente.",
+  "newPrimitives": [],
+  "botHint": "Arma onde peças inimigas se aglomeram para gerar uma vaga de congelamento em cadeia.",
+  "test": "Torre pisa f5; gela por 2 turnos e peão em f6 e bispo em e5 congelam 1 turno.",
+  "colors": [
+   "#00B4D8",
+   "#FB8500"
+  ],
+  "icon": "AVALANCHA_NEVE",
+  "sfx": "explosion_bam",
+  "item": "A chunky blue and white snow-cannon emerging from a trapdoor with a giant snowball loaded."
+ },
+ {
+  "id": "rt_congelamento_defesa",
+  "name": "Refletor de Zero Graus",
+  "kind": "REACTIVE",
+  "rarity": "COMMON",
+  "family": "Criogenia Cartoon",
+  "pieces": "",
+  "trigger": "CAPTURE",
+  "negates": [],
+  "target": "",
+  "text": "Quando uma peça aliada vai ser capturada: congela o atacante durante 1 turno e cancela o ataque.",
+  "recipe": {
+   "when": "CAPTURE",
+   "if": [],
+   "do": [
+    {
+     "op": "negateCapture",
+     "who": "attacker",
+     "n": 1
+    },
+    {
+     "op": "freeze",
+     "who": "attacker",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Dispara quando o adversário ataca uma peça tua.",
+  "newPrimitives": [],
+  "botHint": "Ativa para salvar uma peça ameaçada e punir o atacante com congelamento imediato.",
+  "test": "Dama preta ataca Cavalo branco; armadilha dispara, nega o ataque e gela a Dama por 1 turno.",
+  "colors": [
+   "#00B4D8",
+   "#F8FAFC"
+  ],
+  "icon": "REFLETOR_ZERO",
+  "sfx": "ice_freeze",
+  "item": "A round frosted vanity mirror reflecting a comical blue icicle ray."
+ },
+ {
+  "id": "rt_estatua_gelo",
+  "name": "Criopreservação Flash",
+  "kind": "REACTIVE",
+  "rarity": "RARE",
+  "family": "Criogenia Cartoon",
+  "pieces": "",
+  "trigger": "DESTROYED",
+  "negates": [],
+  "target": "",
+  "text": "Quando uma peça tua é destruída: transforma a peça que a destruiu em Peão congelado durante 2 turnos.",
+  "recipe": {
+   "when": "DESTROYED",
+   "if": [
+    "attackerNonKing"
+   ],
+   "do": [
+    {
+     "op": "morph",
+     "who": "attacker",
+     "n": 2
+    },
+    {
+     "op": "freeze",
+     "who": "attacker",
+     "n": 2
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Dispara após a perda de uma peça tua.",
+  "newPrimitives": [],
+  "botHint": "Arma antes de disputas táticas; se perderes uma peça menor, a peça maior agressora é neutralizada.",
+  "test": "Torre preta captura Bispo branco em d4; Torre preta é transmutada em Peão e congelada por 2 turnos.",
+  "colors": [
+   "#00B4D8",
+   "#D90429"
+  ],
+  "icon": "CRIOPRESERVA_EMERG",
+  "sfx": "magic_zap",
+  "item": "A high-tech cryo-capsule chamber with frosted glass windows and liquid nitrogen frost."
+ },
+ {
+  "id": "ct_estalactite_travagem",
+  "name": "Barreira de Estalactites",
+  "kind": "COUNTER",
+  "rarity": "COMMON",
+  "family": "Criogenia Cartoon",
+  "pieces": "",
+  "trigger": "",
+  "negates": [
+   "QUICK"
+  ],
+  "target": "",
+  "text": "Counter-Trap: anula a ativação de uma Magia Rápida inimiga e congela 1 peça inimiga aleatória durante 1 turno.",
+  "recipe": {
+   "when": "LINK",
+   "if": [
+    "linkIsQuick"
+   ],
+   "do": [
+    {
+     "op": "negateLink",
+     "who": "link",
+     "n": 1
+    },
+    {
+     "op": "freeze",
+     "who": "randomEnemyNonKing",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Responde a uma Magia Rápida do adversário.",
+  "newPrimitives": [],
+  "botHint": "Reserva para negar magias rápidas de dano ou mobilidade do oponente.",
+  "test": "Adversário lança Magia Rápida; Barreira anula-a e congela um Cavalo adversário aleatório por 1 turno.",
+  "colors": [
+   "#00B4D8",
+   "#7C3AED"
+  ],
+  "icon": "BARREIRA_ESTALACTITE",
+  "sfx": "negate_stamp",
+  "item": "A row of three sharp glossy turquoise icicles pointed downwards with an icy cyan aura."
+ },
+ {
+  "id": "ct_nevasca_tribunal",
+  "name": "Crio-Anulador de Feitiços",
+  "kind": "COUNTER",
+  "rarity": "RARE",
+  "family": "Criogenia Cartoon",
+  "pieces": "",
+  "trigger": "",
+  "negates": [
+   "GRID",
+   "REACTIVE"
+  ],
+  "target": "",
+  "text": "Counter-Trap: anula qualquer Armadilha ativada pelo adversário e destrói todos os Escudos das peças inimigas.",
+  "recipe": {
+   "when": "LINK",
+   "if": [
+    "linkIsTrap"
+   ],
+   "do": [
+    {
+     "op": "negateLink",
+     "who": "link",
+     "n": 1
+    },
+    {
+     "op": "shatterShields",
+     "who": "enemy",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Responde a armadilhas de casa ou reativas adversárias.",
+  "newPrimitives": [],
+  "botHint": "Usa ao atacar uma casa suspeita ou para desarmar armadilhas e quebrar escudos simultaneamente.",
+  "test": "Adversário ativa Armadilha Reativa; anula o elo e quebra escudos de todas as peças pretas.",
+  "colors": [
+   "#00B4D8",
+   "#047857"
+  ],
+  "icon": "CRIO_ANULADOR",
+  "sfx": "glass",
+  "item": "A frozen mechanical stamp with ice-gears that shatters translucent shields upon impact."
+ },
+ {
+  "id": "qs_sopro_invernal",
+  "name": "Brisa Polar Concentrada",
+  "kind": "QUICK",
+  "rarity": "COMMON",
+  "family": "Criogenia Cartoon",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "ENEMY_PIECE",
+  "text": "Congela 1 peça inimiga sem equipamentos durante 1 turno (exceto o Rei).",
+  "recipe": {
+   "when": "PREP",
+   "if": [
+    "targetEnemyNonKing",
+    "hasNoEquips"
+   ],
+   "do": [
+    {
+     "op": "freeze",
+     "who": "target",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na tua preparação da mão ou Zona, ou em resposta da Zona.",
+  "newPrimitives": [],
+  "botHint": "Usa para paralisar um cavalo ou bispo antes de avançar peões ou desferir ataques táticos.",
+  "test": "Lança em Cavalo preto em f6; o Cavalo fica congelado 1 turno e não pode defender d5.",
+  "colors": [
+   "#00B4D8",
+   "#F8FAFC"
+  ],
+  "icon": "BRISA_POLAR",
+  "sfx": "ice_freeze",
+  "item": "A swirl of baby-blue cartoon wind carrying tiny smiling ice crystals and snowflake confetti."
+ },
+ {
+  "id": "qs_congelador_relampago",
+  "name": "Nevasca em Spray Portátil",
+  "kind": "QUICK",
+  "rarity": "EPIC",
+  "family": "Criogenia Cartoon",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "OWN_PIECE",
+  "text": "Congela todas as peças inimigas que partilhem a mesma fila ou coluna que uma peça tua escolhida (exceto o Rei).",
+  "recipe": {
+   "when": "PREP",
+   "if": [
+    "targetOwnPiece"
+   ],
+   "do": [
+    {
+     "op": "freeze",
+     "who": "colRowEnemiesNonKing",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação ou resposta da Zona, tendo uma peça tua bem alinhada com peças inimigas.",
+  "newPrimitives": [],
+  "botHint": "Usa quando a tua Torre ou Dama encara múltiplas peças adversárias na mesma coluna ou fila.",
+  "test": "Torre branca em e1 tem Peão em e5 e Dama em e7; ativa spray e congela e5 e e7 por 1 turno.",
+  "colors": [
+   "#00B4D8",
+   "#9333EA"
+  ],
+  "icon": "SPRAY_NEVASCA",
+  "sfx": "ice_freeze",
+  "item": "An aerosol spray can colored icy blue with a frost nozzle spraying a wide fan of frozen fog."
+ },
+ {
+  "id": "eq_chave_inglesa_turbo",
+  "name": "Chave de Fendas Roscada",
+  "kind": "EQUIP",
+  "rarity": "COMMON",
+  "family": "Oficina Maluca",
+  "pieces": "pr",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa um Peão ou Torre. Ao mover-se, remove 1 Equipamento de uma peça inimiga ortogonalmente adjacente.",
+  "recipe": {
+   "when": "AFTER_MOVE",
+   "if": [
+    "hasAdjacentEnemyWithEquip"
+   ],
+   "do": [
+    {
+     "op": "stripEquips",
+     "who": "adjEnemyWithEquip",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação se tiveres Peão ou Torre.",
+  "newPrimitives": [],
+  "botHint": "Equipa para desarmar peças inimigas equipadas ao posicionar-se lado a lado.",
+  "test": "Peão avança para c4 adjacente a Cavalo equipado com Armadura de Cacto; o cacto é destruído.",
+  "colors": [
+   "#FB8500",
+   "#64748B"
+  ],
+  "icon": "CHAVE_FENDAS",
+  "sfx": "sword_draw",
+  "item": "A chunky cartoon orange screwdriver with a spiral chrome head and floating tiny brass screws."
+ },
+ {
+  "id": "eq_broca_perfuradora",
+  "name": "Broca Perfuradora de Aço",
+  "kind": "EQUIP",
+  "rarity": "COMMON",
+  "family": "Oficina Maluca",
+  "pieces": "pn",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa um Cavalo ou Peão. Se atacar uma peça com Escudo, destrói o Escudo e completa a captura no mesmo lance.",
+  "recipe": {
+   "when": "CAPTURE",
+   "if": [
+    "targetHasShield"
+   ],
+   "do": [
+    {
+     "op": "shatterShields",
+     "who": "target",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação em Cavalo ou Peão.",
+  "newPrimitives": [],
+  "botHint": "Equipa quando o oponente tiver peças importantes protegidas por escudos.",
+  "test": "Cavalo com Broca captura Bispo com Escudo em f7; o Escudo estilhaça e o Bispo morre de imediato.",
+  "colors": [
+   "#FB8500",
+   "#0F141C"
+  ],
+  "icon": "BROCA_PERFURADORA",
+  "sfx": "glass",
+  "item": "A vibrant yellow handheld industrial drill with spiral hazard stripes and metal sparks."
+ },
+ {
+  "id": "eq_chassi_reforcado",
+  "name": "Chassi de Titânio Amarelo",
+  "kind": "EQUIP",
+  "rarity": "RARE",
+  "family": "Oficina Maluca",
+  "pieces": "rq",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa uma Torre ou Dama. Ganha 1 Escudo e não pode ser afetada por Armadilhas de Casa.",
+  "recipe": {
+   "when": "ON_EQUIP",
+   "if": [],
+   "do": [
+    {
+     "op": "shield",
+     "who": "self",
+     "n": 1
+    },
+    {
+     "op": "grantMoveRule",
+     "who": "self",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação em Torre ou Dama.",
+  "newPrimitives": [
+   "grantMoveRule"
+  ],
+  "botHint": "Equipa na tua peça de maior ataque para avançar sem temer Bigornas ou Minas de Casa.",
+  "test": "Torre com Chassi pisa casa com Bigorna de 100 Toneladas; a armadilha não dispara contra a Torre.",
+  "colors": [
+   "#FB8500",
+   "#2563EB"
+  ],
+  "icon": "CHASSI_TITANIO",
+  "sfx": "shield_clang",
+  "item": "A heavy-duty yellow construction frame with chunky hazard chevrons and dual steel rivets."
+ },
+ {
+  "id": "eq_exoesqueleto_tita",
+  "name": "Exoesqueleto Robô Mecânico",
+  "kind": "EQUIP",
+  "rarity": "LEGENDARY",
+  "family": "Oficina Maluca",
+  "pieces": "p",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa um Peão. Passa a mover-se como Torre ou Bispo (à escolha no lance) e recebe 1 Escudo.",
+  "recipe": {
+   "when": "ON_EQUIP",
+   "if": [],
+   "do": [
+    {
+     "op": "shield",
+     "who": "self",
+     "n": 1
+    },
+    {
+     "op": "grantMoveRule",
+     "who": "self",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação quando tens um Peão livre e queres criar uma ameaça devastadora.",
+  "newPrimitives": [
+   "grantMoveRule"
+  ],
+  "botHint": "Equipa num Peão central para transformá-lo num colosso tático com mobilidade total.",
+  "test": "Peão em e4 com Exoesqueleto move-se diagonalmente para b7 ou verticalmente para e8 como Dama parcial.",
+  "colors": [
+   "#FB8500",
+   "#D90429"
+  ],
+  "icon": "EXOESQUELETO_ROBO",
+  "sfx": "shield_clang",
+  "item": "A giant chunky red and yellow mech suit cockpit sized perfectly for a tiny cartoon pawn."
+ },
+ {
+  "id": "gt_esteira_rolante",
+  "name": "Tapete Rolante de Fábrica",
+  "kind": "GRID",
+  "rarity": "COMMON",
+  "family": "Oficina Maluca",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Escondida numa casa. A peça inimiga que a pise é transportada 2 casas na direção em que se movia.",
+  "recipe": {
+   "when": "STEP",
+   "if": [],
+   "do": [
+    {
+     "op": "pushBack",
+     "who": "stepper",
+     "n": -2
+    }
+   ]
+  },
+  "canUse": "Na preparação em casa das filas 3 a 6.",
+  "newPrimitives": [],
+  "botHint": "Coloca em frente a peças inimigas para forçá-las a avançar em excesso para casas atacadas.",
+  "test": "Cavalo preto pisa d5; tapete empurra-o forçadamente para d7 onde fica desprotegido.",
+  "colors": [
+   "#FB8500",
+   "#64748B"
+  ],
+  "icon": "TAPETE_ROLANTE",
+  "sfx": "spring_jump",
+  "item": "A miniature industrial conveyor belt with black rubber treads and bright orange guide rails."
+ },
+ {
+  "id": "gt_prensa_hidraulica",
+  "name": "Prensa Hidráulica Auto",
+  "kind": "GRID",
+  "rarity": "RARE",
+  "family": "Oficina Maluca",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Escondida numa casa. A peça inimiga que a pise perde todos os seus Equipamentos e é congelada durante 1 turno.",
+  "recipe": {
+   "when": "STEP",
+   "if": [],
+   "do": [
+    {
+     "op": "stripEquips",
+     "who": "stepper",
+     "n": 1
+    },
+    {
+     "op": "freeze",
+     "who": "stepper",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação em casa onde o inimigo tenta infiltrações com peças equipadas.",
+  "newPrimitives": [],
+  "botHint": "Excelente para desarmar cavalos e bispos carregados de bónus de movimento.",
+  "test": "Torre inimiga com dois equipamentos pisa c5; perde ambos os itens e fica congelada 1 turno.",
+  "colors": [
+   "#FB8500",
+   "#D90429"
+  ],
+  "icon": "PRENSA_HIDRAULICA",
+  "sfx": "explosion_bam",
+  "item": "A heavy cast-iron pneumatic press stamper poised over an oily industrial steel base."
+ },
+ {
+  "id": "gt_triturador_sucata",
+  "name": "Triturador de Lixo Mecânico",
+  "kind": "GRID",
+  "rarity": "EPIC",
+  "family": "Oficina Maluca",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Escondida numa casa. Peão inimigo que a pise é destruído; peça maior perde 1 Equipamento e tu compras 2 cartas.",
+  "recipe": {
+   "when": "STEP",
+   "if": [
+    "stepperIsPawn"
+   ],
+   "do": [
+    {
+     "op": "destroy",
+     "who": "stepper",
+     "n": 1
+    }
+   ],
+   "else": [
+    {
+     "op": "stripEquips",
+     "who": "stepper",
+     "n": 1
+    },
+    {
+     "op": "draw",
+     "who": "owner",
+     "n": 2
+    }
+   ]
+  },
+  "canUse": "Na preparação numa casa disputada.",
+  "newPrimitives": [],
+  "botHint": "Arma em casas centrais; se um peão entrar é destruído; se entrar peça maior rende 2 cartas.",
+  "test": "Dama preta pisa e5; perde bónus e dono do triturador compra imediatamente 2 cartas da reserva.",
+  "colors": [
+   "#FB8500",
+   "#2EC4B6"
+  ],
+  "icon": "TRITURADOR_LIXO",
+  "sfx": "explosion_bam",
+  "item": "A metal hopper box with spinning jagged spiky cogs devouring nuts, bolts, and tin cans."
+ },
+ {
+  "id": "rt_troca_pecas_express",
+  "name": "Oficina de Troca Rápida",
+  "kind": "REACTIVE",
+  "rarity": "COMMON",
+  "family": "Oficina Maluca",
+  "pieces": "",
+  "trigger": "DESTROYED",
+  "negates": [],
+  "target": "",
+  "text": "Quando uma peça aliada equipada for capturada: move os seus Equipamentos para outra peça aliada compatível.",
+  "recipe": {
+   "when": "DESTROYED",
+   "if": [
+    "hadEquips"
+   ],
+   "do": [
+    {
+     "op": "stealEquip",
+     "who": "alliedBackup",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Dispara quando a tua peça equipada for eliminada.",
+  "newPrimitives": [],
+  "botHint": "Protege os teus valiosos investimentos em equipamentos transferindo-os antes do abate.",
+  "test": "Cavalo com Espada da Ganância é morto; espada voa imediatamente para o Bispo em c1.",
+  "colors": [
+   "#FB8500",
+   "#FFB703"
+  ],
+  "icon": "OFICINA_TROCA",
+  "sfx": "hop",
+  "item": "A cartoon pit-stop toolbox that opens wide to reveal spare mechanical robotic arms."
+ },
+ {
+  "id": "rt_fusao_engenhocas",
+  "name": "Fundição de Sucata Rápida",
+  "kind": "REACTIVE",
+  "rarity": "RARE",
+  "family": "Oficina Maluca",
+  "pieces": "",
+  "trigger": "CAPTURE",
+  "negates": [],
+  "target": "",
+  "text": "Quando uma peça tua equipada for atacada: destrói 1 Equipamento dela para negar o ataque e comprar 1 carta.",
+  "recipe": {
+   "when": "CAPTURE",
+   "if": [
+    "targetHasEquip"
+   ],
+   "do": [
+    {
+     "op": "stripEquips",
+     "who": "target",
+     "n": 1
+    },
+    {
+     "op": "negateCapture",
+     "who": "attacker",
+     "n": 1
+    },
+    {
+     "op": "draw",
+     "who": "owner",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Dispara perante ataque contra a tua peça equipada.",
+  "newPrimitives": [],
+  "botHint": "Sacrifica um acessório dispensável para salvar a integridade da tua peça maior e comprar recurso.",
+  "test": "Bispo equipado com Chassi sofre bote de Torre; Chassi dissipa o ataque e compras 1 carta.",
+  "colors": [
+   "#FB8500",
+   "#2EC4B6"
+  ],
+  "icon": "FUNDICAO_SUCATA",
+  "sfx": "shield_clang",
+  "item": "A red miniature crucible furnace melting chrome gears into a shiny liquid gold ingot."
+ },
+ {
+  "id": "ct_desmancha_prazeres",
+  "name": "Chave Inglesa de Boicote",
+  "kind": "COUNTER",
+  "rarity": "RARE",
+  "family": "Oficina Maluca",
+  "pieces": "",
+  "trigger": "",
+  "negates": [
+   "EQUIP",
+   "QUICK"
+  ],
+  "target": "",
+  "text": "Counter-Trap: anula a ativação de um Equipamento ou Magia Rápida inimiga e compra 1 carta.",
+  "recipe": {
+   "when": "LINK",
+   "if": [
+    "linkIsEquipOrQuick"
+   ],
+   "do": [
+    {
+     "op": "negateLink",
+     "who": "link",
+     "n": 1
+    },
+    {
+     "op": "draw",
+     "who": "owner",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Responde a Equipamento ou Magia Rápida adversária.",
+  "newPrimitives": [],
+  "botHint": "Guarda para sabotar feitiços cruciais ou armas de alto valor do oponente comprando recurso.",
+  "test": "Adversário joga Magia Rápida; Chave inglesa cancela o efeito e jogador compra 1 carta.",
+  "colors": [
+   "#FB8500",
+   "#2563EB"
+  ],
+  "icon": "CHAVE_BOICOTE",
+  "sfx": "negate_stamp",
+  "item": "A hefty blue-handled adjustable wrench snapping shut aggressively with a golden spark."
+ },
+ {
+  "id": "qs_ajuste_calibragem",
+  "name": "Óleo Lubrificante Turbo",
+  "kind": "QUICK",
+  "rarity": "COMMON",
+  "family": "Oficina Maluca",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "OWN_PIECE",
+  "text": "Escolhe 1 peça aliada. Neste turno, ela ignora Armadilhas de Casa e podes mover 1 armadilha tua para outra casa.",
+  "recipe": {
+   "when": "PREP",
+   "if": [
+    "targetOwnPiece"
+   ],
+   "do": [
+    {
+     "op": "grantMoveRule",
+     "who": "target",
+     "n": 1
+    },
+    {
+     "op": "moveTrap",
+     "who": "ownerTrap",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação ou resposta da Zona, antes de mover uma peça para zona com armadilhas.",
+  "newPrimitives": [
+   "grantMoveRule",
+   "moveTrap"
+  ],
+  "botHint": "Usa na peça que planeias infiltrar no território do adversário para neutralizar armadilhas.",
+  "test": "Aplica no Cavalo em c3; o Cavalo salta para d5 sem ativar armadilhas e reposiciona 1 mina aliada.",
+  "colors": [
+   "#FB8500",
+   "#F8FAFC"
+  ],
+  "icon": "OLEO_TURBO",
+  "sfx": "hop",
+  "item": "A classic red tin oil can with a curved thin spout dripping a single golden glowing droplet."
+ },
+ {
+  "id": "qs_sobrecarga_reator",
+  "name": "Sobrecarga de Energia Flash",
+  "kind": "QUICK",
+  "rarity": "EPIC",
+  "family": "Oficina Maluca",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "OWN_PIECE",
+  "text": "Destrói 1 Equipamento teu. Dá 1 Escudo a todas as tuas peças maiores e ganha +1 ação de carta.",
+  "recipe": {
+   "when": "PREP",
+   "if": [
+    "hasAlliedEquip"
+   ],
+   "do": [
+    {
+     "op": "stripEquips",
+     "who": "targetAlliedEquip",
+     "n": 1
+    },
+    {
+     "op": "shield",
+     "who": "allAlliedMajors",
+     "n": 1
+    },
+    {
+     "op": "cardActionMod",
+     "who": "owner",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação quando tiveres um equipamento dispensável e várias peças no tabuleiro.",
+  "newPrimitives": [
+   "cardActionMod"
+  ],
+  "botHint": "Converte um acessório antigo numa barreira de escudos coletiva para todo o teu exército.",
+  "test": "Destrói Chave de Fendas no Peão; Torre, Bispo e Dama recebem 1 Escudo e ganhas ação extra.",
+  "colors": [
+   "#FB8500",
+   "#D90429"
+  ],
+  "icon": "SOBRECARGA_FLASH",
+  "sfx": "explosion_bam",
+  "item": "A pulsing energy capacitor glowing bright crimson and amber with crackling sparks."
+ },
+ {
+  "id": "qs_recauchutagem_express",
+  "name": "Estação de Montagem Rápida",
+  "kind": "QUICK",
+  "rarity": "EPIC",
+  "family": "Oficina Maluca",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "NONE",
+  "text": "Recupera 1 Equipamento do teu cemitério para a mão e ganha +1 ação de carta neste turno.",
+  "recipe": {
+   "when": "PREP",
+   "if": [
+    "hasEquipInGrave"
+   ],
+   "do": [
+    {
+     "op": "graveRecover",
+     "who": "owner",
+     "n": 1
+    },
+    {
+     "op": "cardActionMod",
+     "who": "owner",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação se tiveres um equipamento potente no cemitério.",
+  "newPrimitives": [
+   "graveRecover",
+   "cardActionMod"
+  ],
+  "botHint": "Excelente para reintroduzir imediatamente uma arma lendária ou épica destruída.",
+  "test": "Ativa a estação; recupera Cetro do Falso Monarca do cemitério e recebe ação extra para equipar.",
+  "colors": [
+   "#FB8500",
+   "#9333EA"
+  ],
+  "icon": "ESTACAO_MONTAGEM",
+  "sfx": "magic_zap",
+  "item": "A compact yellow workstation bench loaded with automated robotic screwdrivers and blueprints."
+ },
+ {
+  "id": "eq_sapato_palhaco",
+  "name": "Sapatos Gigantes de Palhaço",
+  "kind": "EQUIP",
+  "rarity": "COMMON",
+  "family": "Grande Circo Trapalhão",
+  "pieces": "p",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa um Peão. Passa a poder capturar andando 1 casa em frente, mas não pode capturar na diagonal.",
+  "recipe": {
+   "when": "MOVE_RULE",
+   "if": [],
+   "do": [
+    {
+     "op": "grantMoveRule",
+     "who": "self",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação num Peão bloqueado de frente por peça inimiga.",
+  "newPrimitives": [
+   "grantMoveRule"
+  ],
+  "botHint": "Equipa num Peão central trancado de frente para devorar o obstáculo frontal de surpresa.",
+  "test": "Peão em d4 com sapatos captura peça inimiga diretamente em d5.",
+  "colors": [
+   "#D90429",
+   "#FFB703"
+  ],
+  "icon": "SAPATOS_PALHACO",
+  "sfx": "hop",
+  "item": "Enormous squeaky red and yellow vinyl clown shoes with round bulbous toes and starry laces."
+ },
+ {
+  "id": "eq_monociclo_acrobata",
+  "name": "Monociclo Acrobático",
+  "kind": "EQUIP",
+  "rarity": "RARE",
+  "family": "Grande Circo Trapalhão",
+  "pieces": "nb",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa um Cavalo ou Bispo. Ao capturar, pode saltar imediatamente para uma casa vazia a 1 casa de distância.",
+  "recipe": {
+   "when": "ON_CAPTURE",
+   "if": [
+    "hasAdjacentEmpty"
+   ],
+   "do": [
+    {
+     "op": "dodge",
+     "who": "self",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação num Cavalo ou Bispo em posição de ataque.",
+  "newPrimitives": [],
+  "botHint": "Equipa para permitir táticas de bater e fugir (hit-and-run) sem sofrer recapturas imediatas.",
+  "test": "Cavalo em f7 captura peão e salta de imediato para g5, escapando da recaptura do Rei.",
+  "colors": [
+   "#D90429",
+   "#2563EB"
+  ],
+  "icon": "MONOCICLO_ACROBATA",
+  "sfx": "spring_jump",
+  "item": "A quirky tall vinyl unicycle with a glittering chrome wheel and a rainbow clown saddle."
+ },
+ {
+  "id": "eq_canhao_homem_bala",
+  "name": "Canhão de Circo Triunfal",
+  "kind": "EQUIP",
+  "rarity": "LEGENDARY",
+  "family": "Grande Circo Trapalhão",
+  "pieces": "rq",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa uma Torre ou Dama. Uma vez por partida, arremessa 1 Peão aliado adjacente até 3 casas em linha reta.",
+  "recipe": {
+   "when": "PREP",
+   "if": [
+    "hasAdjacentAlliedPawn",
+    "oncePerGame"
+   ],
+   "do": [
+    {
+     "op": "teleport",
+     "who": "alliedPawn",
+     "n": 3
+    }
+   ]
+  },
+  "canUse": "Na preparação com a Torre ou Dama perto de um Peão que queiras promover.",
+  "newPrimitives": [],
+  "botHint": "Usa para disparar um peão diretamente da fila 4 para a fila 7 ou 8, criando promoção relâmpago.",
+  "test": "Torre dispara Peão de b4 para b7, a um passo solitário da coroação de Dama.",
+  "colors": [
+   "#D90429",
+   "#FB8500"
+  ],
+  "icon": "CANHAO_CIRCO",
+  "sfx": "explosion_bam",
+  "item": "A vibrant crimson circus cannon with gold stars and decorative smoking barrel rings."
+ },
+ {
+  "id": "gt_torta_creme",
+  "name": "Torta de Chantilly Explosiva",
+  "kind": "GRID",
+  "rarity": "COMMON",
+  "family": "Grande Circo Trapalhão",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Escondida numa casa. A peça inimiga que a pise fica coberta de chantilly: não pode capturar durante 2 turnos.",
+  "recipe": {
+   "when": "STEP",
+   "if": [],
+   "do": [
+    {
+     "op": "silenceEquips",
+     "who": "stepper",
+     "n": 2
+    },
+    {
+     "op": "grantMoveRule",
+     "who": "stepper",
+     "n": 2
+    }
+   ]
+  },
+  "canUse": "Na preparação em casa das filas 3 a 6.",
+  "newPrimitives": [
+   "silenceEquips",
+   "grantMoveRule"
+  ],
+  "botHint": "Arma para impedir que uma peça maior inimiga realize capturas cruciais durante 2 turnos.",
+  "test": "Dama preta pisa e4; leva com a torta e fica impedida de capturar qualquer peça por 2 turnos.",
+  "colors": [
+   "#D90429",
+   "#F8FAFC"
+  ],
+  "icon": "TORTA_CHANTILLY",
+  "sfx": "explosion_bam",
+  "item": "A cartoon tin pie plate loaded with a mountain of fluffy white cream and a shiny red cherry on top."
+ },
+ {
+  "id": "gt_alcapao_palco",
+  "name": "Alçapão Ilusionista de Palco",
+  "kind": "GRID",
+  "rarity": "RARE",
+  "family": "Grande Circo Trapalhão",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Escondida numa casa. A peça inimiga que a pise cai no alçapão e reaparece na sua casa de partida original.",
+  "recipe": {
+   "when": "STEP",
+   "if": [],
+   "do": [
+    {
+     "op": "returnToFrom",
+     "who": "stepper",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação numa casa avançada que o adversário deseje ocupar.",
+  "newPrimitives": [],
+  "botHint": "Arma para anular totalmente o desenvolvimento de peças adversárias.",
+  "test": "Cavalo preto desenvolvido para f6 pisa o alçapão e é enviado de volta para b8/g8.",
+  "colors": [
+   "#D90429",
+   "#7C3AED"
+  ],
+  "icon": "ALCAPAO_PALCO",
+  "sfx": "trap",
+  "item": "A polished wooden circus stage trapdoor bursting open with glittering gold magic sparks."
+ },
+ {
+  "id": "gt_argola_fogo",
+  "name": "Argola de Fogo Espetacular",
+  "kind": "GRID",
+  "rarity": "EPIC",
+  "family": "Grande Circo Trapalhão",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Escondida numa casa. A peça inimiga que a pise perde 1 Escudo, é empurrada 2 casas e fica congelada 1 turno.",
+  "recipe": {
+   "when": "STEP",
+   "if": [],
+   "do": [
+    {
+     "op": "shatterShields",
+     "who": "stepper",
+     "n": 1
+    },
+    {
+     "op": "pushBack",
+     "who": "stepper",
+     "n": 2
+    },
+    {
+     "op": "freeze",
+     "who": "stepper",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação em coluna aberta.",
+  "newPrimitives": [],
+  "botHint": "Arma para castigar invasores de grande calibre quebrando escudos e repelindo-os.",
+  "test": "Torre inimiga com escudo pisa d5; escudo explode, é empurrada para d7 e fica congelada 1 turno.",
+  "colors": [
+   "#D90429",
+   "#FFB703"
+  ],
+  "icon": "ARGOLA_FOGO",
+  "sfx": "explosion_bam",
+  "item": "A fiery circus ring made of sculpted cartoon flames on a glossy striped circus stand."
+ },
+ {
+  "id": "rt_buzina_estridente",
+  "name": "Buzina de Ar Ensurdecedora",
+  "kind": "REACTIVE",
+  "rarity": "COMMON",
+  "family": "Grande Circo Trapalhão",
+  "pieces": "",
+  "trigger": "CHECK",
+  "negates": [],
+  "target": "",
+  "text": "Quando o teu Rei fica em xeque: empurra a peça agressora 1 casa para trás e cancela o xeque.",
+  "recipe": {
+   "when": "CHECK",
+   "if": [],
+   "do": [
+    {
+     "op": "pushBack",
+     "who": "checkers",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Dispara quando o teu Rei sofrer um xeque.",
+  "newPrimitives": [],
+  "botHint": "Salva o Rei de xeques imprevistos empurrando o atacante para longe da linha de mira.",
+  "test": "Cavalo preto dá xeque em f2; buzina toca, cavalo é empurrado para f3 ou f1 e o xeque acaba.",
+  "colors": [
+   "#D90429",
+   "#FB8500"
+  ],
+  "icon": "BUZINA_AR",
+  "sfx": "spring_jump",
+  "item": "A bright red bulbous squeeze horn with an oversized brass horn bell producing sound waves."
+ },
+ {
+  "id": "rt_troca_truque",
+  "name": "Ilusão de Espelhos de Feira",
+  "kind": "REACTIVE",
+  "rarity": "RARE",
+  "family": "Grande Circo Trapalhão",
+  "pieces": "",
+  "trigger": "CAPTURE",
+  "negates": [],
+  "target": "",
+  "text": "Quando uma peça tua vai ser capturada: troca-a de lugar com outra peça aliada compatível (exceto o Rei).",
+  "recipe": {
+   "when": "CAPTURE",
+   "if": [
+    "hasValidAlliedSwap"
+   ],
+   "do": [
+    {
+     "op": "swapPieces",
+     "who": "targetWithAllied",
+     "n": 1
+    },
+    {
+     "op": "negateCapture",
+     "who": "attacker",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Dispara quando o inimigo declarar captura.",
+  "newPrimitives": [
+   "swapPieces"
+  ],
+  "botHint": "Salva a tua Dama trocando-a de sítio com um Peão ou Torre no momento do bote.",
+  "test": "Bispo inimigo ataca Dama em d4; armadilha troca a Dama com Peão em a2 e cancela o ataque.",
+  "colors": [
+   "#D90429",
+   "#2EC4B6"
+  ],
+  "icon": "ILUSAO_ESPELHOS",
+  "sfx": "magic_zap",
+  "item": "A tri-fold carnival funhouse mirror showing warped miniature duplicate cartoon reflections."
+ },
+ {
+  "id": "rt_truque_desaparecer",
+  "name": "Truque de Desaparecimento",
+  "kind": "REACTIVE",
+  "rarity": "LEGENDARY",
+  "family": "Grande Circo Trapalhão",
+  "pieces": "",
+  "trigger": "CAPTURE",
+  "negates": [],
+  "target": "",
+  "text": "Quando uma peça aliada for atacada: teletransporta todas as tuas peças para casas vazias seguras e cancela o ataque.",
+  "recipe": {
+   "when": "CAPTURE",
+   "if": [],
+   "do": [
+    {
+     "op": "teleport",
+     "who": "allAlliedNonKingSafe",
+     "n": 1
+    },
+    {
+     "op": "negateCapture",
+     "who": "attacker",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Dispara perante captura crucial inimiga.",
+  "newPrimitives": [],
+  "botHint": "O auge do ilusionismo: dispersa todo o teu exército para casas seguras, anulando armadilhas e mates.",
+  "test": "Dama adversária dá xeque ao Rei e ameaça garfo; todo o esquadrão reaparece noutras casas seguro.",
+  "colors": [
+   "#D90429",
+   "#7C3AED"
+  ],
+  "icon": "TRUQUE_MAGICA",
+  "sfx": "magic_zap",
+  "item": "A velvet magician top hat with golden stars and a white dove emerging with cartoon sparkles."
+ },
+ {
+  "id": "ct_risada_gravada",
+  "name": "Caixa de Gargalhadas Troça",
+  "kind": "COUNTER",
+  "rarity": "COMMON",
+  "family": "Grande Circo Trapalhão",
+  "pieces": "",
+  "trigger": "",
+  "negates": [
+   "GRID",
+   "QUICK"
+  ],
+  "target": "",
+  "text": "Counter-Trap: anula uma Armadilha de Casa ou Magia Rápida inimiga e empurra a peça ativa 1 casa.",
+  "recipe": {
+   "when": "LINK",
+   "if": [
+    "linkIsGridOrQuick"
+   ],
+   "do": [
+    {
+     "op": "negateLink",
+     "who": "link",
+     "n": 1
+    },
+    {
+     "op": "pushBack",
+     "who": "activePiece",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Responde a cartas ativadas de casa ou rápidas.",
+  "newPrimitives": [],
+  "botHint": "Anula a jogada surpresa do adversário e desalinha a posição da sua peça.",
+  "test": "Oponente joga Magia Rápida para salvar peça; Caixa anula e empurra a peça dele para trás.",
+  "colors": [
+   "#D90429",
+   "#FFB703"
+  ],
+  "icon": "CAIXA_GARGALHADAS",
+  "sfx": "negate_stamp",
+  "item": "A bright red novelty laughing box with yellow grin marks and little audio sound-waves."
+ },
+ {
+  "id": "ct_varinha_truque",
+  "name": "Varinha de Flores Falsas",
+  "kind": "COUNTER",
+  "rarity": "RARE",
+  "family": "Grande Circo Trapalhão",
+  "pieces": "",
+  "trigger": "",
+  "negates": [
+   "REACTIVE"
+  ],
+  "target": "",
+  "text": "Counter-Trap: anula qualquer Armadilha Reativa inimiga e compra 1 carta.",
+  "recipe": {
+   "when": "LINK",
+   "if": [
+    "linkIsReactive"
+   ],
+   "do": [
+    {
+     "op": "negateLink",
+     "who": "link",
+     "n": 1
+    },
+    {
+     "op": "draw",
+     "who": "owner",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Responde quando o oponente disparar uma Armadilha Reativa.",
+  "newPrimitives": [],
+  "botHint": "Usa para garantir que o teu ataque atinge o alvo em cheio e sem contra-ataques.",
+  "test": "Inimigo ativa Boneco de Testes Insuflável; varinha anula a troca e compras 1 carta.",
+  "colors": [
+   "#D90429",
+   "#2563EB"
+  ],
+  "icon": "VARINHA_FLORES",
+  "sfx": "negate_stamp",
+  "item": "A black magician wand with a white tip that pops out a colorful fabric bouquet of daisies."
+ },
+ {
+  "id": "qs_cambalhota_maluca",
+  "name": "Malabarismo de Troca Súbita",
+  "kind": "QUICK",
+  "rarity": "COMMON",
+  "family": "Grande Circo Trapalhão",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "ALLIED_PIECE_PAIR",
+  "text": "Troca as posições de 2 peças aliadas adjacentes (nenhuma pode ser o Rei).",
+  "recipe": {
+   "when": "PREP",
+   "if": [
+    "areAlliedAdjacentNonKing"
+   ],
+   "do": [
+    {
+     "op": "swapPieces",
+     "who": "targetPair",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na tua preparação ou resposta da Zona, com 2 peças aliadas coladas.",
+  "newPrimitives": [
+   "swapPieces"
+  ],
+  "botHint": "Excelente para tirar uma peça valiosa do perigo colocando um peão ou torre defensora.",
+  "test": "Troca Dama em f3 com Peão em f2 para blindar a Dama de ataque de Bispo.",
+  "colors": [
+   "#D90429",
+   "#F8FAFC"
+  ],
+  "icon": "MALABARISMO_TROCA",
+  "sfx": "hop",
+  "item": "Three glossy juggling clubs colored red, teal, and yellow spinning in a dynamic airborne arc."
+ },
+ {
+  "id": "qs_cabo_aco_voador",
+  "name": "Cabo de Tirolesa Acrobática",
+  "kind": "QUICK",
+  "rarity": "EPIC",
+  "family": "Grande Circo Trapalhão",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "OWN_PIECE",
+  "text": "Escolhe 1 peça tua. Ela desliza em linha reta por cima de casas vazias até à borda do tabuleiro.",
+  "recipe": {
+   "when": "PREP",
+   "if": [
+    "targetOwnPiece"
+   ],
+   "do": [
+    {
+     "op": "teleport",
+     "who": "targetToEdge",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação ou resposta da Zona em peça com linha desimpedida.",
+  "newPrimitives": [],
+  "botHint": "Permite que uma Torre ou Bispo cruze todo o tabuleiro num piscar de olhos.",
+  "test": "Torre em a3 voa pela tirolesa até h3 através de casas livres, atacando a retaguarda inimiga.",
+  "colors": [
+   "#D90429",
+   "#2EC4B6"
+  ],
+  "icon": "CABO_TIROLESA",
+  "sfx": "spring_jump",
+  "item": "A steel zip-line pulley with colorful circus striped handles and tiny flying sparks."
+ },
+ {
+  "id": "eq_tubo_ensaio_toxico",
+  "name": "Frasco de Ácido Verdejante",
+  "kind": "EQUIP",
+  "rarity": "COMMON",
+  "family": "Laboratório Mutante",
+  "pieces": "p",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa um Peão. Ao ser capturado por uma peça inimiga (exceto o Rei), destrói a peça atacante.",
+  "recipe": {
+   "when": "ON_DEATH",
+   "if": [
+    "killerNonKing"
+   ],
+   "do": [
+    {
+     "op": "destroy",
+     "who": "attacker",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação num Peão avançado que defenda o centro.",
+  "newPrimitives": [],
+  "botHint": "Transforma o teu peão num veneno mortal; o adversário não pode capturá-lo sem morrer junto.",
+  "test": "Dama adversária captura peão com ácido em d5; a Dama é imediatamente destruída.",
+  "colors": [
+   "#2EC4B6",
+   "#047857"
+  ],
+  "icon": "FRASCO_ACIDO",
+  "sfx": "glass",
+  "item": "A bubbling conical glass laboratory flask filled with radioactive neon-green effervescent liquid."
+ },
+ {
+  "id": "eq_braco_mutante",
+  "name": "Braço Biónico Elástico",
+  "kind": "EQUIP",
+  "rarity": "RARE",
+  "family": "Laboratório Mutante",
+  "pieces": "b",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa um Bispo. Passa a poder mover-se e capturar 1 casa em qualquer direção ortogonal.",
+  "recipe": {
+   "when": "MOVE_RULE",
+   "if": [],
+   "do": [
+    {
+     "op": "grantMoveRule",
+     "who": "self",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação num Bispo para cobrir as fraquezas da sua cor de casa.",
+  "newPrimitives": [
+   "grantMoveRule"
+  ],
+  "botHint": "Permite que o teu Bispo mude a cor das casas onde opera e escape de bloqueios diagonais.",
+  "test": "Bispo de casas brancas move-se 1 casa para o lado para uma casa preta e continua a jogar.",
+  "colors": [
+   "#2EC4B6",
+   "#7C3AED"
+  ],
+  "icon": "BRACO_BIONICO",
+  "sfx": "sword_draw",
+  "item": "A segmented teal mechanical robot arm with a three-pronged claw holding an Erlenmeyer flask."
+ },
+ {
+  "id": "eq_elixir_mutacao_total",
+  "name": "Soro da Mutação Alfa",
+  "kind": "EQUIP",
+  "rarity": "LEGENDARY",
+  "family": "Laboratório Mutante",
+  "pieces": "p",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa um Peão. Transforma-o permanentemente numa Dama com 1 Escudo.",
+  "recipe": {
+   "when": "ON_EQUIP",
+   "if": [],
+   "do": [
+    {
+     "op": "morphPiece",
+     "who": "self",
+     "n": 99
+    },
+    {
+     "op": "shield",
+     "who": "self",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação quando tens um Peão livre e precisas de superioridade bélica imediata.",
+  "newPrimitives": [
+   "morphPiece"
+  ],
+  "botHint": "Cria uma segunda Dama no tabuleiro equipada com escudo, alterando radicalmente o equilíbrio.",
+  "test": "Peão em e2 toma o soro e torna-se instantaneamente numa Dama protegida por Escudo.",
+  "colors": [
+   "#2EC4B6",
+   "#D90429"
+  ],
+  "icon": "SORO_ALFA",
+  "sfx": "magic_zap",
+  "item": "A golden syringe filled with swirling rainbow plasma equipped with glowing pressure meters."
+ },
+ {
+  "id": "gt_gas_sonifero",
+  "name": "Gás Sonífero Experimental",
+  "kind": "GRID",
+  "rarity": "COMMON",
+  "family": "Laboratório Mutante",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Escondida numa casa. A peça inimiga que a pise é adormecida: fica congelada durante 2 turnos.",
+  "recipe": {
+   "when": "STEP",
+   "if": [],
+   "do": [
+    {
+     "op": "freeze",
+     "who": "stepper",
+     "n": 2
+    }
+   ]
+  },
+  "canUse": "Na preparação numa casa de passagem obrigatória.",
+  "newPrimitives": [],
+  "botHint": "Imobiliza qualquer atacante com sono profundo por 2 turnos inteiros.",
+  "test": "Bispo preto pisa c4; inala o gás e fica adormecido (congelado) durante 2 turnos.",
+  "colors": [
+   "#2EC4B6",
+   "#64748B"
+  ],
+  "icon": "GAS_SONIFERO",
+  "sfx": "ice_freeze",
+  "item": "A brass laboratory canister venting a thick cloud of purple sleeping vapor with floating Zzz letters."
+ },
+ {
+  "id": "gt_armadilha_clones",
+  "name": "Câmara de Clonagem",
+  "kind": "GRID",
+  "rarity": "RARE",
+  "family": "Laboratório Mutante",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Escondida numa casa. Ao pisar, a peça inimiga vira Peão 2 turnos e tu geras 1 Peão teu numa casa adjacente.",
+  "recipe": {
+   "when": "STEP",
+   "if": [
+    "stepperNonKing"
+   ],
+   "do": [
+    {
+     "op": "morph",
+     "who": "stepper",
+     "n": 2
+    },
+    {
+     "op": "promoteInstant",
+     "who": "emptyAdj",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação numa casa que o oponente planeia atacar.",
+  "newPrimitives": [
+   "promoteInstant"
+  ],
+  "botHint": "Reduz a peça inimiga a peão e ainda concede um peão bónus às tuas fileiras.",
+  "test": "Cavalo pisa e5; vira peão por 2 turnos e surge um peão aliado na casa d5 livre.",
+  "colors": [
+   "#2EC4B6",
+   "#FFB703"
+  ],
+  "icon": "CAMARA_CLONES",
+  "sfx": "magic_zap",
+  "item": "A twin glass tube pod filled with bubbling cyan gel with electrical sparks jumping between them."
+ },
+ {
+  "id": "gt_lodo_radioativo",
+  "name": "Piscina de Lodo Radioativo",
+  "kind": "GRID",
+  "rarity": "EPIC",
+  "family": "Laboratório Mutante",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Escondida numa casa. A peça inimiga que a pise perde todos os Equipamentos, Escudos e vira Peão 2 turnos.",
+  "recipe": {
+   "when": "STEP",
+   "if": [
+    "stepperNonKing"
+   ],
+   "do": [
+    {
+     "op": "stripEquips",
+     "who": "stepper",
+     "n": 1
+    },
+    {
+     "op": "shatterShields",
+     "who": "stepper",
+     "n": 1
+    },
+    {
+     "op": "morph",
+     "who": "stepper",
+     "n": 2
+    }
+   ]
+  },
+  "canUse": "Na preparação no caminho de peças ultra-equipadas do inimigo.",
+  "newPrimitives": [],
+  "botHint": "Desativa por completo os bónus da peça adversária, desnudando-a de itens e poderes.",
+  "test": "Dama preta com armadura e escudo pisa e4; perde tudo e vira um mero peão por 2 turnos.",
+  "colors": [
+   "#2EC4B6",
+   "#0F141C"
+  ],
+  "icon": "LODO_RADIOATIVO",
+  "sfx": "explosion_bam",
+  "item": "A glowing toxic radioactive green puddle melting the checkerboard floor with rising bubbles."
+ },
+ {
+  "id": "rt_antidoto_emergencia",
+  "name": "Injeção de Antídoto Turbo",
+  "kind": "REACTIVE",
+  "rarity": "COMMON",
+  "family": "Laboratório Mutante",
+  "pieces": "",
+  "trigger": "CHECK",
+  "negates": [],
+  "target": "",
+  "text": "Quando o teu Rei fica em xeque ou uma peça aliada é congelada: limpa o gelo das tuas peças e dá 1 Escudo à peça.",
+  "recipe": {
+   "when": "CHECK",
+   "if": [
+    "alliedIsFrozenOrMorphed"
+   ],
+   "do": [
+    {
+     "op": "freeze",
+     "who": "target",
+     "n": 0
+    },
+    {
+     "op": "shield",
+     "who": "target",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Dispara quando o inimigo congelar uma peça tua ou der xeque.",
+  "newPrimitives": [],
+  "botHint": "Mantém as tuas peças operacionais contra baralhos de controlo de gelo e mutações.",
+  "test": "Oponente congela o teu Cavalo; o antídoto remove o gelo imediatamente e concede 1 Escudo.",
+  "colors": [
+   "#2EC4B6",
+   "#F8FAFC"
+  ],
+  "icon": "INJECAO_ANTIDOTO",
+  "sfx": "glass",
+  "item": "A chunky white and red emergency auto-injector pen releasing a soothing turquoise mist."
+ },
+ {
+  "id": "rt_reacao_quimica_cadeia",
+  "name": "Fórmula da Reação em Cadeia",
+  "kind": "REACTIVE",
+  "rarity": "RARE",
+  "family": "Laboratório Mutante",
+  "pieces": "",
+  "trigger": "DESTROYED",
+  "negates": [],
+  "target": "",
+  "text": "Quando uma peça tua é destruída: transforma a peça inimiga mais valiosa (exceto o Rei) em Peão por 2 turnos.",
+  "recipe": {
+   "when": "DESTROYED",
+   "if": [],
+   "do": [
+    {
+     "op": "morph",
+     "who": "highestEnemyNonKing",
+     "n": 2
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Dispara quando perderes uma peça.",
+  "newPrimitives": [],
+  "botHint": "Pena máxima para o adversário: mesmo que ele mate um peão teu, a Dama dele vira Peão.",
+  "test": "Peão branco em h2 é capturado; a Dama preta em d8 transforma-se num Peão durante 2 turnos.",
+  "colors": [
+   "#2EC4B6",
+   "#D90429"
+  ],
+  "icon": "REACAO_CADEIA",
+  "sfx": "magic_zap",
+  "item": "A chemical beaker bursting with pink and cyan atomic spark particles and fizzing bubbles."
+ },
+ {
+  "id": "rt_pele_borracha",
+  "name": "Enxerto Celular de Borracha",
+  "kind": "REACTIVE",
+  "rarity": "EPIC",
+  "family": "Laboratório Mutante",
+  "pieces": "",
+  "trigger": "CAPTURE",
+  "negates": [],
+  "target": "",
+  "text": "Quando uma peça tua vai ser capturada: em vez disso ganha 1 Escudo e empurra o atacante 2 casas.",
+  "recipe": {
+   "when": "CAPTURE",
+   "if": [],
+   "do": [
+    {
+     "op": "shield",
+     "who": "target",
+     "n": 1
+    },
+    {
+     "op": "pushBack",
+     "who": "attacker",
+     "n": 2
+    },
+    {
+     "op": "negateCapture",
+     "who": "attacker",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Dispara perante ataque inimigo.",
+  "newPrimitives": [],
+  "botHint": "Salva a peça, concede proteção duradoura e repele o atacante com força elástica.",
+  "test": "Cavalo preto tenta comer Bispo em e3; Bispo ganha Escudo e Cavalo é arremessado para trás.",
+  "colors": [
+   "#2EC4B6",
+   "#FB8500"
+  ],
+  "icon": "ENXERTO_BORRACHA",
+  "sfx": "spring_jump",
+  "item": "A flexible pink and teal rubberized skin membrane patch stretching outwards with bounce lines."
+ },
+ {
+  "id": "ct_descontaminador",
+  "name": "Câmara de Vácuo Esteril",
+  "kind": "COUNTER",
+  "rarity": "RARE",
+  "family": "Laboratório Mutante",
+  "pieces": "",
+  "trigger": "",
+  "negates": [
+   "GRID",
+   "REACTIVE"
+  ],
+  "target": "",
+  "text": "Counter-Trap: anula uma Armadilha de Casa ou Reativa e transforma o stepper/atacante em Peão 1 turno.",
+  "recipe": {
+   "when": "LINK",
+   "if": [
+    "linkIsTrap"
+   ],
+   "do": [
+    {
+     "op": "negateLink",
+     "who": "link",
+     "n": 1
+    },
+    {
+     "op": "morph",
+     "who": "triggerPiece",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Responde a armadilhas ativadas pelo adversário.",
+  "newPrimitives": [],
+  "botHint": "Esteriliza armadilhas e pune o proprietário transformando a peça envolvida num Peão.",
+  "test": "Inimigo ativa Armadilha Reativa; anula-a e o atacante vira peão por 1 turno.",
+  "colors": [
+   "#2EC4B6",
+   "#2563EB"
+  ],
+  "icon": "CAMARA_VACUO",
+  "sfx": "negate_stamp",
+  "item": "A sterile stainless steel dome with a glowing cyan laser ring that disintegrates trap wires."
+ },
+ {
+  "id": "qs_transmutacao_peao",
+  "name": "Elixir da Transmutação Fácil",
+  "kind": "QUICK",
+  "rarity": "COMMON",
+  "family": "Laboratório Mutante",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "OWN_PIECE",
+  "text": "Escolhe 1 Peão teu. Transforma-o num Cavalo ou Bispo durante 2 turnos, revertendo depois.",
+  "recipe": {
+   "when": "PREP",
+   "if": [
+    "targetOwnPawn"
+   ],
+   "do": [
+    {
+     "op": "morphPiece",
+     "who": "target",
+     "n": 2
+    }
+   ]
+  },
+  "canUse": "Na tua preparação ou resposta da Zona, tendo um Peão em posição estratégica.",
+  "newPrimitives": [
+   "morphPiece"
+  ],
+  "botHint": "Surpreende o adversário com um garfo de Cavalo saído de um Peão aparentemente inofensivo.",
+  "test": "Peão em d4 transforma-se em Cavalo em d4 e ataca simultaneamente o Rei e a Dama em c6 e e6.",
+  "colors": [
+   "#2EC4B6",
+   "#FFB703"
+  ],
+  "icon": "ELIXIR_FACIL",
+  "sfx": "magic_zap",
+  "item": "A corked glass potion bottle filled with swirling violet and golden sparkling liquid."
+ },
+ {
+  "id": "qs_raio_desestabilizador",
+  "name": "Pistola de Raios Quânticos",
+  "kind": "QUICK",
+  "rarity": "COMMON",
+  "family": "Laboratório Mutante",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "ENEMY_PIECE",
+  "text": "Escolhe 1 peça inimiga (exceto o Rei). Ela não pode dar xeque nem capturar peças durante este turno.",
+  "recipe": {
+   "when": "PREP",
+   "if": [
+    "targetEnemyNonKing"
+   ],
+   "do": [
+    {
+     "op": "silenceEquips",
+     "who": "target",
+     "n": 1
+    },
+    {
+     "op": "grantMoveRule",
+     "who": "target",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação ou resposta da Zona quando o oponente prepara xeque-mate ou ataque devastador.",
+  "newPrimitives": [
+   "silenceEquips",
+   "grantMoveRule"
+  ],
+  "botHint": "Neutraliza temporariamente a principal peça ofensiva do oponente sem ter de a matar.",
+  "test": "Dama adversária em h5 pronta para mate em f7 perde a capacidade de dar xeque este turno.",
+  "colors": [
+   "#2EC4B6",
+   "#9333EA"
+  ],
+  "icon": "PISTOLA_QUANTICA",
+  "sfx": "magic_zap",
+  "item": "A retro-futuristic teal and yellow ray gun with concentric rings around the muzzle."
+ },
+ {
+  "id": "qs_soro_crescimento",
+  "name": "Soro de Crescimento Gigante",
+  "kind": "QUICK",
+  "rarity": "EPIC",
+  "family": "Laboratório Mutante",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "OWN_PIECE",
+  "text": "Escolhe 1 Peão teu na 6.ª ou 7.ª fila. Promove-o imediatamente a Dama sem gastar o lance de xadrez.",
+  "recipe": {
+   "when": "PREP",
+   "if": [
+    "targetOwnPawnRank6or7"
+   ],
+   "do": [
+    {
+     "op": "promoteInstant",
+     "who": "target",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação quando tens um peão avançado prestes a alcançar a última fila.",
+  "newPrimitives": [
+   "promoteInstant"
+  ],
+  "botHint": "Acelera a coroação de forma fulminante, permitindo atacar com a Dama no mesmo turno.",
+  "test": "Peão em e7 é promovido instantaneamente a Dama; lance normal subsequente dá xeque em e8.",
+  "colors": [
+   "#2EC4B6",
+   "#D90429"
+  ],
+  "icon": "FRASCO_CRESCIMENTO",
+  "sfx": "magic_zap",
+  "item": "A massive bubbling syringe loaded with glowing orange growth hormone and metallic needles."
+ },
+ {
+  "id": "eq_distintivo_fiscal",
+  "name": "Distintivo do Juiz Estrito",
+  "kind": "EQUIP",
+  "rarity": "COMMON",
+  "family": "Tribunal da Batota",
+  "pieces": "rb",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa um Bispo ou Torre. Peças inimigas não podem ativar Equipamentos enquanto estiverem a 2 casas.",
+  "recipe": {
+   "when": "MOVE_RULE",
+   "if": [],
+   "do": [
+    {
+     "op": "silenceEquips",
+     "who": "enemiesWithin2",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação num Bispo ou Torre bem posicionado.",
+  "newPrimitives": [
+   "silenceEquips"
+  ],
+  "botHint": "Cria uma zona de interdição onde engenhocas do oponente deixam de funcionar.",
+  "test": "Torre com distintivo em d4 impede que o Cavalo em f4 use os seus poderes de equipamento.",
+  "colors": [
+   "#64748B",
+   "#FFB703"
+  ],
+  "icon": "DISTINTIVO_JUIZ",
+  "sfx": "shield_clang",
+  "item": "A polished silver star badge with a cartoon engraved gavel in the center and blue ribbon."
+ },
+ {
+  "id": "eq_balanca_justica",
+  "name": "Balança da Lei Inflexível",
+  "kind": "EQUIP",
+  "rarity": "RARE",
+  "family": "Tribunal da Batota",
+  "pieces": "pnbrq",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa qualquer peça aliada. Sempre que o adversário jogar uma carta da mão, ele perde 1 ação de carta no turno dele.",
+  "recipe": {
+   "when": "LINK",
+   "if": [
+    "cardFromOpponentHand"
+   ],
+   "do": [
+    {
+     "op": "cardActionMod",
+     "who": "opponent",
+     "n": -1
+    }
+   ]
+  },
+  "canUse": "Na preparação numa peça protegida.",
+  "newPrimitives": [
+   "cardActionMod"
+  ],
+  "botHint": "Tributa cada ação de carta do adversário, reduzindo drasticamente a flexibilidade dele.",
+  "test": "Adversário usa 2 cartas no seu turno; no próximo turno só terá 1 ação disponível.",
+  "colors": [
+   "#64748B",
+   "#2563EB"
+  ],
+  "icon": "BALANCA_LEI",
+  "sfx": "shield_clang",
+  "item": "A classic golden justice scale tilting comically with small legal books balancing on brass pans."
+ },
+ {
+  "id": "gt_zona_multa",
+  "name": "Radar Rodoviário Flash",
+  "kind": "GRID",
+  "rarity": "COMMON",
+  "family": "Tribunal da Batota",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Escondida numa casa. A peça inimiga que a pise é multada: o dono dela descarta 1 carta aleatória da mão.",
+  "recipe": {
+   "when": "STEP",
+   "if": [],
+   "do": [
+    {
+     "op": "handDiscardRandom",
+     "who": "opponent",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação em casa de trânsito rápido de cavalos e damas.",
+  "newPrimitives": [
+   "handDiscardRandom"
+  ],
+  "botHint": "Pune a velocidade inimiga forçando descarte imediato de recursos da mão.",
+  "test": "Cavalo preto entra em e5; radar dispara e o jogador adversário descarta 1 carta ao calhas.",
+  "colors": [
+   "#64748B",
+   "#D90429"
+  ],
+  "icon": "RADAR_MULTA",
+  "sfx": "explosion_bam",
+  "item": "A cute speed camera on a tripod with a giant cartoon flash bulb flashing white light."
+ },
+ {
+  "id": "gt_cela_detencao",
+  "name": "Cela de Detenção Provisória",
+  "kind": "GRID",
+  "rarity": "RARE",
+  "family": "Tribunal da Batota",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Escondida numa casa. A peça que a pise fica presa: congelada durante 2 turnos e não pode receber cartas.",
+  "recipe": {
+   "when": "STEP",
+   "if": [],
+   "do": [
+    {
+     "op": "freeze",
+     "who": "stepper",
+     "n": 2
+    },
+    {
+     "op": "untargetable",
+     "who": "stepper",
+     "n": 2
+    }
+   ]
+  },
+  "canUse": "Na preparação numa casa cobiçada.",
+  "newPrimitives": [
+   "untargetable"
+  ],
+  "botHint": "Isola uma peça agressiva do oponente, impedindo-o até de a salvar com magias rápidas.",
+  "test": "Dama adversária pisa c5; fica presa nas grades por 2 turnos e imune a bónus ou resgates.",
+  "colors": [
+   "#64748B",
+   "#0F141C"
+  ],
+  "icon": "CELA_DETENCAO",
+  "sfx": "trap",
+  "item": "A miniature iron prison cell with thick black vertical bars and a comical padlock on the door."
+ },
+ {
+  "id": "rt_mandado_apreensao",
+  "name": "Mandado Judicial de Busca",
+  "kind": "REACTIVE",
+  "rarity": "COMMON",
+  "family": "Tribunal da Batota",
+  "pieces": "",
+  "trigger": "DESTROYED",
+  "negates": [],
+  "target": "",
+  "text": "Quando uma peça aliada for capturada: confisca 1 Equipamento da peça atacante e compras 1 carta.",
+  "recipe": {
+   "when": "DESTROYED",
+   "if": [
+    "attackerHasEquip"
+   ],
+   "do": [
+    {
+     "op": "stripEquips",
+     "who": "attacker",
+     "n": 1
+    },
+    {
+     "op": "draw",
+     "who": "owner",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Dispara quando a tua peça sofrer captura por peça equipada.",
+  "newPrimitives": [],
+  "botHint": "Desarma o agressor no ato do crime e recupera valor comprando carta.",
+  "test": "Cavalo inimigo com Espada mata Peão; espada é confiscada e as Brancas compram 1 carta.",
+  "colors": [
+   "#64748B",
+   "#F8FAFC"
+  ],
+  "icon": "MANDADO_JUDICIAL",
+  "sfx": "capture",
+  "item": "A rolled up parchment paper scroll tied with a red ribbon and stamped with a wax seal."
+ },
+ {
+  "id": "rt_habeas_corpus",
+  "name": "Sentença de Despejo Imediato",
+  "kind": "REACTIVE",
+  "rarity": "RARE",
+  "family": "Tribunal da Batota",
+  "pieces": "",
+  "trigger": "CHECK",
+  "negates": [],
+  "target": "",
+  "text": "Quando o teu Rei fica em xeque: expulsa a peça atacante de volta para a casa de onde veio e compras 1 carta.",
+  "recipe": {
+   "when": "CHECK",
+   "if": [
+    "attackerNonKing"
+   ],
+   "do": [
+    {
+     "op": "returnToFrom",
+     "who": "checkers",
+     "n": 1
+    },
+    {
+     "op": "draw",
+     "who": "owner",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Dispara quando o teu Rei sofrer xeque.",
+  "newPrimitives": [],
+  "botHint": "Anula ataques diretos ao Rei punindo o invasor com retrocesso forçado e ganho de carta.",
+  "test": "Torre preta desce para e1 dando xeque; ordem judicial manda a Torre de volta para e8.",
+  "colors": [
+   "#64748B",
+   "#7C3AED"
+  ],
+  "icon": "SENTENCA_DESPEJO",
+  "sfx": "negate_stamp",
+  "item": "A heavy wooden courtroom judge gavel banging down on a circular sound block with sparks."
+ },
+ {
+  "id": "rt_injuncao_suprema",
+  "name": "Veto do Supremo Tribunal",
+  "kind": "REACTIVE",
+  "rarity": "LEGENDARY",
+  "family": "Tribunal da Batota",
+  "pieces": "",
+  "trigger": "CAPTURE",
+  "negates": [],
+  "target": "",
+  "text": "Quando o adversário declarar uma captura: anula a captura, destrói o atacante e o adversário descarta 1 carta.",
+  "recipe": {
+   "when": "CAPTURE",
+   "if": [
+    "attackerNonKing"
+   ],
+   "do": [
+    {
+     "op": "negateCapture",
+     "who": "attacker",
+     "n": 1
+    },
+    {
+     "op": "destroy",
+     "who": "attacker",
+     "n": 1
+    },
+    {
+     "op": "handDiscardRandom",
+     "who": "opponent",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Dispara perante qualquer tentativa de captura do adversário.",
+  "newPrimitives": [
+   "handDiscardRandom"
+  ],
+  "botHint": "A resposta definitiva de proteção: destrói o atacante e ainda pune a mão de jogo dele.",
+  "test": "Dama adversária tenta comer Torre; Dama é destruída e adversário descarta 1 carta.",
+  "colors": [
+   "#64748B",
+   "#D90429"
+  ],
+  "icon": "VETO_SUPREMO",
+  "sfx": "negate_stamp",
+  "item": "A golden judge gavel encased in divine purple comic lightning striking a shattered rulebook."
+ },
+ {
+  "id": "ct_cartao_vermelho",
+  "name": "Cartão Vermelho do Árbitro",
+  "kind": "COUNTER",
+  "rarity": "COMMON",
+  "family": "Tribunal da Batota",
+  "pieces": "",
+  "trigger": "",
+  "negates": [
+   "EQUIP",
+   "GRID",
+   "REACTIVE",
+   "QUICK",
+   "COUNTER"
+  ],
+  "target": "",
+  "text": "Counter-Trap: anula a ativação de qualquer carta do adversário. A peça que a usou fica congelada 1 turno.",
+  "recipe": {
+   "when": "LINK",
+   "if": [],
+   "do": [
+    {
+     "op": "negateLink",
+     "who": "link",
+     "n": 1
+    },
+    {
+     "op": "freeze",
+     "who": "triggerPiece",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Responde a qualquer elo de carta do oponente.",
+  "newPrimitives": [],
+  "botHint": "Usa para travar jogadas-chave do adversário expulsando a peça da ação por 1 turno.",
+  "test": "Adversário equipa Botas de Vento; Cartão Vermelho anula as botas e congela o Peão 1 turno.",
+  "colors": [
+   "#64748B",
+   "#D90429"
+  ],
+  "icon": "CARTAO_VERMELHO",
+  "sfx": "negate_stamp",
+  "item": "A bright red plastic referee penalty card held high with yellow whistle hanging on a lanyard."
+ },
+ {
+  "id": "ct_recurso_tribunal",
+  "name": "Embargo de Declaração Flash",
+  "kind": "COUNTER",
+  "rarity": "RARE",
+  "family": "Tribunal da Batota",
+  "pieces": "",
+  "trigger": "",
+  "negates": [
+   "COUNTER"
+  ],
+  "target": "",
+  "text": "Counter-Trap: anula uma Counter-Trap inimiga e o adversário não pode ativar cartas no próximo turno.",
+  "recipe": {
+   "when": "LINK",
+   "if": [
+    "linkIsCounter"
+   ],
+   "do": [
+    {
+     "op": "negateLink",
+     "who": "link",
+     "n": 1
+    },
+    {
+     "op": "cardActionMod",
+     "who": "opponent",
+     "n": -2
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Responde quando o oponente anular uma carta tua com Counter-Trap.",
+  "newPrimitives": [
+   "cardActionMod"
+  ],
+  "botHint": "Garante a resolução do teu combo ao anular a resposta defensiva do inimigo.",
+  "test": "Inimigo usa Apito do Juiz; anula com Embargo e o oponente fica impedido de jogar cartas.",
+  "colors": [
+   "#64748B",
+   "#2EC4B6"
+  ],
+  "icon": "EMBARGO_DECLARACAO",
+  "sfx": "negate_stamp",
+  "item": "A legal folder stamped with a giant red 'REJECTED' mark emitting legal shockwaves."
+ },
+ {
+  "id": "ct_clausula_rescisao",
+  "name": "Rescisão Judicial Unilateral",
+  "kind": "COUNTER",
+  "rarity": "LEGENDARY",
+  "family": "Tribunal da Batota",
+  "pieces": "",
+  "trigger": "",
+  "negates": [
+   "EQUIP",
+   "GRID",
+   "REACTIVE",
+   "QUICK",
+   "COUNTER"
+  ],
+  "target": "",
+  "text": "Counter-Trap: anula qualquer carta do adversário. Destrói todos os Equipamentos de todas as peças dele.",
+  "recipe": {
+   "when": "LINK",
+   "if": [],
+   "do": [
+    {
+     "op": "negateLink",
+     "who": "link",
+     "n": 1
+    },
+    {
+     "op": "stripEquips",
+     "who": "allEnemies",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Responde a qualquer carta do rival.",
+  "newPrimitives": [],
+  "botHint": "Destrói uma carta adversária e desmantela todo o investimento em equipamentos da equipa dele.",
+  "test": "Adversário ativa feitiço; anula-o e retira todas as armas e capas do exército preto.",
+  "colors": [
+   "#64748B",
+   "#FB8500"
+  ],
+  "icon": "QUEBRA_CONTRATO",
+  "sfx": "glass",
+  "item": "A burning legal contract parchment tearing in half with glowing orange embers and falling sparks."
+ },
+ {
+  "id": "qs_intimacao_urgente",
+  "name": "Intimação Notarial Noturna",
+  "kind": "QUICK",
+  "rarity": "COMMON",
+  "family": "Tribunal da Batota",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "SQUARE",
+  "text": "Escolhe 1 casa do tabuleiro. Bloqueia essa casa durante 2 turnos: nenhuma peça pode entrar ou passar.",
+  "recipe": {
+   "when": "PREP",
+   "if": [
+    "targetSquare"
+   ],
+   "do": [
+    {
+     "op": "blockSquare",
+     "who": "target",
+     "n": 2
+    }
+   ]
+  },
+  "canUse": "Na preparação ou resposta da Zona numa casa crítica de avanço.",
+  "newPrimitives": [
+   "blockSquare"
+  ],
+  "botHint": "Tranca uma casa vital do centro ou a passagem da coluna da Torre adversária.",
+  "test": "Bloqueia d5 por 2 turnos; o Cavalo preto não pode avançar para o centro.",
+  "colors": [
+   "#64748B",
+   "#F8FAFC"
+  ],
+  "icon": "INTIMACAO_URGENTE",
+  "sfx": "trap",
+  "item": "A yellow police line tape barrier blocking a checkered square with plastic traffic cones."
+ },
+ {
+  "id": "qs_inspecao_tributaria",
+  "name": "Auditoria Fiscal de Choque",
+  "kind": "QUICK",
+  "rarity": "EPIC",
+  "family": "Tribunal da Batota",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "NONE",
+  "text": "Revela todas as Armadilhas de Casa do adversário, remove 1 delas do jogo sem disparar e compras 1 carta.",
+  "recipe": {
+   "when": "PREP",
+   "if": [],
+   "do": [
+    {
+     "op": "revealTrap",
+     "who": "opponent",
+     "n": 3
+    },
+    {
+     "op": "banishTrap",
+     "who": "opponentTrap",
+     "n": 1
+    },
+    {
+     "op": "draw",
+     "who": "owner",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação quando suspeitares de minas e armadilhas inimigas espalhadas.",
+  "newPrimitives": [
+   "banishTrap"
+  ],
+  "botHint": "Desmascara emboscadas adversárias, bane uma mina e converte a batota do oponente em compra.",
+  "test": "Revela 2 armadilhas escondidas em d5 e f4, bane a de d5 e o jogador compra 1 carta.",
+  "colors": [
+   "#64748B",
+   "#2563EB"
+  ],
+  "icon": "AUDITORIA_FISCAL",
+  "sfx": "magic_zap",
+  "item": "A magnifying glass with a bright blue LED light scanning through an invisible blueprint grid."
+ },
+ {
+  "id": "eq_gancho_pirata",
+  "name": "Gancho de Abordagem Veloz",
+  "kind": "EQUIP",
+  "rarity": "COMMON",
+  "family": "Banco de Sucata & Pirataria",
+  "pieces": "nr",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa uma Torre ou Cavalo. Ao capturar uma peça, puxa 1 Peão inimigo adjacente para a casa vaga deixada.",
+  "recipe": {
+   "when": "ON_CAPTURE",
+   "if": [
+    "hasAdjacentEnemyPawn"
+   ],
+   "do": [
+    {
+     "op": "pushBack",
+     "who": "adjEnemyPawn",
+     "n": -1
+    }
+   ]
+  },
+  "canUse": "Na preparação num Cavalo ou Torre de assalto.",
+  "newPrimitives": [],
+  "botHint": "Desestrutura as barreiras defensivas de peões do oponente durante capturas.",
+  "test": "Cavalo come Bispo em f6 e puxa Peão de g7 para f6 desmantelando a guarda do Rei.",
+  "colors": [
+   "#FFB703",
+   "#0F141C"
+  ],
+  "icon": "GANCHO_PIRATA",
+  "sfx": "sword_draw",
+  "item": "A shiny steel pirate hook with a gold skull emblem on a leather cuff and a miniature rope coil."
+ },
+ {
+  "id": "eq_papagaio_vigia",
+  "name": "Papagaio de Espiar Baralhos",
+  "kind": "EQUIP",
+  "rarity": "RARE",
+  "family": "Banco de Sucata & Pirataria",
+  "pieces": "pnbrq",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa qualquer peça aliada. No início do teu turno, olha para a carta do topo do teu baralho e podes colocá-la no fundo.",
+  "recipe": {
+   "when": "TURN_START",
+   "if": [],
+   "do": [
+    {
+     "op": "scryTop",
+     "who": "deck",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação numa peça da retaguarda.",
+  "newPrimitives": [
+   "TURN_START",
+   "scryTop"
+  ],
+  "botHint": "Garante compras consistentes descartando cartas mortas para o fundo do baralho.",
+  "test": "Olha a carta do topo: é uma armadilha desnecessária, manda para o fundo e compra uma magia chave.",
+  "colors": [
+   "#FFB703",
+   "#047857"
+  ],
+  "icon": "PAPAGAIO_VIGIA",
+  "sfx": "hop",
+  "item": "A colorful vinyl green and scarlet macaw parrot perched on a tiny wooden pirate peg."
+ },
+ {
+  "id": "eq_saco_pilhagem",
+  "name": "Saco de Dobrões de Ouro",
+  "kind": "EQUIP",
+  "rarity": "EPIC",
+  "family": "Banco de Sucata & Pirataria",
+  "pieces": "p",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa um Peão. Quando este Peão alcançar a 5.ª fila ou superior, compras 2 cartas e ele ganha 1 Escudo.",
+  "recipe": {
+   "when": "AFTER_MOVE",
+   "if": [
+    "selfRank5Plus",
+    "oncePerCard"
+   ],
+   "do": [
+    {
+     "op": "draw",
+     "who": "owner",
+     "n": 2
+    },
+    {
+     "op": "shield",
+     "who": "self",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação num Peão que esteja prestes a avançar para o campo adversário.",
+  "newPrimitives": [],
+  "botHint": "Incentiva avanços agressivos recompensando com 2 cartas e proteção reforçada.",
+  "test": "Peão avança para c5; ganha 1 Escudo e o jogador compra 2 cartas imediatamente.",
+  "colors": [
+   "#FFB703",
+   "#FB8500"
+  ],
+  "icon": "SACO_DOBROES",
+  "sfx": "shield_clang",
+  "item": "A bulging canvas burlap sack overflowing with shiny golden dubloons and glittering gems."
+ },
+ {
+  "id": "eq_bussola_tesouro",
+  "name": "Bússola Dourada Caraíbas",
+  "kind": "EQUIP",
+  "rarity": "LEGENDARY",
+  "family": "Banco de Sucata & Pirataria",
+  "pieces": "nq",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa uma Dama ou Cavalo. Ao capturar, rouba a carta do topo do baralho do adversário para a tua mão.",
+  "recipe": {
+   "when": "ON_CAPTURE",
+   "if": [],
+   "do": [
+    {
+     "op": "draw",
+     "who": "stealOpponentDeckTop",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na tua melhor peça de ataque.",
+  "newPrimitives": [],
+  "botHint": "Devora o baralho inimigo e usa os truques do adversário contra ele próprio.",
+  "test": "Cavalo come peão inimigo; o jogador retira a carta do topo do baralho preto para a sua mão.",
+  "colors": [
+   "#FFB703",
+   "#7C3AED"
+  ],
+  "icon": "BUSSOLA_DOURADA",
+  "sfx": "magic_zap",
+  "item": "An ornate golden navigational compass with a spinning cyan crystal needle pointing at an X."
+ },
+ {
+  "id": "gt_barril_polvora",
+  "name": "Barril de Pólvora Pirata",
+  "kind": "GRID",
+  "rarity": "COMMON",
+  "family": "Banco de Sucata & Pirataria",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Escondida numa casa. A peça inimiga que a pise explode: destrói a própria peça se for Peão; se for maior sofre 1 turno freeze.",
+  "recipe": {
+   "when": "STEP",
+   "if": [
+    "stepperIsPawn"
+   ],
+   "do": [
+    {
+     "op": "destroy",
+     "who": "stepper",
+     "n": 1
+    }
+   ],
+   "else": [
+    {
+     "op": "freeze",
+     "who": "stepper",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação em coluna disputada.",
+  "newPrimitives": [],
+  "botHint": "Elimina peões infiltrados e paralisa peças maiores que se aventurem a entrar.",
+  "test": "Peão preto pisa c4; barril detona e o peão é removido do tabuleiro.",
+  "colors": [
+   "#FFB703",
+   "#D90429"
+  ],
+  "icon": "BARRIL_POLVORA",
+  "sfx": "explosion_bam",
+  "item": "A wooden grooved powder keg with black metal hoops and a sizzling cartoon fuse on top."
+ },
+ {
+  "id": "gt_mapa_naufragio",
+  "name": "X Assinala Tesouro Perdido",
+  "kind": "GRID",
+  "rarity": "RARE",
+  "family": "Banco de Sucata & Pirataria",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Escondida numa casa. Quando uma peça aliada pisar esta casa: compras 2 cartas e a armadilha é gasta.",
+  "recipe": {
+   "when": "STEP",
+   "if": [
+    "stepperIsAllied"
+   ],
+   "do": [
+    {
+     "op": "draw",
+     "who": "owner",
+     "n": 2
+    }
+   ]
+  },
+  "canUse": "Na preparação numa casa onde uma peça tua possa passar tranquilamente.",
+  "newPrimitives": [],
+  "botHint": "Uma armadilha amiga: envia o teu próprio peão ou cavalo para desenterrar 2 cartas.",
+  "test": "Cavalo branco salta para f3 onde armaste o mapa; recebes 2 cartas da reserva.",
+  "colors": [
+   "#FFB703",
+   "#2EC4B6"
+  ],
+  "icon": "MAPA_TESOURO",
+  "sfx": "hop",
+  "item": "An old worn treasure map roll with a bright red 'X' mark and miniature gold palm trees."
+ },
+ {
+  "id": "gt_tubarao_mar",
+  "name": "Tanque Tubarões Famintos",
+  "kind": "GRID",
+  "rarity": "EPIC",
+  "family": "Banco de Sucata & Pirataria",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Escondida numa casa. Peça inimiga que a pise perde todos os Escudos e é engolida: destruída (exceto o Rei).",
+  "recipe": {
+   "when": "STEP",
+   "if": [
+    "stepperNonKing"
+   ],
+   "do": [
+    {
+     "op": "shatterShields",
+     "who": "stepper",
+     "n": 1
+    },
+    {
+     "op": "destroy",
+     "who": "stepper",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação numa casa central crucial.",
+  "newPrimitives": [],
+  "botHint": "A armadilha assassina do arquétipo pirata: destrói sem apelo nem agravo qualquer peça inimiga.",
+  "test": "Torre preta pisa e4; o alçapão com tubarões abre-se e a Torre é destruída.",
+  "colors": [
+   "#FFB703",
+   "#00B4D8"
+  ],
+  "icon": "TANQUE_TUBAROES",
+  "sfx": "explosion_bam",
+  "item": "A trapdoor with water splashes revealing a cartoon blue hammerhead shark with smiling teeth."
+ },
+ {
+  "id": "rt_seguro_naufragio",
+  "name": "Baú de Resgate de Pirata",
+  "kind": "REACTIVE",
+  "rarity": "COMMON",
+  "family": "Banco de Sucata & Pirataria",
+  "pieces": "",
+  "trigger": "DESTROYED",
+  "negates": [],
+  "target": "",
+  "text": "Quando uma peça aliada for destruída: recupera 1 carta de Equipamento ou Magia do cemitério para a mão.",
+  "recipe": {
+   "when": "DESTROYED",
+   "if": [],
+   "do": [
+    {
+     "op": "graveRecover",
+     "who": "owner",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Dispara quando perderes uma peça.",
+  "newPrimitives": [
+   "graveRecover"
+  ],
+  "botHint": "Garante reciclagem ininterrupta de recursos vitais do cemitério após baixas.",
+  "test": "Cavalo branco morre; o Baú abre-se e resgata uma Magia Rápida usada anteriormente.",
+  "colors": [
+   "#FFB703",
+   "#64748B"
+  ],
+  "icon": "BAU_RESGATE",
+  "sfx": "hop",
+  "item": "A sturdy iron-banded wooden treasure chest slightly cracked open with glowing green light."
+ },
+ {
+  "id": "rt_canhoneio_bordo",
+  "name": "Bateria Canhões de Bordo",
+  "kind": "REACTIVE",
+  "rarity": "RARE",
+  "family": "Banco de Sucata & Pirataria",
+  "pieces": "",
+  "trigger": "CAPTURE",
+  "negates": [],
+  "target": "",
+  "text": "Quando uma peça aliada maior for atacada: o atacante sofre pushBack 2 casas e compras 1 carta.",
+  "recipe": {
+   "when": "CAPTURE",
+   "if": [
+    "targetIsMajorOrMinor"
+   ],
+   "do": [
+    {
+     "op": "pushBack",
+     "who": "attacker",
+     "n": 2
+    },
+    {
+     "op": "draw",
+     "who": "owner",
+     "n": 1
+    },
+    {
+     "op": "negateCapture",
+     "who": "attacker",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Dispara quando o rival atacar Torre, Bispo, Cavalo ou Dama.",
+  "newPrimitives": [],
+  "botHint": "Repele o atacante à canhonada e concede vantagem de mão para o contra-ataque.",
+  "test": "Dama adversária ataca Torre em a1; leva com tiros de canhão, recua 2 casas e compras 1 carta.",
+  "colors": [
+   "#FFB703",
+   "#D90429"
+  ],
+  "icon": "CANHOES_BORDO",
+  "sfx": "explosion_bam",
+  "item": "A row of three miniature bronze pirate ship cannons firing simultaneously with black smoke puffs."
+ },
+ {
+  "id": "rt_reciclagem_turbo",
+  "name": "Íman Sucata Submarina",
+  "kind": "REACTIVE",
+  "rarity": "EPIC",
+  "family": "Banco de Sucata & Pirataria",
+  "pieces": "",
+  "trigger": "DESTROYED",
+  "negates": [],
+  "target": "",
+  "text": "Quando uma peça aliada é destruída: compras 2 cartas e o adversário descarta 1 carta aleatória da mão.",
+  "recipe": {
+   "when": "DESTROYED",
+   "if": [],
+   "do": [
+    {
+     "op": "draw",
+     "who": "owner",
+     "n": 2
+    },
+    {
+     "op": "handDiscardRandom",
+     "who": "opponent",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Dispara quando uma peça tua for destruída.",
+  "newPrimitives": [
+   "handDiscardRandom"
+  ],
+  "botHint": "Vira o jogo de recursos com um balanço brutal de +2 cartas tuas e -1 carta adversária.",
+  "test": "Torre aliada é destruída; íman ativa-se, jogador compra 2 cartas e inimigo descarta 1.",
+  "colors": [
+   "#FFB703",
+   "#2563EB"
+  ],
+  "icon": "IMAN_SUBMARINO",
+  "sfx": "magic_zap",
+  "item": "A giant horseshoe magnet encrusted with cartoon barnacles pulling floating gears and coins."
+ },
+ {
+  "id": "ct_motim_bordo",
+  "name": "Garrafa de Rum Explosiva",
+  "kind": "COUNTER",
+  "rarity": "COMMON",
+  "family": "Banco de Sucata & Pirataria",
+  "pieces": "",
+  "trigger": "",
+  "negates": [
+   "GRID",
+   "EQUIP"
+  ],
+  "target": "",
+  "text": "Counter-Trap: anula uma Armadilha de Casa ou Equipamento inimigo e compras 1 carta.",
+  "recipe": {
+   "when": "LINK",
+   "if": [
+    "linkIsGridOrEquip"
+   ],
+   "do": [
+    {
+     "op": "negateLink",
+     "who": "link",
+     "n": 1
+    },
+    {
+     "op": "draw",
+     "who": "owner",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Responde a armadilhas de casa ou equipamentos.",
+  "newPrimitives": [],
+  "botHint": "Desarma ameaças passivas e mantém a tua mão cheia de truques.",
+  "test": "Inimigo equipa Lança Telescópica; garrafa explode, anula a lança e compras 1 carta.",
+  "colors": [
+   "#FFB703",
+   "#9333EA"
+  ],
+  "icon": "GARRAFA_RUM",
+  "sfx": "glass",
+  "item": "A round glass rum bottle with a flaming rag cork ready to burst like a pirate molotov."
+ },
+ {
+  "id": "qs_saque_rapido",
+  "name": "Pilha de Tralha de Convés",
+  "kind": "QUICK",
+  "rarity": "COMMON",
+  "family": "Banco de Sucata & Pirataria",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "NONE",
+  "text": "Compra 2 cartas e depois descarta 1 carta da tua mão à tua escolha.",
+  "recipe": {
+   "when": "PREP",
+   "if": [],
+   "do": [
+    {
+     "op": "draw",
+     "who": "owner",
+     "n": 2
+    },
+    {
+     "op": "handDiscardRandom",
+     "who": "owner",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação ou resposta da Zona para cavar respostas vitais no baralho.",
+  "newPrimitives": [
+   "handDiscardRandom"
+  ],
+  "botHint": "Filtra a mão trocando cartas pesadas ou circunstanciais por opções imediatas.",
+  "test": "Lança o feitiço; compra 2 cartas novas e descarta uma armadilha redundante.",
+  "colors": [
+   "#FFB703",
+   "#F8FAFC"
+  ],
+  "icon": "PILHA_TRALHA",
+  "sfx": "hop",
+  "item": "A messy cartoon pile of wooden planks, coiled ropes, rusted anchor, and empty brass tankards."
+ },
+ {
+  "id": "qs_arremesso_ancora",
+  "name": "Âncora Pesada de Galeão",
+  "kind": "QUICK",
+  "rarity": "RARE",
+  "family": "Banco de Sucata & Pirataria",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "ENEMY_PIECE",
+  "text": "Escolhe 1 peça inimiga (exceto o Rei). Empurra-a 2 casas e congela-a durante 1 turno.",
+  "recipe": {
+   "when": "PREP",
+   "if": [
+    "targetEnemyNonKing"
+   ],
+   "do": [
+    {
+     "op": "pushBack",
+     "who": "target",
+     "n": 2
+    },
+    {
+     "op": "freeze",
+     "who": "target",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação ou resposta da Zona contra avanços agressivos.",
+  "newPrimitives": [],
+  "botHint": "Desaloja uma peça do seu posto avançado e ancora-a com congelamento temporário.",
+  "test": "Atinge Cavalo preto em d5; o Cavalo é empurrado para d7 e fica congelado por 1 turno.",
+  "colors": [
+   "#FFB703",
+   "#64748B"
+  ],
+  "icon": "ANCORA_GALEAO",
+  "sfx": "explosion_bam",
+  "item": "A massive black cast-iron ship anchor dropping with heavy comic impact dust clouds."
+ },
+ {
+  "id": "eq_colete_balas",
+  "name": "Colete Balístico Insuflável",
+  "kind": "EQUIP",
+  "rarity": "COMMON",
+  "family": "Força Policial",
+  "pieces": "pb",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa um Peão ou Bispo. Recebe 1 Escudo e não pode ser capturado por Peões inimigos.",
+  "recipe": {
+   "when": "ON_EQUIP",
+   "if": [],
+   "do": [
+    {
+     "op": "shield",
+     "who": "self",
+     "n": 1
+    },
+    {
+     "op": "grantMoveRule",
+     "who": "self",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação num Peão ou Bispo na linha de frente.",
+  "newPrimitives": [
+   "grantMoveRule"
+  ],
+  "botHint": "Torna a peça impermeável a peões inimigos com proteção extra de escudo.",
+  "test": "Peão em d4 equipado não pode ser capturado pelo peão preto em e5 e sobrevive a ataques.",
+  "colors": [
+   "#2563EB",
+   "#F8FAFC"
+  ],
+  "icon": "COLETE_BALISTICO",
+  "sfx": "shield_clang",
+  "item": "A puffy dark blue tactical vest with bright yellow 'POLICE' letters and cartoon padding."
+ },
+ {
+  "id": "eq_megafone_ordem",
+  "name": "Megafone de Dispersão",
+  "kind": "EQUIP",
+  "rarity": "RARE",
+  "family": "Força Policial",
+  "pieces": "nr",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa uma Torre ou Cavalo. Ao mover-se, empurra todas as peças inimigas adjacentes 1 casa para longe.",
+  "recipe": {
+   "when": "AFTER_MOVE",
+   "if": [
+    "hasAdjacentEnemies"
+   ],
+   "do": [
+    {
+     "op": "pushBack",
+     "who": "allAdjacentEnemies",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação num Cavalo ou Torre de invasão.",
+  "newPrimitives": [],
+  "botHint": "Abre caminho através de bloqueios densos espalhando as tropas defensoras.",
+  "test": "Cavalo salta para d5; peões inimigos em c6, e6 e d6 são dispersos 1 casa para trás.",
+  "colors": [
+   "#2563EB",
+   "#FFB703"
+  ],
+  "icon": "MEGAFONE_ORDEM",
+  "sfx": "spring_jump",
+  "item": "A white and blue electronic bullhorn megaphone emitting yellow lightning bolt sound waves."
+ },
+ {
+  "id": "eq_sirene_perseguicao",
+  "name": "Sirene Emergência Giro",
+  "kind": "EQUIP",
+  "rarity": "EPIC",
+  "family": "Força Policial",
+  "pieces": "rq",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa uma Torre ou Dama. Ganha a capacidade de mover-se 1 casa na diagonal e recebe 1 Escudo.",
+  "recipe": {
+   "when": "ON_EQUIP",
+   "if": [],
+   "do": [
+    {
+     "op": "shield",
+     "who": "self",
+     "n": 1
+    },
+    {
+     "op": "grantMoveRule",
+     "who": "self",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação numa Torre para torná-la numa quasi-Dama com proteção de escudo.",
+  "newPrimitives": [
+   "grantMoveRule"
+  ],
+  "botHint": "Confere à Torre manobrabilidade diagonal eliminando ângulos mortos.",
+  "test": "Torre em a1 move-se diagonalmente para b2 e depois verticalmente para b8.",
+  "colors": [
+   "#2563EB",
+   "#D90429"
+  ],
+  "icon": "SIRENE_EMERGENCIA",
+  "sfx": "magic_zap",
+  "item": "A flashing red and blue dual revolving police beacon with chrome base and glossy plastic domes."
+ },
+ {
+  "id": "eq_escudo_choque",
+  "name": "Escudo Tático Antitumulto",
+  "kind": "EQUIP",
+  "rarity": "LEGENDARY",
+  "family": "Força Policial",
+  "pieces": "pnbrq",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Equipa qualquer peça aliada. Recebe 2 Escudos. Enquanto tiver Escudo, o teu Rei não pode sofrer xeque.",
+  "recipe": {
+   "when": "ON_EQUIP",
+   "if": [],
+   "do": [
+    {
+     "op": "shield",
+     "who": "self",
+     "n": 2
+    },
+    {
+     "op": "grantMoveRule",
+     "who": "self",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na tua peça mais bem guardada.",
+  "newPrimitives": [
+   "grantMoveRule"
+  ],
+  "botHint": "O ápice da segurança defensiva: bloqueia completamente investidas de xeque ao teu Rei.",
+  "test": "Cavalo em f3 recebe o Escudo Tático; peças pretas não podem declarar lances que ponham Rei em xeque.",
+  "colors": [
+   "#2563EB",
+   "#0F141C"
+  ],
+  "icon": "ESCUDO_ANTITUMULTO",
+  "sfx": "shield_clang",
+  "item": "A heavy polycarbonate transparent riot shield with reinforced blue metal bars and double grips."
+ },
+ {
+  "id": "gt_barricada_picos",
+  "name": "Tapete de Fita de Picos",
+  "kind": "GRID",
+  "rarity": "COMMON",
+  "family": "Força Policial",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Escondida numa casa. Peça inimiga que a pise perde 1 Escudo e fica congelada durante 1 turno.",
+  "recipe": {
+   "when": "STEP",
+   "if": [],
+   "do": [
+    {
+     "op": "shatterShields",
+     "who": "stepper",
+     "n": 1
+    },
+    {
+     "op": "freeze",
+     "who": "stepper",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação em casa de trânsito rápido.",
+  "newPrimitives": [],
+  "botHint": "Fura proteções e imobiliza peças velozes do oponente.",
+  "test": "Cavalo preto pisa e4; pneus furados, perde escudo e fica congelado por 1 turno.",
+  "colors": [
+   "#2563EB",
+   "#64748B"
+  ],
+  "icon": "FITA_PICOS",
+  "sfx": "glass",
+  "item": "A deployable metal spike strip unrolled on the tiles with glossy silver hollow spikes."
+ },
+ {
+  "id": "gt_cone_sinalizacao",
+  "name": "Cone de Trânsito Refletor",
+  "kind": "GRID",
+  "rarity": "RARE",
+  "family": "Força Policial",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Escondida numa casa. A peça que a pise é desviada 1 casa para o lado e a casa fica bloqueada 2 turnos.",
+  "recipe": {
+   "when": "STEP",
+   "if": [],
+   "do": [
+    {
+     "op": "pushBack",
+     "who": "stepper",
+     "n": 1
+    },
+    {
+     "op": "blockSquare",
+     "who": "sq",
+     "n": 2
+    }
+   ]
+  },
+  "canUse": "Na preparação em gargalo central.",
+  "newPrimitives": [
+   "blockSquare"
+  ],
+  "botHint": "Redireciona o atacante e cria uma barreira física temporária no tabuleiro.",
+  "test": "Bispo pisa d4; é desviado para c4 e a casa d4 fica interdita a qualquer passagem por 2 turnos.",
+  "colors": [
+   "#2563EB",
+   "#FB8500"
+  ],
+  "icon": "CONE_TRANSITO",
+  "sfx": "spring_jump",
+  "item": "A bright orange rubber traffic cone with dual white reflective stripes and a black heavy base."
+ },
+ {
+  "id": "gt_rede_captura",
+  "name": "Lança-Redes Pneumático",
+  "kind": "GRID",
+  "rarity": "EPIC",
+  "family": "Força Policial",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "",
+  "text": "Escondida numa casa. A peça inimiga que a pise fica imobilizada: congelada 2 turnos e perde todos os Equipamentos.",
+  "recipe": {
+   "when": "STEP",
+   "if": [],
+   "do": [
+    {
+     "op": "freeze",
+     "who": "stepper",
+     "n": 2
+    },
+    {
+     "op": "stripEquips",
+     "who": "stepper",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação no trajeto da peça mais perigosa do oponente.",
+  "newPrimitives": [],
+  "botHint": "Neutraliza em absoluto atacantes de elite desarmando-os e prendendo-os.",
+  "test": "Dama adversária equipada pisa c4; a rede cai, desarma todos os equipamentos e congela-a 2 turnos.",
+  "colors": [
+   "#2563EB",
+   "#047857"
+  ],
+  "icon": "REDE_CAPTURA",
+  "sfx": "trap",
+  "item": "A spring-loaded canister opening to deploy a heavy weighted nylon net with brass weights."
+ },
+ {
+  "id": "rt_algemas_rapidas",
+  "name": "Algemas de Aço Reforçado",
+  "kind": "REACTIVE",
+  "rarity": "COMMON",
+  "family": "Força Policial",
+  "pieces": "",
+  "trigger": "DESTROYED",
+  "negates": [],
+  "target": "",
+  "text": "Quando uma peça aliada for capturada: congela a peça agressora durante 2 turnos.",
+  "recipe": {
+   "when": "DESTROYED",
+   "if": [
+    "attackerNonKing"
+   ],
+   "do": [
+    {
+     "op": "freeze",
+     "who": "attacker",
+     "n": 2
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Dispara após a perda de uma peça tua.",
+  "newPrimitives": [],
+  "botHint": "Prende o agressor no local do crime impedindo-o de recuar ou manobrar.",
+  "test": "Cavalo preto come Peão branco em d4; o Cavalo fica algemado (congelado) durante 2 turnos.",
+  "colors": [
+   "#2563EB",
+   "#64748B"
+  ],
+  "icon": "ALGEMAS_ACO",
+  "sfx": "shield_clang",
+  "item": "A pair of shiny chrome cartoon handcuffs with a linked chain and tiny keyhole details."
+ },
+ {
+  "id": "rt_cordao_seguranca",
+  "name": "Cordão de Polícia Blindado",
+  "kind": "REACTIVE",
+  "rarity": "RARE",
+  "family": "Força Policial",
+  "pieces": "",
+  "trigger": "CHECK",
+  "negates": [],
+  "target": "",
+  "text": "Quando o teu Rei fica em xeque: move 1 Torre aliada para uma casa ao lado do Rei que bloqueie o xeque e dá-lhe 1 Escudo.",
+  "recipe": {
+   "when": "CHECK",
+   "if": [
+    "hasAvailableRook"
+   ],
+   "do": [
+    {
+     "op": "castleFree",
+     "who": "alliedRookAdjacentKing",
+     "n": 1
+    },
+    {
+     "op": "shield",
+     "who": "kingProtector",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação na Zona. Dispara quando o teu Rei sofrer xeque.",
+  "newPrimitives": [
+   "castleFree"
+  ],
+  "botHint": "Traz uma Torre para intercetar o ataque e erguer um baluarte protetor imediato.",
+  "test": "Bispo preto dá xeque ao Rei branco; Torre voa para a casa adjacente e blinda a defesa com Escudo.",
+  "colors": [
+   "#2563EB",
+   "#FFB703"
+  ],
+  "icon": "CORDAO_POLICIA",
+  "sfx": "shield_clang",
+  "item": "A striped yellow and black sawn barricade with blinking yellow safety lights on each post."
+ },
+ {
+  "id": "qs_escolta_armada",
+  "name": "Carro Patrulha Batedor",
+  "kind": "QUICK",
+  "rarity": "COMMON",
+  "family": "Força Policial",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "OWN_PIECE",
+  "text": "Escolhe 1 Peão teu. Concede-lhe 1 Escudo e neste turno ele pode avançar 2 casas mesmo fora da casa inicial.",
+  "recipe": {
+   "when": "PREP",
+   "if": [
+    "targetOwnPawn"
+   ],
+   "do": [
+    {
+     "op": "shield",
+     "who": "target",
+     "n": 1
+    },
+    {
+     "op": "grantMoveRule",
+     "who": "target",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação ou resposta da Zona num Peão que queiras projetar no tabuleiro.",
+  "newPrimitives": [
+   "grantMoveRule"
+  ],
+  "botHint": "Dá aceleração e proteção ao peão para consolidar postos avançados e preparar coroações.",
+  "test": "Peão em d4 recebe escudo e avança 2 casas para d6, ameaçando a estrutura preta.",
+  "colors": [
+   "#2563EB",
+   "#D90429"
+  ],
+  "icon": "CARRO_PATRULHA",
+  "sfx": "spring_jump",
+  "item": "A cute rounded blue and white cartoon police squad car with glowing headlights and lightbar."
+ },
+ {
+  "id": "qs_bloqueio_tatico",
+  "name": "Barreira Antidistúrbios",
+  "kind": "QUICK",
+  "rarity": "COMMON",
+  "family": "Força Policial",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "OWN_PIECE",
+  "text": "Escolhe 1 peça aliada. Dá-lhe 1 Escudo. Se já tiver Escudo, dá 1 Escudo a outra peça adjacente.",
+  "recipe": {
+   "when": "PREP",
+   "if": [
+    "targetOwnPiece"
+   ],
+   "do": [
+    {
+     "op": "shield",
+     "who": "target",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação ou resposta da Zona para resguardar uma peça antes do combate.",
+  "newPrimitives": [],
+  "botHint": "Garante sobrevivência imediata a uma peça chave alvo de ameaça iminente.",
+  "test": "Dama branca em perigo recebe 1 Escudo e aguenta o ataque sem ser capturada.",
+  "colors": [
+   "#2563EB",
+   "#2EC4B6"
+  ],
+  "icon": "BARREIRA_PORTATIL",
+  "sfx": "shield_clang",
+  "item": "A portable foldable blue steel tactical barrier with bright yellow reflector strips."
+ },
+ {
+  "id": "qs_helicoptero_apoio",
+  "name": "Helicóptero de Vigilância",
+  "kind": "QUICK",
+  "rarity": "RARE",
+  "family": "Força Policial",
+  "pieces": "",
+  "trigger": "",
+  "negates": [],
+  "target": "OWN_PIECE",
+  "text": "Escolhe 1 peça aliada (exceto o Rei). Transporta-a pelo ar para qualquer casa vazia da tua 1.ª ou 2.ª fila.",
+  "recipe": {
+   "when": "PREP",
+   "if": [
+    "targetOwnNonKing"
+   ],
+   "do": [
+    {
+     "op": "teleport",
+     "who": "targetToBackRow",
+     "n": 1
+    }
+   ]
+  },
+  "canUse": "Na preparação ou resposta da Zona para resgatar uma peça encurralada.",
+  "newPrimitives": [],
+  "botHint": "Evacua de emergência uma peça maior ameaçada e reposiciona-a em segurança na retaguarda.",
+  "test": "Dama encurralada em h4 é resgatada de helicóptero para a casa segura d1.",
+  "colors": [
+   "#2563EB",
+   "#7C3AED"
+  ],
+  "icon": "HELICOPTERO_APOIO",
+  "sfx": "hop",
+  "item": "A chunky blue police helicopter with spinning twin yellow rotors and searchlight beam."
+ }
+]
