@@ -72,7 +72,7 @@
     ['ct_tesoura_corta_fio', 'Tesoura Gigante Corta-Fios', 'COUNTER_SPELL', 'COUNTER', 'COMMON', 3, { negates: ['GRID'], reveal: true },
       'Counter-Trap: anula uma Armadilha de Casa ativada pelo adversário e revela outra armadilha escondida dele.', ['#FA903E', '#111111', 'GIANT_SCISSORS', 'negate_stamp']],
     ['ct_ima_equipamento', 'Íman Ladrão de Engenhocas', 'COUNTER_SPELL', 'QUICK', 'RARE', 2, { target: 'STEAL' },
-      'Magia Rápida: rouba 1 Equipamento de uma peça inimiga e passa-o para uma peça tua compatível.', ['#D93025', '#1A73E8', 'THIEF_MAGNET', 'magic_zap']],
+      'Magia Rápida: rouba 1 Equipamento de uma peça inimiga e passa-o para uma peça tua compatível. Se o Equipamento dá Escudo, o Escudo vai com ele.', ['#D93025', '#1A73E8', 'THIEF_MAGNET', 'magic_zap']],
     ['ct_apito_juiz', 'Apito do Juiz Subornado', 'COUNTER_SPELL', 'COUNTER', 'LEGENDARY', 3, { negates: ['EQUIP', 'GRID', 'REACTIVE', 'COUNTER', 'QUICK'], draw: 1 },
       'Counter-Trap suprema: anula qualquer carta do adversário, destrói-a e compras 1 carta.', ['#FCC934', '#111111', 'GOLDEN_WHISTLE', 'negate_stamp']],
     ['ct_emp_cartoon', 'Pulso Eletromagnético Boom', 'COUNTER_SPELL', 'QUICK', 'EPIC', 2, { target: 'SQUARE' },

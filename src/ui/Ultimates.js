@@ -41,6 +41,7 @@
     DEFS,
     /** Peças cuja transformação ainda não se mostra (à espera do fim do cut-in de invocação). */
     hold: new Set(),
+    wardHold: new Set(),   // cores cuja barreira ainda está a caminho do Rei (aparece quando a energia chega)
     def(id) { return DEFS[id] || null; },
     hero(d) { return YC.asset(`assets/ultimate/${d.icon}/hero.png`); },
     video(d, kind) { return `assets/ultimate/${d.icon}/${(d.files && d.files[kind]) || kind}.mp4`; },
@@ -67,6 +68,7 @@
     /** 'fusion' | 'guard' | null: que barreira tem o Rei desta cor (a da fusão tem outras cores e partículas). */
     wardStyle(m, color) {
       if (!m || !m.pos) return null;
+      if (U.wardHold.has(color)) return null;
       let style = null;
       for (const q of m.pos.board) {
         if (!q || q.color !== color || !q.shield) continue;
@@ -233,6 +235,21 @@
       const id = p.card && p.card.id;
       if (!U.active(an.ui.match, id)) return an.equipAttach(p);
       return U.transform(an, p.piece, id, () => an.equipAttach(p));
+    },
+
+    /** A peça ganhou Escudo (equipar ou roubar o Escudo Tático): se for um guardião, a energia voa até ao Rei e só
+        então a barreira aparece. Os dois jogadores veem o mesmo (corre nos dois clientes). */
+    async onShieldGain(an, p) {
+      const m = an.ui.match, d = U.forPiece(p.piece, m), k = YC.Chess.kingSquare(m.pos, p.piece.color);
+      if (!U.guards(d) || k < 0 || k === p.sq) return an.shieldGain(p);
+      // se o Rei já tinha a barreira de outro guardião, não a esconde (senão estilhaçava e voltava)
+      const col = p.piece.color, had = m.pos.board.some((q) => q && q !== p.piece && q.color === col && q.shield && U.guards(U.forPiece(q, m)));
+      if (!had) U.wardHold.add(col);
+      try {
+        await an.shieldGain(p);
+        await U.bolt(an, p.sq, k, d, { text: 'REI PROTEGIDO!' });
+      } catch (err) { console.warn('[ultimate]', err); } finally { if (!had) U.wardHold.delete(col); }
+      an.sync();
     },
 
     /** Íman: a carta muda de dono e a peça de quem a roubou também se transforma (ou funde-se). */

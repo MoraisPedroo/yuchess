@@ -292,7 +292,13 @@
         from.equips.splice(from.equips.indexOf(eq), 1);
         to.equips.push(eq);
         m.say(`Íman! Roubou ${YC.Cards.get(eq).name}.`, team, { card: eq, sq: l.target.to, pieceId: to.id });
-        return m.bus.emitAsync('equip:steal', { from: l.target.from, to: l.target.to, id: eq, team });
+        await m.bus.emitAsync('equip:steal', { from: l.target.from, to: l.target.to, id: eq, team });
+        // o Escudo que esse Equipamento dá vai com ele (ex.: Escudo Tático — o Rei de quem roubou fica protegido)
+        if (YC.Cards.get(eq).shield) {
+          if (from.shield) { from.shield = false; await m.bus.emitAsync('shield:shatter', { piece: from, sq: l.target.from, cause: id }); }
+          if (!to.shield) await m.giveShield(to, eq);
+        }
+        return;
       }
       if (id === 'ct_emp_cartoon') {
         const [r, c] = C().rc(l.target.sq);

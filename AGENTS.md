@@ -33,7 +33,7 @@ Escreve como se o próximo leitor não tivesse visto nada do que fizeste.
 |---|---|
 | `python tools/serve.py` → <http://localhost:8765> | Servidor local sem cache. |
 | `node tools/test-chess-rules.js` | Regras de xadrez (contagens *perft* de referência) + equipamentos que mudam lances. Tem de dar `Tudo certo.` (`--deep` corre as contagens grandes). |
-| `node tools/test-cards.js` | Um teste de cenário por carta/regra: os das 31 originais estão no próprio ficheiro e os das 89 da expansão (e das regras do baralho de 22) em `tools/tests/*.js`, carregados sozinhos. Tem de dar `132/132 testes passaram.` |
+| `node tools/test-cards.js` | Um teste de cenário por carta/regra: os das 31 originais estão no próprio ficheiro e os das 89 da expansão (e das regras do baralho de 22) em `tools/tests/*.js`, carregados sozinhos. Tem de dar `134/134 testes passaram.` |
 | `node tools/simulate.js 30` | 30 partidas bot vs bot sem ecrã; verifica invariantes (2 × 22 cartas sempre, 1 Rei de cada cor, Chain fechada, quem jogou não fica em xeque). Tem de dar `30/30` e `Cartas nunca ativadas: nenhuma`. |
 | `node tools/simulate-online.js 8` | Protocolo online (lockstep) com dois motores ligados por mensagens, com latência e desistências. Tem de dar `Sincronizadas: 8/8`. |
 | `node tools/build.js` | Gera `dist/chess-gi-oh.html` (ficheiro único). `dist/` não vai para o git. |

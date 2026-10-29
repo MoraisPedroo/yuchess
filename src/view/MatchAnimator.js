@@ -38,7 +38,7 @@
       on('capture:snapback', this.snapback);
       on('capture:miss', ({ to }) => this.at(to, 'FALHOU!', '#575B5F', 'spring_jump'));
       on('shield:shatter', this.shieldShatter);
-      on('shield:gain', ({ sq }) => { this.sync(); S('shield_clang'); return Promise.all([FX().ring(this.board.fx, ...this.xy(sq), '#12B5CB', 0.2), FX().wait(420)]); });
+      on('shield:gain', (p) => (YC.Ultimate ? YC.Ultimate.onShieldGain(this, p) : this.shieldGain(p)), 8000);
       on('shield:divine', ({ sq }) => this.at(sq, 'ÉGIDE!', '#12B5CB', 'shield_clang', { ring: '#12B5CB', colors: ['#12B5CB', '#fff', '#FCC934'] }));
       on('shield:blocked', ({ sq }) => this.pop(sq, 'BLOQUEADO!', '#FA903E', 'error'));
       on('mirror:bounce', ({ from, to }) => Promise.all([this.at(to, 'BOING!', '#F538A0', 'spring_jump', { ring: '#F538A0' }), FX().ring(this.board.fx, ...this.xy(from), '#12B5CB', 0.22)]));
@@ -200,6 +200,12 @@
       S('hop');
       if (a) await FX().to(a.querySelector('.squash'), { y: '-12%', scaleY: 1.1, duration: 0.18, ease: 'power2.out' });
       await FX().wait(160);
+    }
+
+    shieldGain({ sq }) {
+      this.sync();
+      S('shield_clang');
+      return Promise.all([FX().ring(this.board.fx, ...this.xy(sq), '#12B5CB', 0.2), FX().wait(420)]);
     }
 
     async shieldShatter({ piece, sq }) {

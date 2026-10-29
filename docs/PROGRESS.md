@@ -9,7 +9,7 @@
 
 **Funciona e está testado**
 - Xadrez completo (`src/game/ChessRules.js`): lances legais, xeque, xeque-mate, afogamento, roque, en passant, promoção, 50 lances, repetição tripla, material insuficiente. Contagens *perft* de referência certas (início, Kiwipete, posições 3–5).
-- **120 cartas** (31 originais + 89 da expansão em 7 famílias, 2026-10-27) com efeitos, Chain de Velocidade 1/2/3, janelas de resposta (captura, destruição, xeque), Zona de Armadilhas com "enjoo", Armadilhas de Casa escondidas (máx. 3), escudos, congelar, metamorfose, teletransporte, casas bloqueadas, peças silenciadas, trocas, peões novos, roubo e descarte de cartas, etc. 132 testes de cenário a passar (um por carta + regras + explicação dos lances).
+- **120 cartas** (31 originais + 89 da expansão em 7 famílias, 2026-10-27) com efeitos, Chain de Velocidade 1/2/3, janelas de resposta (captura, destruição, xeque), Zona de Armadilhas com "enjoo", Armadilhas de Casa escondidas (máx. 3), escudos, congelar, metamorfose, teletransporte, casas bloqueadas, peças silenciadas, trocas, peões novos, roubo e descarte de cartas, etc. 134 testes de cenário a passar (um por carta + regras + explicação dos lances + Ultimates).
 - Bot (Fácil/Médio/Difícil) e simulações: 30/30 partidas bot vs bot sem quebrar invariantes; todas as cartas chegam a ser usadas.
 - Economia: pacotinhos de 5 cartas com raridades, pity épico/lendário, duplicados → Poeira Estelar, criação de cartas, validação de baralhos, recompensas. **Baralhos de 22 cartas** desde 2026-10-27 (perfis antigos de 12 são convertidos sozinhos: `Economy.migrate22`).
 - Interface cartoon nova (peças com expressões, cartas holográficas, animações GSAP, confetes, sons sintetizados): Arena, Loja com abertura em 4 atos, Baralhos, partida contra o bot com respostas da Chain, layout de telemóvel. Testado no navegador (partidas inteiras bot vs bot no ecrã sem erros; equipar, virar carta, lance e resposta com a Égide feitos à mão).
@@ -51,6 +51,11 @@
 - Num separador escondido o navegador quase para as animações (requestAnimationFrame); o motor espera no máximo 4 s por animação, por isso o jogo nunca bloqueia, só fica lento.
 
 ## Registo de sessões
+
+### 2026-10-29 (noite, 3) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Escudo Tático roubado pelo Íman** (erro): o Íman só mudava o Equipamento de dono; o Escudo (`piece.shield`) ficava na peça antiga e o `ChessRules.guarded` exige os dois na mesma peça, por isso nenhum Rei ficava protegido e a barreira desaparecia para os dois. Agora (`CardEffects.resolveQuick`, ramo `ct_ima_equipamento`), se o Equipamento roubado dá Escudo, a peça roubada perde o Escudo (`shield:shatter`) e a de quem roubou ganha-o (`giveShield`). Texto do Íman atualizado ("Se o Equipamento dá Escudo, o Escudo vai com ele"). Teste novo em `tools/tests/ultimate.js` (134/134).
+- **Animação**: a barreira do Rei de quem perdeu estilhaça; a de quem roubou só aparece quando a energia do guardião chega ao Rei (`Ultimate.onShieldGain` + `Ultimate.wardHold`, ligado ao `shield:gain` do `MatchAnimator`, com "REI PROTEGIDO!") e cresce do Rei com faíscas (`Board3DUltimate.syncWards`, transição desligada → ligada). Vale também ao equipar o Escudo normalmente e na fusão (barreira dupla). Se o Rei já tinha a barreira de outro guardião, não a esconde. Corre nos dois clientes, por isso os dois jogadores veem o mesmo.
+- Como testar: partida contra o bot com a Ultimate do Escudo desbloqueada; o adversário equipa o Escudo Tático, roubas com o Íman → a barreira dele parte, aparece o Kaito do teu lado e a barreira passa para o teu Rei; a partir daí o adversário deixa de te poder dar xeque e tu já lho podes dar.
 
 ### 2026-10-29 (noite, 2) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Fusão de Ultimates** (`src/ui/UltimateFusion.js`): a mesma peça com o Cetro e o Escudo Tático (um Peão, que aceita os dois) vira **Akaito, a Fusão Real** — personagem nova feita no Gemini (metade rainha rubi, metade guardião azul). Vale se as Ultimates forem do mesmo jogador ou uma de cada (`match.ults`), e se a segunda carta chegar por equipar ou pelo Íman (`Ultimate.transform`).

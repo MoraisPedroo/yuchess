@@ -81,10 +81,16 @@
         const wardF = this.accessory(g, 'ultWardFusion', style === 'fusion', () => this.makeWard(true));
         if (wardF) wardF.position.y = 0.62;
         if (g.userData.wardOn && !on) {
-          // o Escudo do guardião partiu: a barreira estilhaça
+          // o Escudo do guardião partiu (ou foi roubado): a barreira estilhaça
           const w = this.sqWorld(sq);
           if (this.shards3D) this.shards3D(w.x, 0.8, w.z, 0x48CAE4, { n: 22, size: 0.09, sp: 3, glow: true });
           if (this.sparks) this.sparks(w.x, 0.8, w.z, 0x48CAE4, { n: 18, speed: 2.4 });
+        }
+        if (g.userData.wardOn === false && on) {
+          // a barreira acabou de chegar: cresce do Rei com um anel de faíscas
+          const w = this.sqWorld(sq), o = style === 'fusion' ? wardF : ward, c2 = style === 'fusion' ? 0xD90429 : 0xffffff;
+          if (this.sparks) { this.sparks(w.x, 0.7, w.z, 0x48CAE4, { n: 26, speed: 2.6 }); this.sparks(w.x, 1.1, w.z, c2, { n: 14, speed: 1.8 }); }
+          if (o && window.gsap) window.gsap.fromTo(o.scale, { x: 0.05, y: 0.05, z: 0.05 }, { x: 1, y: 1, z: 1, duration: 0.7, ease: 'back.out(1.8)' });
         }
         g.userData.wardOn = on;
         if (ward) ward.position.y = 0.62;
