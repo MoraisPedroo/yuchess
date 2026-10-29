@@ -30,7 +30,7 @@
 
 - O Pedro está a testar a versão publicada e vai enviar os erros que encontrar (sobretudo: velocidade das animações, arrastar cartas no telemóvel, legibilidade do zoom).
 - Falta publicar o `firestore.rules` no Firebase (ver "Configuração pendente") para o online funcionar. As regras aceitam agora baralhos de 22 (e de 12, para clientes antigos em cache).
-- **Vídeos das Lendárias novas**: feito o do Trineu Glaciar; faltam 8 (limite diário de vídeos do Gemini). Passos e ícones em `docs/ART-PROMPTS.md` (secção "Vídeos das 9 Lendárias novas") com `tools/legend-video.py`. Até lá estas cartas têm a animação CSS `.hc-alive`. A arte das 89 cartas novas já está em `assets/items/`.
+- **Vídeos das Lendárias novas**: feitos Trineu Glaciar, Exoesqueleto, Canhão de Circo e Truque de Desaparecimento; faltam 5 (Soro Alfa, Veto Supremo, Quebra de Contrato, Bússola Dourada, Escudo Antitumulto). O plano Pro do Gemini dá ~3 vídeos por janela de uso (ver gemini.google.com/usage → "Uso atual", que diz a hora a que reinicia). Passos e ícones em `docs/ART-PROMPTS.md` (secção "Vídeos das 9 Lendárias novas") com `tools/legend-video.py`. Até lá estas cartas têm a animação CSS `.hc-alive`. A arte das 89 cartas novas já está em `assets/items/`.
 
 ## Próximos passos (por prioridade)
 
@@ -53,6 +53,10 @@
 - Num separador escondido o navegador quase para as animações (requestAnimationFrame); o motor espera no máximo 4 s por animação, por isso o jogo nunca bloqueia, só fica lento.
 
 ## Registo de sessões
+
+### 2026-10-29 (manhã) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Vídeos das Lendárias**: o limite do Gemini já tinha reiniciado. Feitos mais 3 (Exoesqueleto Robô, Canhão de Circo, Truque de Desaparecimento) com a imagem inicial de `tools/legend-video.py start` e o prompt "Animate this exact cartoon object…" (prompts em `docs/ART-PROMPTS.md`), comprimidos para 480×270 e acrescentados a `ItemToken.VIDEO`. Ao 4.º o Gemini voltou a dizer "I can create more videos as soon as your limit resets": o limite não é diário, é a janela "Uso atual" de `gemini.google.com/usage` (3 vídeos gastam ~90 %).
+- **Como testar**: Baralhos ou Loja → passar o rato numa destas 3 Lendárias (ou zoom) → o vídeo toca em vez da animação CSS.
 
 ### 2026-10-29 · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Lance perto de armadilhas** (queixa do Pedro): o cubo da armadilha flutuava e, em perspetiva, tapava ~¼ da casa de trás; o clique ia para a armadilha e abria o cartão dela. Agora o cubo nunca apanha o rato (`Board3D.target` usa a casa por baixo e só devolve a armadilha na própria casa), o cartão da armadilha não aparece com uma peça/alvo escolhido e o cubo está mais baixo.

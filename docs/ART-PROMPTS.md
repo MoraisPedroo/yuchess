@@ -132,9 +132,30 @@ Row 4, left to right: 13) Pure white empty background. 14) Pure white empty back
 
 ## Vídeos das 9 Lendárias novas (Veo)
 
-Estado (2026-10-29): feito o do **Trineu Glaciar** (`assets/video/trineu_glaciar.mp4`). Os outros 8 ficaram à espera do
-limite diário de vídeos do Gemini ("I can create more videos as soon as your limit resets"). Até lá essas cartas usam a
-animação em CSS (`.hc-alive` em `cards.css`: o objeto flutua, o brilho pulsa e há estrelinhas).
+Estado (2026-10-29): feitos **Trineu Glaciar**, **Exoesqueleto Robô**, **Canhão de Circo** e **Truque de Desaparecimento**
+(`assets/video/`). Faltam 5: Soro Alfa, Veto Supremo, Quebra de Contrato, Bússola Dourada e Escudo Antitumulto. O Gemini
+(plano Pro) dá ~3 vídeos por janela de uso; quando acaba responde "I can create more videos as soon as your limit resets"
+e `gemini.google.com/usage` → "Uso atual" diz a hora a que reinicia. Até lá essas cartas usam a animação em CSS
+(`.hc-alive` em `cards.css`: o objeto flutua, o brilho pulsa e há estrelinhas).
+
+Prompts usados / a usar (todos acabam em *A &lt;cor&gt; glow pulses behind it over the dark background. Static camera,
+object centered, smooth seamless loop, 2D cartoon game asset look. No text, no logos, no people.*):
+- EXOESQUELETO_ROBO (feito): *a chunky red and yellow toy mech suit with a tiny pilot in the cockpit … flexes its big
+  hydraulic claws and bobs slightly while its chest core glows bright amber and vents tiny puffs of white cartoon steam* (red).
+- CANHAO_CIRCO (feito): *a crimson circus cannon with gold stars on chunky wheels … rocks gently back and forth while the fuse
+  sizzles, then puffs a ring of star-shaped cartoon smoke from the barrel* (golden).
+- TRUQUE_MAGICA (feito): *a navy magician top hat with gold stars and a white dove on top … the hat hops and tilts while the
+  dove flaps its wings and rises a little, then settles back, as golden magic sparkles swirl around it* (purple).
+- SORO_ALFA: *a golden laboratory syringe with a rainbow liquid glass barrel and three round pressure gauges … floats and
+  vibrates slightly while glowing rainbow plasma bubbles swirl inside the barrel and the gauge needles bounce* (teal).
+- VETO_SUPREMO: *a golden judge gavel crackling with purple lightning over an open old law book … lifts and slams down onto
+  the book, sending out a circular purple shockwave and sparks, then rises back up* (purple).
+- QUEBRA_CONTRATO: *a torn parchment contract with a round seal, burning along the tear … the two halves sway apart and back
+  while bright orange cartoon flames flicker along the torn edges and tiny embers float up* (orange).
+- BUSSOLA_DOURADA: *an ornate golden pirate pocket compass with a colorful compass rose … sways gently on its ring while the
+  needle spins quickly and settles, and golden sparkles twinkle around it* (golden).
+- ESCUDO_ANTITUMULTO: *a chunky blue and transparent riot shield with a blue handle strap … hovers slowly while a hexagonal
+  cyan energy barrier ripples across its surface and deflects a bouncing cartoon spark* (cyan).
 
 Como fazer cada um (mesmo método dos vídeos antigos — imagem inicial + "Animate this exact cartoon object…"):
 1. `python tools/legend-video.py start ICONE '#cor'` → `_tmp_art/start_<icone>.png`.

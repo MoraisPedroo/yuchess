@@ -11,7 +11,7 @@
     /** Ícones (theme.icon) com imagem em assets/items/<icon em minúsculas>.png. */
     IMG: new Set(YC.ITEM_ART || []),
     /** Objetos com vídeo em assets/video/<icone>.mp4 (feitos com o Veo a partir da imagem do objeto). */
-    VIDEO: new Set(['ROYAL_SCEPTER', 'HEAVY_ANVIL', 'RUBBER_MIRROR', 'GOLDEN_WHISTLE', 'TRINEU_GLACIAR']),
+    VIDEO: new Set(['ROYAL_SCEPTER', 'HEAVY_ANVIL', 'RUBBER_MIRROR', 'GOLDEN_WHISTLE', 'TRINEU_GLACIAR', 'EXOESQUELETO_ROBO', 'CANHAO_CIRCO', 'TRUQUE_MAGICA']),
 
     video(def) { return Item.VIDEO.has(def.theme.icon) ? `assets/video/${def.theme.icon.toLowerCase()}.mp4` : null; },
 
