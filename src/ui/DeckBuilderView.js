@@ -9,10 +9,21 @@
   const KINDS = [['ALL', 'Todas'], ['EQUIP', 'Equipamentos'], ['GRID', 'Armadilhas de Casa'], ['REACTIVE', 'Reativas'], ['COUNTER', 'Counter-Traps'], ['QUICK', 'Magias Rápidas']];
   const NEW = () => View.newSet || (View.newSet = new Set((YC.CARDS_NEW || []).map((n) => n[0])));
   const FAMS = [['ALL', 'Todas as famílias'], ['classic', 'Clássicas'], ['gelo', 'Criogenia'], ['oficina', 'Oficina'], ['circo', 'Circo'], ['lab', 'Laboratório'], ['tribunal', 'Tribunal'], ['sucata', 'Sucata & Piratas'], ['policia', 'Polícia']];
+  const RARS = [['ALL', 'Todas as raridades'], ['LEGENDARY', 'Lendárias', 'crown'], ['EPIC', 'Épicas', 'gemEpic'], ['RARE', 'Raras', 'gemRare'], ['COMMON', 'Comuns', 'gemCommon']];
+
+  /** Chips de raridade com quantas dessa raridade já tens (cartas diferentes) / o total. */
+  function rarChips(p) {
+    return RARS.map(([k, l, ic]) => {
+      const all = YC.Cards.LIST.filter((c) => k === 'ALL' || c.rarity === k);
+      const have = all.filter((c) => E().owned(p, c.id) > 0).length;
+      return `<button class="chip r-chip ${View.rar === k ? 'on' : 'dark'}" data-rar="${k}" data-r="${k}">${ic ? YC.Icon(ic, { size: 16 }) : ''}${l}<small>${have}/${all.length}</small></button>`;
+    }).join('');
+  }
 
   const View = {
     filter: 'ALL',
     fam: 'ALL',
+    rar: 'ALL',
     mine: false,
     draft: null,
 
@@ -33,6 +44,7 @@
             <div class="coll-head"><h2>Coleção</h2><span class="coin-pill dust"><i></i>${p.stardust}</span></div>
             <div class="filters">${KINDS.map(([k, l]) => `<button class="chip ${View.filter === k ? 'on' : 'dark'}" data-f="${k}">${l}</button>`).join('')}</div>
             <div class="filters fams">${FAMS.map(([k, l]) => `<button class="chip ${View.fam === k ? 'on' : 'dark'}" data-fam="${k}">${l}</button>`).join('')}<button class="chip ${View.mine ? 'on' : 'dark'}" data-mine="1">Só as minhas</button></div>
+            <div class="filters rars">${rarChips(p)}</div>
             <div class="coll-grid"></div>
           </section>
           <section class="panel deck">
@@ -57,6 +69,7 @@
       const r = View.root;
       r.querySelectorAll('[data-f]').forEach((b) => b.onclick = () => { View.filter = b.dataset.f; View.render(); });
       r.querySelectorAll('[data-fam]').forEach((b) => b.onclick = () => { View.fam = b.dataset.fam; View.render(); });
+      r.querySelectorAll('[data-rar]').forEach((b) => b.onclick = () => { View.rar = b.dataset.rar; View.render(); });
       r.querySelector('[data-mine]').onclick = () => { View.mine = !View.mine; View.render(); };
       r.querySelector('.deck-pick').onchange = (e) => View.pick(e.target.value);
       r.querySelector('.deck-name').oninput = (e) => { View.draft.name = e.target.value; };
@@ -68,6 +81,7 @@
       const order = YC.Cards.RARITY;
       const list = YC.Cards.LIST.filter((c) => (View.filter === 'ALL' || c.kind === View.filter)
         && (View.fam === 'ALL' || (View.fam === 'classic' ? !NEW().has(c.id) : c.family === View.fam))
+        && (View.rar === 'ALL' || c.rarity === View.rar)
         && (!View.mine || E().owned(p, c.id) > 0))
         .sort((a, b) => order[a.rarity].order - order[b.rarity].order || a.kind.localeCompare(b.kind));
       for (const c of list) {

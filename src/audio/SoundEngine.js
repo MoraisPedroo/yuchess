@@ -87,7 +87,16 @@
       error() { Sound.tone({ type: 'square', f: 180, f2: 140, dur: 0.15, vol: 0.12 }); },
       reveal_rare() { [784, 988, 1175].forEach((f, i) => Sound.tone({ type: 'triangle', f, t: i * 0.07, dur: 0.25, vol: 0.14 })); },
       reveal_epic() { [659, 831, 988, 1319].forEach((f, i) => Sound.tone({ type: 'triangle', f, t: i * 0.07, dur: 0.35, vol: 0.16 })); Sound.presets.magic_zap(); },
-      reveal_legend() { Sound.presets.victory_fanfare(); Sound.noise({ dur: 1.2, vol: 0.15, type: 'highpass', f: 5000 }); }
+      reveal_legend() { Sound.presets.victory_fanfare(); Sound.noise({ dur: 1.2, vol: 0.15, type: 'highpass', f: 5000 }); },
+      // pacote: passar o rato no verso de uma carta (a Comum não tem som) e a carga antes de virar a Épica
+      hover_rare() { [1175, 1568].forEach((f, i) => Sound.tone({ type: 'triangle', f, t: i * 0.06, dur: 0.32, vol: 0.07 })); Sound.noise({ dur: 0.25, vol: 0.05, type: 'highpass', f: 5000 }); },
+      hover_epic() { Sound.noise({ dur: 0.45, vol: 0.12, type: 'bandpass', f: 500, f2: 2600, q: 0.9 }); [523, 659, 784].forEach((f) => Sound.tone({ type: 'triangle', f, dur: 0.75, vol: 0.06, attack: 0.12 })); },
+      hover_legendary() {
+        Sound.tone({ type: 'sine', f: 82, f2: 98, dur: 1.4, vol: 0.25, attack: 0.25 });
+        [392, 494, 587, 784, 988].forEach((f, i) => Sound.tone({ type: i % 2 ? 'sine' : 'triangle', f, t: i * 0.04, dur: 1.5, vol: 0.06, attack: 0.4 }));
+        Sound.noise({ dur: 1.2, vol: 0.08, type: 'highpass', f: 3000, f2: 8000 });
+      },
+      charge() { Sound.noise({ dur: 0.45, vol: 0.16, type: 'bandpass', f: 300, f2: 3000, q: 1.2 }); Sound.tone({ type: 'sawtooth', f: 110, f2: 440, dur: 0.45, vol: 0.05 }); }
     }
   };
 

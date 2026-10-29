@@ -54,6 +54,13 @@
 
 ## Registo de sessões
 
+### 2026-10-29 (12h) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Pedido do Pedro**: no pacote, ao passar o rato no verso de uma carta antes de a virar, uma animação "tipo Hearthstone" se for Lendária (e mais simples, mas bonita, nas Épicas e nas outras); animações ao virar; filtro de raridade nos Baralhos.
+- **Aura no verso** (`src/ui/GachaFX.js` + `styles/gacha.css`, ligado no `GachaView`): cada carta de costas tem uma aura escondida que acende ao passar o rato — Comum: contorno claro; Rara: brilho azul a pulsar e faíscas a subir; Épica: brilho roxo, raios a rodar, a carta levita e o fundo fica roxo; Lendária: línguas de fogo douradas à volta da carta, raios duplos, estrelas a subir, a carta treme e o fundo aquece. Cada uma com som (`hover_rare/epic/legendary` no `SoundEngine`; a Comum não tem som). No telemóvel não há rato: a aura acende no início da revelação.
+- **Revelações**: Comum com anel e reflexo; Rara com anel azul, faíscas e reflexo; Épica com carga (a luz é sugada para a carta), raios, dois anéis, clarão roxo e carimbo "ÉPICA!"; Lendária arde e treme no lugar, voa para o centro, vira com clarão dourado, raios gigantes, anéis, carimbo "LENDÁRIA!" com o nome da carta numa pílula, faíscas, tremor e chuva de confetes. Depois de virada, a Rara/Épica/Lendária fica com um brilho calmo por trás. "Reduzir movimento" deixa só o brilho parado. O fundo do pacote passou a `overflow: clip` (o foco já não o desloca).
+- **Baralhos**: terceira fila de filtros "Todas as raridades / Lendárias / Épicas / Raras / Comuns", com a insígnia e quantas diferentes já tens (ex.: "Lendárias 2/13"); a escolhida fica na cor da raridade. Junta-se aos filtros de tipo, família e "Só as minhas".
+- **Como testar**: Loja → Abrir pacotinho → rasgar → passar o rato nas cartas de costas (as mais raras ficam nas posições 4 e 5) e clicar; para ver uma Lendária sem sorte, na consola: `YC.GachaView.ceremony([{id: YC.Cards.LIST.find(c => c.rarity === 'LEGENDARY').id, rarity: 'LEGENDARY', isNew: true}])`. Baralhos → fila das raridades.
+
 ### 2026-10-29 (11h) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Últimos 2 vídeos das Lendárias**: Bússola Dourada e Escudo Antitumulto, na janela de uso das 11:09. As 13 Lendárias têm agora vídeo. O Veo recusou o primeiro pedido da Bússola ("I can't generate that video") — tirei a palavra "pirate" e passou; no Escudo usei "cartoon shield" em vez de "riot shield" para não arriscar. Os prompts finais estão em `docs/ART-PROMPTS.md`.
 - **Como testar**: Baralhos ou Loja → passar o rato na Bússola Dourada ou no Escudo Antitumulto (ou zoom) → o vídeo toca.

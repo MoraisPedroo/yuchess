@@ -1,8 +1,8 @@
 /* GachaView.js — Loja: pacotinho de 5 cartas por 100 de ouro (pacote de foil com medalhão do cavalo) e a abertura
    em ritual tátil (docs/DIRECAO-DE-ARTE.md, secção Pacote): o pacote voa para o centro a rodar e achata; uma costura
    tracejada com uma faísca na cor da melhor raridade; rasgar (clique ou arrastar) → pausa de impacto de 90 ms → a
-   aba voa e o invólucro cai com faíscas; 5 cartas de costas em leque (as mais raras no fim); revelar uma a uma com
-   escalada por raridade (Comum rápida … Lendária com carimbo "LENDÁRIA!", vídeo e chuva dourada); "Revelar tudo". */
+   aba voa e o invólucro cai com faíscas; 5 cartas de costas em leque (as mais raras no fim; ao passar o rato no verso
+   acende-se a aura da raridade, GachaFX); revelar uma a uma com escalada por raridade (Comum rápida … Lendária com carimbo "LENDÁRIA!", vídeo e chuva dourada); "Revelar tudo". */
 (function (YC) {
   'use strict';
 
@@ -19,33 +19,10 @@
     + `<div class="pack-medal" style="background-image:url('${backUrl()}')"></div><div class="pack-title">Chess-Gi-Oh!</div><div class="pack-ribbon">5 CARTAS</div><div class="pack-shine"></div>`
     + `</div><div class="pack-fin bottom"></div></div>`;
 
-  /** Faíscas de vinil (estrelas e quadrados com contorno) numa explosão curta, em coordenadas do ecrã. */
-  function sparks(parent, x, y, color, n, spread = 160) {
-    const g = G();
-    if (!g || calm()) return;
-    for (let i = 0; i < n; i++) {
-      const s = document.createElement('i');
-      const star = i % 3 === 0;
-      s.style.cssText = `position:fixed;left:${x}px;top:${y}px;width:${star ? 14 : 9}px;height:${star ? 14 : 9}px;margin:-7px 0 0 -7px;z-index:6;pointer-events:none;`
-        + (star ? `background:${color};clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%)`
-          : `background:${color};border:2px solid #0F141C;border-radius:3px`);
-      parent.appendChild(s);
-      const a = Math.random() * Math.PI * 2, d = spread * (0.45 + Math.random() * 0.75);
-      g.fromTo(s, { x: 0, y: 0, scale: 1.2, rotation: 0 }, { x: Math.cos(a) * d, y: Math.sin(a) * d + 30, scale: 0.2, rotation: 200 + Math.random() * 200, duration: 0.42 + Math.random() * 0.25, ease: 'expo.out', onComplete: () => s.remove() });
-    }
-  }
-
-  /** Tremor curto do palco (nunca dos botões), amortecido: 6 abanões a diminuir. */
-  function shake(el, px) {
-    const g = G();
-    if (!g || !px || calm()) return;
-    const tl = g.timeline({ onComplete: () => g.set(el, { x: 0, y: 0 }) });
-    for (let i = 0; i < 6; i++) {
-      const k = px * (1 - i / 6);
-      tl.to(el, { x: (i % 2 ? 1 : -1) * k, y: (Math.random() - 0.5) * k, duration: 0.03, ease: 'none' });
-    }
-    tl.to(el, { x: 0, y: 0, duration: 0.04 });
-  }
+  // faíscas, tremor, anéis, raios, clarão, confetes e a aura das cartas de costas: GachaFX.js
+  const F = () => YC.GachaFX;
+  const sparks = (...a) => F().sparks(...a);
+  const shake = (...a) => F().shake(...a);
 
   const View = {
     render(root) {
@@ -182,6 +159,7 @@
         if (g) g.fromTo(wrap, { y: 260, rotation: (i - 2) * 12, opacity: 0, scale: 0.6 }, { y: 0, rotation: (i - 2) * 2.5, opacity: 1, scale: 1, duration: 0.44, delay: i * 0.065, ease: 'expo.out' });
         setTimeout(() => S('card_flip'), i * 65);
         const slot = { c, el, wrap, shown: false };
+        F().attach(slot, ov);                  // aura da raridade ao passar o rato no verso
         el.addEventListener('click', () => View.reveal(slot, ov, slots));
         return slot;
       });
@@ -204,52 +182,79 @@
       const g = G(), { c, el, wrap } = slot, tilt = el.querySelector('.hc-tilt'), S = (n) => YC.Sound.play(n);
       const flip = (ms) => { tilt.style.transition = `transform ${ms}ms var(--ease-out-snappy)`; el.classList.remove('face-down'); setTimeout(() => { tilt.style.transition = ''; }, ms + 20); };
       const at = () => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
-      const R = c.rarity;
+      const R = c.rarity, col = RAY[R], w = el.getBoundingClientRect().width, fx = F();
       if (!g || calm()) { flip(120); }
       else if (R === 'COMMON') {
+        fx.hot(slot, ov, false);
         S('card_flip');
-        await tw(el, { y: -10, duration: 0.06 });
+        await tw(el, { y: -12, duration: 0.07 });
         flip(200); await wait(200);
-        await tw(el, { y: 0, duration: 0.06 });
+        fx.ring(ov, ...at(), '#F8FAFC', w * 1.7, 0.42, 4);
+        fx.shine(el);
+        await tw(el, { y: 0, duration: 0.08 });
       } else if (R === 'RARE') {
+        // a aura azul acende, a carta salta e vira com um anel e faíscas
+        fx.hot(slot, ov, true);
         S('reveal_rare');
-        await tw(el, { y: -18, scale: 1.08, duration: 0.08, ease: 'power2.out' });
+        await tw(el, { y: -20, scale: 1.08, duration: 0.14, ease: 'power2.out' });
         flip(240); await wait(240);
-        sparks(ov, ...at(), RAY.RARE, 8, 120);
-        await tw(el, { y: 0, scale: 1, duration: 0.14, ease: 'power2.out' });
+        fx.ring(ov, ...at(), col, w * 2.2, 0.5, 6);
+        sparks(ov, ...at(), col, 12, 140);
+        fx.shine(el);
+        await tw(el, { y: 0, scale: 1, duration: 0.16, ease: 'power2.out' });
       } else if (R === 'EPIC') {
-        await tw(el, { scale: 0.92, duration: 0.11, ease: 'power2.in', onUpdate: () => g.set(el, { x: (Math.random() - 0.5) * 6 }) });
+        // carga roxa (a luz é sugada e a carta encolhe a tremer) → salta, vira, raios, dois anéis e "ÉPICA!"
+        fx.hot(slot, ov, true);
+        S('charge');
+        fx.implode(ov, ...at(), col, 16, 0.34, w * 1.3);
+        await tw(el, { scale: 0.9, duration: fast ? 0.18 : 0.32, ease: 'power2.in', onUpdate: () => g.set(el, { x: (Math.random() - 0.5) * 7 }) });
         S('reveal_epic');
-        g.to(el, { x: 0, scale: 1.18, y: -16, duration: 0.19, ease: 'expo.out' });
+        g.to(el, { x: 0, scale: 1.2, y: -18, duration: 0.2, ease: 'expo.out' });
         flip(190); await wait(190);
         await wait(60);                       // hit-stop
-        sparks(ov, ...at(), RAY.EPIC, 24, 170);
-        shake(ov.querySelector('.gacha-cards'), 4);
-        await tw(el, { scale: 1, y: 0, duration: 0.26, ease: 'power3.out' });
+        const [x, y] = at();
+        fx.burst(ov, x, y, col, w * 3.6, 0.85);
+        fx.ring(ov, x, y, col, w * 2.6, 0.55, 7);
+        setTimeout(() => fx.ring(ov, x, y, '#E9D5FF', w * 1.9, 0.45, 4), 90);
+        fx.flash(ov, 'rgba(168, 85, 247, .45)', 0.6, 0.35);
+        sparks(ov, x, y, col, 26, 180);
+        shake(ov.querySelector('.gacha-cards'), 5);
+        fx.shine(el);
+        fx.stamp(ov, 'ÉPICA!', { cls: 'epic', x, y: y - w * 0.95, hold: fast ? 350 : 650 });
+        await tw(el, { scale: 1, y: 0, duration: 0.3, ease: 'power3.out' });
       } else {
-        // Lendária: escurece, a carta vai ao centro com anel dourado, explode, carimbo e chuva dourada
+        // Lendária: a carta arde e treme no lugar (a luz dourada é sugada), voa para o centro, vira com clarão,
+        // raios gigantes, anéis, carimbo com o nome, faíscas, tremor e chuva de confetes dourados
+        fx.hot(slot, ov, true);
         const rays = ov.querySelector('.god-rays');
+        S('hover_legendary');
+        fx.implode(ov, ...at(), col, 24, 0.45, w * 1.5);
+        await tw(el, { scale: 0.94, duration: fast ? 0.22 : 0.5, ease: 'power1.in', onUpdate: () => g.set(el, { x: (Math.random() - 0.5) * 8, rotation: (Math.random() - 0.5) * 3 }) });
         g.to(rays, { opacity: 1, duration: 0.26 });
         const [cx, cy] = at();
-        const dx = innerWidth / 2 - cx, dy = innerHeight / 2 - cy;
+        const dx = innerWidth / 2 - cx + g.getProperty(el, 'x'), dy = innerHeight / 2 - cy + g.getProperty(el, 'y');
         wrap.style.zIndex = 5;
-        await tw(el, { x: dx, y: dy, scale: 1.1, duration: 0.26, ease: 'power3.inOut', onUpdate: () => g.set(el, { rotation: (Math.random() - 0.5) * 3 }) });
+        await tw(el, { x: dx, y: dy, scale: 1.15, rotation: 0, duration: 0.3, ease: 'power3.inOut' });
         S('reveal_legend');
-        g.to(el, { scale: 1.35, rotation: 0, duration: 0.24, ease: 'expo.out' });
+        g.to(el, { scale: 1.4, duration: 0.24, ease: 'expo.out' });
         flip(240); await wait(240);
-        const stamp = document.createElement('div');
-        stamp.className = 'legend-stamp';
-        stamp.textContent = 'LENDÁRIA!';
-        ov.appendChild(stamp);
-        g.fromTo(stamp, { scale: 2.2, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.14, ease: 'power3.in' });
+        const X = innerWidth / 2, Y = innerHeight / 2;
+        fx.flash(ov, 'rgba(255, 236, 170, .95)', 0.8, 0.55);
+        fx.burst(ov, X, Y, col, Math.max(innerWidth, innerHeight) * 0.9, 1.2);
+        fx.ring(ov, X, Y, col, w * 3.4, 0.65, 9);
+        setTimeout(() => fx.ring(ov, X, Y, '#FFF3B0', w * 2.4, 0.5, 5), 110);
+        fx.stamp(ov, 'LENDÁRIA!', { sub: c.name, x: X, y: el.getBoundingClientRect().top - 10, hold: fast ? 700 : 1300 });
         await wait(80);                       // hit-stop
-        sparks(ov, innerWidth / 2, innerHeight / 2, RAY.LEGENDARY, 40, 300);
-        shake(ov, 8);
-        await wait(fast ? 500 : 900);
-        g.to(stamp, { opacity: 0, y: -20, duration: 0.2, onComplete: () => stamp.remove() });
+        sparks(ov, X, Y, col, 44, 320);
+        shake(ov, 9);
+        fx.shine(el);
+        fx.rain(ov, ['#FFB703', '#FFD166', '#FFF3B0', '#F8FAFC', '#FB8500'], fast ? 40 : 70, 1.8);
+        await wait(fast ? 800 : 1500);
         await tw(el, { x: 0, y: 0, scale: 1, duration: 0.42, ease: 'power3.out' });
         wrap.style.zIndex = '';
       }
+      fx.hot(slot, ov, false);
+      el.classList.add('gx-done');            // fica um brilho calmo da raridade por trás da carta revelada
       const tag = document.createElement('div');
       tag.className = `gacha-tag ${c.dupe ? 'dupe' : c.isNew ? 'new' : ''}`;
       tag.innerHTML = c.dupe ? `Duplicada: +${c.dust} ${YC.Icon('dust', { size: 16 })}` : c.isNew ? `${YC.Icon('star', { size: 16 })}Nova!` : '+1 cópia';

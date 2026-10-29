@@ -1,0 +1,91 @@
+/* gacha.css — efeitos da abertura do pacote (src/ui/GachaFX.js). Brilho permitido aqui (DIRECAO-DE-ARTE: abertura
+   de pacote). A aura vive dentro da carta (.hcard), por trás da face (z -1) e por cima (faíscas, z 4); mede-se em --cw. */
+
+/* o fundo do pacote nunca faz scroll (os raios e os confetes saem do ecrã; "hidden" ainda deixa o foco deslocá-lo) */
+.gacha-overlay { overflow: clip; }
+
+/* ───────── aura de raridade nas cartas de costas ───────── */
+.gx-aura { position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0; transition: opacity .28s; }
+.gx-front { position: absolute; inset: 0; z-index: 4; pointer-events: none; opacity: 0; transition: opacity .28s; }
+.hcard.gx-hot .gx-aura, .hcard.gx-hot .gx-front { opacity: 1; }
+.gx-COMMON { --gc: rgba(248, 250, 252, .38); --gw: 1.22; --gh: 1.6; }
+.gx-RARE { --gc: rgba(0, 180, 216, .92); --gw: 1.45; --gh: 1.85; }
+.gx-EPIC { --gc: rgba(192, 132, 252, 1); --gw: 1.72; --gh: 2.1; }
+.gx-EPIC .gx-glow { background: radial-gradient(closest-side, #E9D5FF 50%, var(--gc) 68%, transparent 100%); }
+.gx-EPIC .gx-rays { opacity: .6; }
+.gx-LEGENDARY { --gc: rgba(255, 183, 3, 1); --gw: 1.8; --gh: 2.2; }
+
+.gx-glow { position: absolute; left: 50%; top: 50%; width: calc(var(--cw) * var(--gw)); height: calc(var(--cw) * var(--gh));
+  margin: calc(var(--cw) * var(--gh) * -.5) 0 0 calc(var(--cw) * var(--gw) * -.5); border-radius: 34%;
+  background: radial-gradient(closest-side, var(--gc) 60%, transparent 100%); animation: gx-pulse 1.3s ease-in-out infinite alternate; }
+.gx-LEGENDARY .gx-glow { animation-duration: .7s; }
+@keyframes gx-pulse { from { scale: .96; opacity: .72; } to { scale: 1.05; opacity: 1; } }
+
+.gx-rays { position: absolute; left: 50%; top: 50%; width: calc(var(--cw) * 2.4); height: calc(var(--cw) * 2.4); margin: calc(var(--cw) * -1.2) 0 0 calc(var(--cw) * -1.2);
+  border-radius: 50%; background: repeating-conic-gradient(from 0deg, var(--gc) 0 7deg, transparent 7deg 20deg);
+  mask-image: radial-gradient(circle, #000 20%, transparent 68%); -webkit-mask-image: radial-gradient(circle, #000 20%, transparent 68%);
+  opacity: .42; animation: gx-spin 10s linear infinite; }
+.gx-LEGENDARY .gx-rays { width: calc(var(--cw) * 3); height: calc(var(--cw) * 3); margin: calc(var(--cw) * -1.5) 0 0 calc(var(--cw) * -1.5); opacity: .6; animation-duration: 6s; }
+.gx-LEGENDARY .gx-rays.b { background: repeating-conic-gradient(from 9deg, #FFF3B0 0 3deg, transparent 3deg 24deg); opacity: .45; animation-duration: 9s; animation-direction: reverse; }
+@keyframes gx-spin { to { rotate: 360deg; } }
+
+/* Lendária: línguas de fogo à volta da carta (cada uma com o seu ângulo e tremeluzir) */
+.gx-flames i { position: absolute; left: 50%; top: 50%; width: calc(var(--cw) * .26); height: calc(var(--cw) * .46); margin: calc(var(--cw) * -.46) 0 0 calc(var(--cw) * -.13);
+  transform-origin: 50% 100%; border-radius: 50% 50% 46% 46% / 72% 72% 28% 28%;
+  background: radial-gradient(ellipse 50% 62% at 50% 78%, #FFF6C8 0%, #FFC233 34%, rgba(255, 122, 0, .9) 62%, rgba(255, 90, 0, 0) 78%);
+  filter: blur(1.5px); animation: gx-flick .42s ease-in-out infinite alternate; }
+@keyframes gx-flick { 0% { scale: .9 .7; opacity: .7; } 55% { scale: 1.05 1.05; } 100% { scale: .94 calc(1.3 * var(--fs, 1)); opacity: 1; } }
+
+/* faíscas a subir por cima do verso (estrelas na Lendária) */
+.gx-front i { position: absolute; left: 50%; top: 50%; width: calc(var(--cw) * .045 * var(--s)); height: calc(var(--cw) * .045 * var(--s)); margin: calc(var(--cw) * -.0225 * var(--s)) 0 0 calc(var(--cw) * -.0225 * var(--s));
+  border-radius: 50%; background: #fff; box-shadow: 0 0 6px 2px var(--gc); opacity: 0; animation: gx-rise var(--t) linear var(--d) infinite; }
+.gx-front.gx-LEGENDARY i { width: calc(var(--cw) * .08 * var(--s)); height: calc(var(--cw) * .08 * var(--s)); background: #FFE08A; box-shadow: none; border-radius: 0;
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); }
+@keyframes gx-rise {
+  0% { translate: calc(var(--cw) * var(--x)) calc(var(--cw) * .6); opacity: 0; rotate: 0deg; }
+  15% { opacity: 1; }
+  100% { translate: calc(var(--cw) * var(--x) * 1.25) calc(var(--cw) * -1.05); opacity: 0; rotate: 180deg; }
+}
+
+/* a carta levita (Épica, Lendária) e treme (Lendária) — propriedades soltas, para não lutar com o GSAP */
+.gacha-slot .hcard.gx-hot.r-EPIC, .gacha-slot .hcard.gx-hot.r-LEGENDARY { animation: gx-float 1s ease-in-out infinite alternate; }
+@keyframes gx-float { from { translate: 0 0; } to { translate: 0 calc(var(--cw) * -.045); } }
+.gacha-slot .hcard.gx-hot.r-LEGENDARY .hc-tilt { animation: gx-tremble .09s linear infinite; }
+@keyframes gx-tremble { 0%, 100% { translate: 0 0; } 25% { translate: 1.5px -1px; } 50% { translate: -1px 1.5px; } 75% { translate: 1px 1px; } }
+/* o verso ganha o contorno da raridade */
+.gacha-slot .hcard.gx-hot.r-RARE .hc-back { box-shadow: 0 6px 0 #090C10, 0 0 0 3px #00B4D8, 0 0 26px 6px rgba(0, 180, 216, .8); }
+.gacha-slot .hcard.gx-hot.r-EPIC .hc-back { box-shadow: 0 6px 0 #090C10, 0 0 0 4px #C084FC, 0 0 34px 10px rgba(192, 132, 252, .95); }
+.gacha-slot .hcard.gx-hot.r-LEGENDARY .hc-back { box-shadow: 0 6px 0 #090C10, 0 0 0 4px #FFB703, 0 0 36px 12px rgba(255, 183, 3, .95); }
+
+/* depois de revelada: fica um brilho calmo por trás (Rara para cima), sem fogo nem faíscas */
+.hcard.gx-done .gx-aura { opacity: .5; }
+.hcard.gx-done.r-COMMON .gx-aura, .hcard.gx-done .gx-flames, .hcard.gx-done .gx-front, .hcard.gx-done .gx-rays.b { display: none; }
+.hcard.gx-done .gx-glow { animation-duration: 2.4s; }
+.hcard.gx-done .gx-rays { opacity: .25; animation-duration: 24s; }
+
+/* o fundo aquece quando a carta debaixo do rato é Épica ou Lendária */
+.gacha-overlay::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .35s;
+  background: radial-gradient(circle at 50% 58%, var(--heat, transparent), transparent 72%); }
+.gacha-overlay.gx-heat::before { opacity: 1; }
+
+/* ───────── peças das revelações ───────── */
+.gx-ring { position: fixed; pointer-events: none; border-radius: 50%; border: 6px solid var(--c); box-shadow: 0 0 18px var(--c), inset 0 0 18px var(--c); }
+.gx-burst { position: fixed; pointer-events: none; border-radius: 50%; background: repeating-conic-gradient(from 0deg, var(--c) 0 6deg, transparent 6deg 15deg);
+  mask-image: radial-gradient(circle, #000 8%, transparent 64%); -webkit-mask-image: radial-gradient(circle, #000 8%, transparent 64%); }
+.gx-flash { position: fixed; inset: 0; z-index: 7; pointer-events: none; background: radial-gradient(circle at 50% 50%, var(--c), transparent 72%); }
+.gx-dot { position: fixed; z-index: 6; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; pointer-events: none; background: #fff; box-shadow: 0 0 8px 3px var(--c); }
+.gx-confetti { position: fixed; top: -24px; z-index: 6; pointer-events: none; border: 1.5px solid #0F141C; border-radius: 2px; }
+.gx-confetti.star { border: 0; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); }
+.gx-shine { position: absolute; inset: 0; z-index: 4; border-radius: inherit; overflow: hidden; pointer-events: none; }
+.gx-shine::before { content: ''; position: absolute; top: -25%; bottom: -25%; left: -45%; width: 35%; rotate: 14deg;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .8), transparent); animation: gx-sweep .7s ease-out forwards; }
+@keyframes gx-sweep { to { translate: 480% 0; } }
+.legend-stamp small { display: table; margin: 6px auto 0; padding: 3px 14px; border-radius: 999px; background: var(--border-ink); border: 2.5px solid var(--color-primary);
+  font-family: var(--font-sans); font-weight: 800; font-size: clamp(14px, 1.8vw, 20px); letter-spacing: .02em; color: #FFD166; -webkit-text-stroke: 0; text-shadow: none;
+  box-shadow: 0 3px 0 #090C10; transform: skewX(6deg); }
+.legend-stamp.at { position: fixed; translate: -50% -100%; white-space: nowrap; }
+.legend-stamp.epic { font-size: clamp(26px, 3.2vw, 40px); color: #C084FC; -webkit-text-stroke: 2.5px var(--border-ink); text-shadow: 0 4px 0 var(--border-ink); }
+
+/* Reduzir movimento: brilho parado, sem fogo, faíscas nem tremores */
+html.reduce-motion .gx-aura *, html.reduce-motion .gacha-slot .hcard.gx-hot, html.reduce-motion .gacha-slot .hcard.gx-hot .hc-tilt { animation: none !important; }
+html.reduce-motion .gx-front, html.reduce-motion .gx-flames, html.reduce-motion .gx-shine { display: none; }
