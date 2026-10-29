@@ -56,6 +56,7 @@
         this.board = new YC.Board3D(this.q('.stage3d-host'), {
           fxLayer: this.q('.arena-fx'),
           onSquare: (sq) => this.onSquare(sq),
+          onHoverSq: (sq) => this.onHoverSq(sq),
           onPieceHover: (sq, anchor) => (sq >= 0 && !this.dragging ? YC.PieceInspector.show(this, sq, anchor) : YC.PieceInspector.hide()),
           onZoneHover: (t, rect) => this.onTableHover(t, rect),
           onZoneClick: (t) => { if (t.rel === 'me' && t.card) this.onZoneCard({ inst: t.card, setTurn: t.setTurn }); },
@@ -65,6 +66,7 @@
         this.board = new YC.BoardView(this.q('.board-host'), {
           fxLayer: this.q('.arena-fx'),
           onSquare: (sq) => this.onSquare(sq),
+          onHoverSq: (sq) => this.onHoverSq(sq),
           onPieceHover: (sq, el) => (sq >= 0 ? YC.PieceInspector.show(this, sq, el.querySelector('.stand') || el) : YC.PieceInspector.hide())
         });
       }
@@ -102,6 +104,7 @@
       this.stopClock();
       window.removeEventListener('resize', this.onResize);
       YC.PieceInspector.hide(); YC.CardZoom.hide();
+      if (this.hideWhy) this.hideWhy();
       if (this.board && this.board.dispose) this.board.dispose();
       this.root.innerHTML = '';
       this.stage = null;
@@ -259,6 +262,7 @@
           return id ? this.tgtHint(YC.Cards.get(id), this.mode.endsWith('tgt2')) : '';
         }
         case 'card': return 'O que queres fazer com esta carta?';
+        case 'peek': return this.modePeekHint();
         default: return '';
       }
     }

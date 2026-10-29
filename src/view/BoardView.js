@@ -9,10 +9,11 @@
   const FILES = 'ABCDEFGH';
 
   class BoardView {
-    constructor(host, { onSquare, onPieceHover, fxLayer } = {}) {
+    constructor(host, { onSquare, onHoverSq, onPieceHover, fxLayer } = {}) {
       this.host = host;
       this.flipped = false;
       this.onSquare = onSquare || (() => {});
+      this.onHoverSq = onHoverSq || (() => {});
       this.onPieceHover = onPieceHover || (() => {});
       this.pieceEls = new Map();
       this.busy = new Set();
@@ -27,13 +28,15 @@
         const s = document.createElement('div');
         s.className = 'sq';
         s.addEventListener('click', () => this.onSquare(Number(s.dataset.sq)));
+        s.addEventListener('mouseenter', () => this.onHoverSq(Number(s.dataset.sq)));
         this.board.appendChild(s);
         this.squares.push(s);
       }
       // as peças em pé tapam parte da casa de trás: o clique numa peça conta como clique na casa dela
       const pieceOf = (e) => e.target.closest && e.target.closest('.piece');
       this.piecesLayer.addEventListener('click', (e) => { const p = pieceOf(e); if (p) this.onSquare(Number(p.dataset.sq)); });
-      this.piecesLayer.addEventListener('mouseover', (e) => { const p = pieceOf(e); if (p && p !== this.hovered) { this.hovered = p; this.onPieceHover(Number(p.dataset.sq), p); } });
+      this.piecesLayer.addEventListener('mouseover', (e) => { const p = pieceOf(e); if (p && p !== this.hovered) { this.hovered = p; this.onPieceHover(Number(p.dataset.sq), p); this.onHoverSq(Number(p.dataset.sq)); } });
+      this.board.addEventListener('mouseleave', () => this.onHoverSq(-1));
       this.piecesLayer.addEventListener('mouseout', (e) => { const p = pieceOf(e); if (p && !p.contains(e.relatedTarget)) { this.hovered = null; this.onPieceHover(-1, null); } });
       this.layout();
     }
@@ -151,9 +154,9 @@
     }
 
     /** Marcações: seleção, lances possíveis (com o nome da casa, ex.: "D5"), último lance, alvos de cartas. */
-    mark({ sel = -1, moves = [], last = null, equip = [], trap = [], pick = [] } = {}) {
+    mark({ sel = -1, moves = [], last = null, equip = [], trap = [], pick = [], peek = null } = {}) {
       for (const s of this.squares) {
-        s.classList.remove('sel', 'last', 'target', 'equip-ok', 'trap-ok');
+        s.classList.remove('sel', 'last', 'target', 'equip-ok', 'trap-ok', 'peek-from');
         s.querySelectorAll('.dot,.ring,.sq-label').forEach((d) => d.remove());
       }
       if (last) { this.sqEl(last.from).classList.add('last'); this.sqEl(last.to).classList.add('last'); }
@@ -173,6 +176,14 @@
       for (const sq of equip) this.sqEl(sq).classList.add('equip-ok', 'target');
       for (const sq of trap) this.sqEl(sq).classList.add('trap-ok', 'target');
       for (const sq of pick) this.sqEl(sq).classList.add('equip-ok', 'target');
+      if (peek) {
+        this.sqEl(peek.sq).classList.add('peek-from');
+        for (const m of peek.moves) {
+          const s = this.sqEl(m.to);
+          if (s.querySelector('.dot,.ring')) continue;
+          s.insertAdjacentHTML('beforeend', `<div class="${m.captured ? 'ring' : 'dot'} peek"></div><span class="sq-label peek">${FILES[m.to & 7]}${8 - (m.to >> 3)}</span>`);
+        }
+      }
       this.pieceEls.forEach((el) => el.classList.toggle('selected', Number(el.dataset.sq) === sel));
     }
 

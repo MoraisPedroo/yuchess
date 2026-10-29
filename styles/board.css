@@ -25,6 +25,11 @@
 .sq-label { position: absolute; left: 50%; bottom: 6%; transform: translateX(-50%); z-index: 3; pointer-events: none; padding: 0 .4em; border-radius: 6px;
   background: rgba(7, 10, 46, .85); border: 1.5px solid #59E1FF; color: #CFF6FF; font: 700 calc(var(--bw, 560px) * .021) var(--font-head); letter-spacing: .04em; }
 .sq.target { cursor: pointer; }
+/* lances de uma peça inimiga (espreitar, MatchHints): casa dela vermelha, destinos laranja, capturas vermelhas */
+.sq.peek-from { box-shadow: inset 0 0 0 999px rgba(217, 4, 41, .3), inset 0 0 0 3px #D90429; }
+.sq .dot.peek { width: 24%; height: 24%; background: radial-gradient(circle, #FFE1B8 0 25%, #FB8500 55%, rgba(251, 133, 0, 0) 72%); }
+.sq .ring.peek { border-color: #FF4D5E; box-shadow: 0 0 12px #FF4D5E; }
+.sq-label.peek { border-color: #FB8500; color: #FFE1B8; }
 .sq.target:hover { box-shadow: inset 0 0 0 999px rgba(89, 225, 255, .22), inset 0 0 0 2px #59E1FF; }
 .sq.equip-ok::before { content: ''; position: absolute; inset: 4%; border-radius: 50%; z-index: 2; background: radial-gradient(circle, rgba(252, 201, 52, .75), transparent 70%);
   animation: pulse-glow 1.1s ease-in-out infinite; pointer-events: none; }

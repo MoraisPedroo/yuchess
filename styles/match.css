@@ -124,6 +124,17 @@ body.in-match .toast { max-width: 300px; }
 .pi-chips .chip-ice { box-shadow: inset 3px 0 0 #8FD3FF; }
 .pi-chips .chip-morph { box-shadow: inset 3px 0 0 var(--color-success); }
 .pi-chips .chip-danger { background: var(--color-danger); }
+.pi-chips .chip-threat { box-shadow: inset 3px 0 0 #FF4D5E; }
+.pi-chips .chip-reach { box-shadow: inset 3px 0 0 #FB8500; }
+
+/* "porque é que não dá" junto da casa debaixo do rato (MatchHints) */
+.move-why { position: fixed; z-index: 93; max-width: 300px; display: flex; align-items: flex-start; gap: 8px; padding: 8px 12px; pointer-events: none;
+  border-radius: var(--radius-sm); background: var(--surface-2); border: 2.5px solid var(--border-ink); box-shadow: 0 4px 0 #090C10, inset 3px 0 0 var(--color-danger);
+  color: var(--text-main); font: 700 .84rem/1.3 var(--font-sans); animation: why-in .14s var(--ease-out-snappy); }
+.move-why .ico { flex: none; width: 18px; height: 18px; margin-top: 1px; }
+.move-why.soft { box-shadow: 0 4px 0 #090C10, inset 3px 0 0 var(--color-accent); font-weight: 600; }
+@keyframes why-in { from { opacity: 0; transform: translateY(4px); } }
+html.reduce-motion .move-why { animation: none; }
 .pi-eq-title { font-weight: 800; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; }
 .pi-eq { list-style: none; margin: 0; padding: 6px; display: flex; flex-direction: column; gap: 6px; background: var(--surface-1); border-radius: 10px; box-shadow: var(--shadow-tray); }
 .pi-eq li { display: flex; gap: 8px; align-items: center; padding: 6px; border-radius: 8px; background: var(--surface-2); border: 2px solid var(--border-ink); }

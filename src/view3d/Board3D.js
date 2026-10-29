@@ -10,13 +10,13 @@
   class Board3D {
     static available() { return !!(YC.T3 && YC.T3.available()); }
 
-    constructor(host, { fxLayer, onSquare, onPieceHover, onZoneHover, onZoneClick, onPileClick } = {}) {
+    constructor(host, { fxLayer, onSquare, onHoverSq, onPieceHover, onZoneHover, onZoneClick, onPileClick } = {}) {
       const THREE = T(), A = window.THREE_ADDONS;
       this.is3D = true;
       this.host = host;
       this.flipped = false;
       this.portrait = false;
-      this.cb = { onSquare: onSquare || (() => {}), onPieceHover: onPieceHover || (() => {}), onZoneHover: onZoneHover || (() => {}), onZoneClick: onZoneClick || (() => {}), onPileClick: onPileClick || (() => {}) };
+      this.cb = { onSquare: onSquare || (() => {}), onHoverSq: onHoverSq || (() => {}), onPieceHover: onPieceHover || (() => {}), onZoneHover: onZoneHover || (() => {}), onZoneClick: onZoneClick || (() => {}), onPileClick: onPileClick || (() => {}) };
       this.pieceEls = new Map();
       this.busy = new Set();
       this.respondUids = [];
@@ -210,6 +210,8 @@
       }
       if (t && (t.kind === 'zone' || t.kind === 'pile')) this.cb.onZoneHover(t, this.objRect(t));
       if (t && t.kind === 'trap') { const p = this.sqWorld(t.sq); this.cb.onZoneHover(t, this.areaRect(p.x, p.z, 0.6, 0.6, 0.4)); }
+      // casa debaixo do rato (lances da peça inimiga e "porque não dá" — MatchHints)
+      this.cb.onHoverSq(t && (t.kind === 'piece' || t.kind === 'square' || t.kind === 'trap') ? t.sq : -1);
       this.updateArrow();
     }
 

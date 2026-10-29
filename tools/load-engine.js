@@ -20,6 +20,7 @@ const ENGINE_FILES = [
   'src/game/MatchController.js',
   'src/game/MatchEffects.js',
   'src/game/MatchStatus.js',
+  'src/game/MoveExplain.js',
   'src/game/BotAI.js',
   'src/game/BotCards.js',
   'src/game/Economy.js',

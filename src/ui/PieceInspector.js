@@ -43,9 +43,14 @@
       if (p.type === 'k' && YC.Chess.inCheck(m.pos, p.color)) chips.push(['danger', 'warn', 'Em xeque!']);
       if (p.type === 'k') chips.push(['info', 'crown', 'Imune a congelar e a ser destruído por cartas']);
       if (YC.Chess.has(p, 'eq_lanca_telescopica')) chips.push(['info', 'spear', p.lanceUsed ? 'Lança já usada' : 'Lança pronta (1 uso)']);
-      if (m.state.active === p.color && !m.over) {
+      if (m.state.active === p.color && !m.over && p.color === ui.viewer) {
         const n = YC.Chess.legalMovesFrom(m.pos, sq, { turn }).length;
         chips.push(['info', n ? 'arrow' : 'no', n ? `${n} ${n === 1 ? 'lance possível' : 'lances possíveis'}` : 'Sem lances agora']);
+      } else if (!m.over && YC.MoveExplain) {
+        // peça inimiga: o que pode fazer na próxima vez (as casas aparecem a laranja/vermelho no tabuleiro)
+        const mv = YC.MoveExplain.preview(m, sq), n = new Set(mv.map((x) => x.to)).size, caps = ui.peekCaptures ? ui.peekCaptures(mv) : [];
+        chips.push(['reach', n ? 'arrow' : 'no', n ? `Pode ir para ${n} casa${n === 1 ? '' : 's'} na próxima vez` : 'Sem lances na próxima vez']);
+        if (caps.length) chips.push(['threat', 'warn', `Pode capturar: ${caps.join(', ')}`]);
       }
       const equips = p.equips.map((id) => {
         const c = YC.Cards.get(id);

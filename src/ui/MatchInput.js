@@ -32,6 +32,8 @@
         out[spec.mark === 'trap' && !second ? 'trap' : 'pick'] = second ? spec.second(this.tgtFrom) : spec.first;
         if (second) out.sel = this.tgtFrom;
       }
+      const peek = this.peekState && this.peekState();   // lances da peça inimiga (MatchHints)
+      if (peek) out.peek = peek;
       return out;
     },
 
@@ -85,7 +87,8 @@
     },
 
     cancelMode() {
-      this.mode = null; this.selSq = -1; this.selCard = null; this.tgtFrom = -1; this.cardActs = null;
+      this.mode = null; this.selSq = -1; this.selCard = null; this.tgtFrom = -1; this.cardActs = null; this.peekSq = -1;
+      if (this.hideWhy) this.hideWhy();
       if (this.stage) this.renderSoft();
     },
 
@@ -147,8 +150,12 @@
     onSquare(sq) {
       const m = this.match;
       if (this.respondCtx && this.mode && this.mode.startsWith('r-')) return this.respondTarget(sq);
-      if (!this.myTurn()) return;
-      const piece = m.pieceAt(sq);
+      const piece = m.pieceAt(sq), enemy = piece && piece.color !== this.viewer;
+      // tocar numa peça inimiga mostra o que ela pode fazer (também fora da tua vez)
+      if (!this.myTurn()) {
+        if (!this.respondCtx && (!this.mode || this.mode === 'peek')) { if (enemy) return this.peekAt(sq); if (this.mode) this.cancelMode(); }
+        return;
+      }
       if (this.mode === 'equip') {
         if (E().equipTargets(m, this.viewer, YC.Cards.get(this.selCard.id)).includes(sq)) return this.send({ type: 'EQUIP', uid: this.selCard.uid, sq });
         return this.cancelMode();
@@ -158,11 +165,13 @@
         return this.toast('Só em casas vazias das filas 3 a 6.');
       }
       if (this.mode === 'tgt1' || this.mode === 'tgt2') return this.tgtClick(sq, (target) => this.send({ type: 'ACTIVATE', uid: this.selCard.uid, target }));
-      if (m.state.mustPass) return this.toast('Não tens lances: carrega em "Passar a vez".');
+      if (m.state.mustPass) return enemy ? this.peekAt(sq) : this.toast('Não tens lances: carrega em "Passar a vez".');
       if (this.mode === 'piece' && this.selSq >= 0) {
         const moves = C().legalMovesFrom(m.pos, this.selSq, { turn: m.state.turnCount }).filter((mv) => mv.to === sq);
         if (moves.length) return this.makeMove(moves);
+        this.explainClick(sq);              // porque é que a peça escolhida não pode ir para lá (MatchHints)
       }
+      if (enemy && this.viewer) return this.peekAt(sq);
       if (piece && piece.color === this.viewer) {
         S('click');
         this.cancelMode();

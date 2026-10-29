@@ -208,14 +208,16 @@
         last: [0xFFB703, 0.3, 'fill'], sel: [0x00B4D8, 0.45, 'fill'], move: [0x2EC4B6, 1, 'disc'],
         capSq: [0xD90429, 0.16, 'fill'], hot: [0xE2E8F0, 0.95, 'frame'],
         cap: [0xD90429, 1, 'corners'], lance: [0xFB8500, 1, 'corners'], equip: [0xFFB703, 0.42, 'fill'],
-        trap: [0xD97706, 0.42, 'fill'], pick: [0xFFB703, 0.42, 'fill'], check: [0xD90429, 0.5, 'fill']
+        trap: [0xD97706, 0.42, 'fill'], pick: [0xFFB703, 0.42, 'fill'], check: [0xD90429, 0.5, 'fill'],
+        // lances de uma peça inimiga (espreitar): casa dela vermelha, destinos laranja, capturas vermelhas
+        peekSel: [0xD90429, 0.4, 'fill'], peekMove: [0xFB8500, 0.95, 'disc'], peekCapSq: [0xD90429, 0.3, 'fill'], peekCap: [0xFF4D5E, 1, 'corners']
       }[kind];
       const tex = { disc: discTex, corners: cornersTex, frame: frameTex, fill: sqTex }[conf[2]]();
       this.markMats[kind] = new THREE.MeshBasicMaterial({ map: tex, color: new THREE.Color(conf[0]), transparent: true, opacity: conf[1], depthWrite: false });
       return this.markMats[kind];
     },
 
-    mark({ sel = -1, moves = [], last = null, equip = [], trap = [], pick = [] } = {}) {
+    mark({ sel = -1, moves = [], last = null, equip = [], trap = [], pick = [], peek = null } = {}) {
       const THREE = T(), layer = this.layers.marks;
       layer.children.forEach((o) => { if (o.isSprite) o.material.dispose(); if (o === this.arrow) { o.geometry.dispose(); o.material.dispose(); } });
       layer.clear();
@@ -229,6 +231,13 @@
         layer.add(m);
         return m;
       };
+      // etiqueta com o nome da casa na borda de baixo: o disco do lance fica visível ao centro
+      const label = (sq, color) => {
+        const lab = new THREE.Sprite(new THREE.SpriteMaterial({ map: T3().label(YC.Chess.sqName(sq).toUpperCase(), color), depthTest: false }));
+        const p = this.sqWorld(sq);
+        lab.scale.set(0.5, 0.25, 1); lab.position.set(p.x, 0.12, p.z + 0.36);
+        layer.add(lab);
+      };
       if (last) { plane(last.from, 'last'); plane(last.to, 'last'); }
       if (sel >= 0) plane(sel, 'sel');
       for (const mv of moves) {
@@ -236,15 +245,22 @@
         this.targets.set(mv.to, mv);
         if (mv.captured) plane(mv.to, 'capSq', 0.94, 0.011);
         plane(mv.to, mv.captured ? (mv.flag === 'r' ? 'lance' : 'cap') : 'move', 0.96, 0.014);
-        const lab = new THREE.Sprite(new THREE.SpriteMaterial({ map: T3().label(YC.Chess.sqName(mv.to).toUpperCase(), mv.captured ? '#D90429' : '#2EC4B6'), depthTest: false }));
-        const p = this.sqWorld(mv.to);
-        // etiqueta na borda de baixo da casa: o disco do lance fica visível ao centro
-        lab.scale.set(0.5, 0.25, 1); lab.position.set(p.x, 0.12, p.z + 0.36);
-        layer.add(lab);
+        label(mv.to, mv.captured ? '#D90429' : '#2EC4B6');
       }
       for (const sq of equip) plane(sq, 'equip');
       for (const sq of trap) plane(sq, 'trap', 0.82);
       for (const sq of pick) plane(sq, 'pick');
+      if (peek) {
+        plane(peek.sq, 'peekSel');
+        const done = new Set();
+        for (const mv of peek.moves) {
+          if (done.has(mv.to)) continue;
+          done.add(mv.to);
+          if (mv.captured) { plane(mv.to, 'peekCapSq', 0.94, 0.011); plane(mv.to, 'peekCap', 0.96, 0.014); }
+          else plane(mv.to, 'peekMove', 0.8, 0.014);
+          label(mv.to, mv.captured ? '#FF4D5E' : '#FB8500');
+        }
+      }
       // casas onde o clique tem de chegar mesmo que uma peça à frente as tape (Board3D.target)
       this.wanted = new Set([...this.targets.keys(), ...equip, ...trap, ...pick]);
       for (const g of this.pieceEls.values()) g.userData.selected = g.userData.sq === sel;
