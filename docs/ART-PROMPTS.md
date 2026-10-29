@@ -132,10 +132,10 @@ Row 4, left to right: 13) Pure white empty background. 14) Pure white empty back
 
 ## Vídeos das 9 Lendárias novas (Veo)
 
-Estado (2026-10-29): feitos 7 de 9 (`assets/video/`): Trineu Glaciar, Exoesqueleto Robô, Canhão de Circo, Truque de
-Desaparecimento, Soro Alfa, Veto Supremo e Quebra de Contrato. Faltam a Bússola Dourada e o Escudo Antitumulto. O Gemini
-(plano Pro) dá ~3 vídeos por janela de uso; quando acaba responde "I can create more videos as soon as your limit resets"
-e `gemini.google.com/usage` → "Uso atual" diz a hora a que reinicia. Até lá essas cartas usam a animação em CSS
+Estado (2026-10-29): feitos os 9 (`assets/video/`); as 13 Lendárias têm vídeo. O Gemini (plano Pro) dá ~3 vídeos por
+janela de uso; quando acaba responde "I can create more videos as soon as your limit resets" e
+`gemini.google.com/usage` → "Uso atual" diz a hora a que reinicia. Se responder "I can't generate that video", é o filtro
+do Veo: suaviza o prompt (a Bússola só passou sem a palavra "pirate"). Lendárias futuras sem vídeo usam a animação em CSS
 (`.hc-alive` em `cards.css`: o objeto flutua, o brilho pulsa e há estrelinhas).
 
 Prompts usados / a usar (todos acabam em *A &lt;cor&gt; glow pulses behind it over the dark background. Static camera,
@@ -152,10 +152,11 @@ object centered, smooth seamless loop, 2D cartoon game asset look. No text, no l
   the book, sending out a circular purple shockwave and sparks, then rises back up* (purple).
 - QUEBRA_CONTRATO (feito): *a torn parchment contract with a round seal and orange cartoon flames on the torn edges … the
   two paper halves wobble gently while the cartoon flames flicker and small glowing sparks float upward* (orange).
-- BUSSOLA_DOURADA: *an ornate golden pirate pocket compass with a colorful compass rose … sways gently on its ring while the
-  needle spins quickly and settles, and golden sparkles twinkle around it* (golden).
-- ESCUDO_ANTITUMULTO: *a chunky blue and transparent riot shield with a blue handle strap … hovers slowly while a hexagonal
-  cyan energy barrier ripples across its surface and deflects a bouncing cartoon spark* (cyan).
+- BUSSOLA_DOURADA (feito): *an ornate golden pocket compass with a colorful compass rose … sways gently on its ring while
+  the needle turns smoothly and settles, and small golden sparkles twinkle around it* (golden; com "pirate" foi recusado).
+- ESCUDO_ANTITUMULTO (feito): *a chunky blue and transparent cartoon shield with a blue handle strap … hovers slowly up and
+  down while a hexagonal cyan energy barrier ripples across its surface and gently deflects a small bouncing cartoon
+  spark* (cyan).
 
 Como fazer cada um (mesmo método dos vídeos antigos — imagem inicial + "Animate this exact cartoon object…"):
 1. `python tools/legend-video.py start ICONE '#cor'` → `_tmp_art/start_<icone>.png`.

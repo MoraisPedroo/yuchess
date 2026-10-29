@@ -30,11 +30,11 @@
 
 - O Pedro está a testar a versão publicada e vai enviar os erros que encontrar (sobretudo: velocidade das animações, arrastar cartas no telemóvel, legibilidade do zoom).
 - Falta publicar o `firestore.rules` no Firebase (ver "Configuração pendente") para o online funcionar. As regras aceitam agora baralhos de 22 (e de 12, para clientes antigos em cache).
-- **Vídeos das Lendárias novas**: feitos 7 de 9; faltam a Bússola Dourada e o Escudo Antitumulto (prompts prontos em `docs/ART-PROMPTS.md`). O plano Pro do Gemini dá ~3 vídeos por janela de uso (ver gemini.google.com/usage → "Uso atual", que diz a hora a que reinicia). Passos e ícones em `docs/ART-PROMPTS.md` (secção "Vídeos das 9 Lendárias novas") com `tools/legend-video.py`. Até lá estas cartas têm a animação CSS `.hc-alive`. A arte das 89 cartas novas já está em `assets/items/`.
+- ~~Vídeos das Lendárias novas~~: feitos os 9 (2026-10-29); as 13 Lendárias têm vídeo em `assets/video/`. A animação CSS `.hc-alive` fica só como reserva para Lendárias futuras sem vídeo (passos em `docs/ART-PROMPTS.md`, secção "Vídeos das 9 Lendárias novas", com `tools/legend-video.py`).
 
 ## Próximos passos (por prioridade)
 
-00. ~~Expandir para 120 cartas~~ (feito a 2026-10-27). A seguir: arte C–H e vídeos (ver "Em curso"); propostas de economia do relatório ainda por fazer — pacote de boas-vindas (5 pacotes + 1 Lendária à escolha), missões diárias, bónus de 1.ª vitória do dia, trocar 1 carta da mão inicial (mulligan); estatística de vitórias por carta para equilibrar as 120.
+00. ~~Expandir para 120 cartas~~ (feito a 2026-10-27). ~~Arte C–H e vídeos~~ (feitos a 2026-10-29). A seguir: propostas de economia do relatório ainda por fazer — pacote de boas-vindas (5 pacotes + 1 Lendária à escolha), missões diárias, bónus de 1.ª vitória do dia, trocar 1 carta da mão inicial (mulligan); estatística de vitórias por carta para equilibrar as 120.
 0. ~~Redesenho da estética~~ (feito a 2026-10-27 com o relatório do Gemini; ver `docs/DIRECAO-DE-ARTE.md`). Continuar com a lista "Por fazer" desse ficheiro: sons novos, modo daltónico, calha da Chain, Frame Break, câmara 3D nos menus, missões, ecrã VS no online.
 1. Teste real online + corrigir o que as regras recusarem.
 2. Visual: aplicar o estilo néon/3D ao menu, loja e baralhos (os retratos 3D podem entrar lá com `YC.pieceHTML` se houver um renderer); fundo de estádio gerado por IA (prompts no relatório do Gemini, secção 5). Os modelos GLB deixaram de ser precisos: as peças de vinil feitas por código substituem-nos.
@@ -53,6 +53,10 @@
 - Num separador escondido o navegador quase para as animações (requestAnimationFrame); o motor espera no máximo 4 s por animação, por isso o jogo nunca bloqueia, só fica lento.
 
 ## Registo de sessões
+
+### 2026-10-29 (11h) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Últimos 2 vídeos das Lendárias**: Bússola Dourada e Escudo Antitumulto, na janela de uso das 11:09. As 13 Lendárias têm agora vídeo. O Veo recusou o primeiro pedido da Bússola ("I can't generate that video") — tirei a palavra "pirate" e passou; no Escudo usei "cartoon shield" em vez de "riot shield" para não arriscar. Os prompts finais estão em `docs/ART-PROMPTS.md`.
+- **Como testar**: Baralhos ou Loja → passar o rato na Bússola Dourada ou no Escudo Antitumulto (ou zoom) → o vídeo toca.
 
 ### 2026-10-29 (manhã) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Vídeos das Lendárias**: o limite do Gemini já tinha reiniciado. Feitos mais 6: Exoesqueleto Robô, Canhão de Circo e Truque de Desaparecimento; depois, na janela seguinte (6:09), Soro Alfa, Veto Supremo e Rescisão (Quebra de Contrato) com a imagem inicial de `tools/legend-video.py start` e o prompt "Animate this exact cartoon object…" (prompts em `docs/ART-PROMPTS.md`), comprimidos para 480×270 e acrescentados a `ItemToken.VIDEO`. Ao 4.º o Gemini voltou a dizer "I can create more videos as soon as your limit resets": o limite não é diário, é a janela "Uso atual" de `gemini.google.com/usage` (3 vídeos gastam ~90 %). Um pedido ficou encravado sem resposta numa conversa longa; numa conversa nova correu bem. Faltam a Bússola e o Escudo.
