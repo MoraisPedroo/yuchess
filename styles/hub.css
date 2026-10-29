@@ -246,7 +246,8 @@
   .stage-piece { width: 156px; height: 156px; bottom: 34px; } .stage-piece.sp-n { width: 142px; height: 142px; }
   .pedestal { height: 86px; }
   .league-plate small { display: none; }
-  .arena-side .btn { display: none; }
+  .arena-side:not(.arena-rank) .btn { display: none; }
+  .arena-rank .podium { padding-top: 22px; } .arena-rank .p1 .pod-step { height: 60px; } .arena-rank .p2 .pod-step { height: 44px; } .arena-rank .p3 .pod-step { height: 34px; }
 }
 
 @media (max-width: 1100px) {

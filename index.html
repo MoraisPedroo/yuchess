@@ -21,6 +21,7 @@
   <link rel="stylesheet" href="styles/match.css">
   <link rel="stylesheet" href="styles/arena.css">
   <link rel="stylesheet" href="styles/hub.css">
+  <link rel="stylesheet" href="styles/play.css">
 </head>
 <body>
   <header id="topnav">
@@ -36,14 +37,12 @@
     <button class="tab" data-tab="shop" data-icon="chest"><span>Loja</span></button>
     <button class="tab" data-tab="decks" data-icon="cards"><span>Baralhos</span></button>
     <button class="tab" data-tab="arena" data-icon="rook"><span>Arena</span></button>
-    <button class="tab" data-tab="online" data-icon="globe"><span>Online</span></button>
   </nav>
 
   <main id="screens">
     <section id="screen-arena" class="screen"></section>
     <section id="screen-shop" class="screen"></section>
     <section id="screen-decks" class="screen"></section>
-    <section id="screen-online" class="screen"></section>
     <section id="screen-match" class="screen screen-match"></section>
   </main>
   <div id="toasts"></div>
@@ -115,6 +114,8 @@
   <script src="src/ui/GachaView.js"></script>
   <script src="src/ui/DeckBuilderView.js"></script>
   <script src="src/ui/OnlineLobby.js"></script>
+  <script src="src/ui/ArenaRanking.js"></script>
+  <script src="src/ui/PlayMenu.js"></script>
   <script src="src/main.js"></script>
 </body>
 </html>

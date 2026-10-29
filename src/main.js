@@ -15,8 +15,8 @@
       window.addEventListener('pointerdown', () => YC.Sound.init(), { passive: true });
       YC.Hub.init(App);
       const code = new URLSearchParams(location.search).get('sala');
-      YC.Hub.show(code ? 'online' : 'arena');
-      if (code) YC.OnlineLobby.pendingCode = code.toUpperCase();
+      YC.Hub.show('arena');
+      if (code) { YC.OnlineLobby.pendingCode = code.toUpperCase(); YC.PlayMenu.open('online'); }
       YC.OnlineLobby.autoConnect();
     },
 

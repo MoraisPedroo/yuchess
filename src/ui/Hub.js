@@ -1,14 +1,13 @@
 /* Hub.js — barra de topo (conta, ouro, poeira, som), doca de navegação e o ecrã Arena (hub de ação ao estilo
-   Supercell: palco com as peças 3D do jogador, baralho ativo, garantias da loja e o botão JOGAR). Mudar de ecrã
+   Supercell: pódio dos melhores jogadores, palco com as peças 3D, baralho ativo e o botão JOGAR, que abre o
+   PlayMenu — contra o bot ou online; o antigo separador Online vive agora aí). Mudar de ecrã
    é uma transição curta: o ecrã antigo sai para o lado oposto ao separador escolhido e o novo entra em escada. */
 (function (YC) {
   'use strict';
 
   const esc = (s) => YC.HoloCard.esc(s);
   const I = (n, o) => YC.Icon(n, o);
-  const CLOCKS = [[5, '5 min'], [10, '10 min'], [0, 'Sem limite']];
-  const LEVELS = [['easy', 'Fácil', 'Joga ao calhas de vez em quando.'], ['medium', 'Médio', 'Pensa 2 lances à frente.'], ['hard', 'Difícil', 'Pensa 3 lances e usa bem as cartas.']];
-  const ORDER = ['shop', 'decks', 'arena', 'online'];
+  const ORDER = ['shop', 'decks', 'arena'];
   const RANK = { LEGENDARY: 3, EPIC: 2, RARE: 1, COMMON: 0 };
   const G = () => window.gsap;
 
@@ -54,6 +53,7 @@
     },
 
     show(tab) {
+      if (tab === 'online') { Hub.show('arena'); return YC.PlayMenu.open('online'); }
       const prev = Hub.tab, g = G(), token = (Hub.token = (Hub.token || 0) + 1);
       const old = document.querySelector('.screen.active'), next = document.getElementById(`screen-${tab}`);
       const dir = Math.sign(ORDER.indexOf(tab) - ORDER.indexOf(prev)) || 1;
@@ -68,7 +68,6 @@
         if (tab === 'arena') Hub.renderArena();
         if (tab === 'shop') YC.GachaView.render(next);
         if (tab === 'decks') YC.DeckBuilderView.render(next);
-        if (tab === 'online') YC.OnlineLobby.render(next);
         window.scrollTo(0, 0);
         if (g && tab !== 'match' && next.children.length && !YC.reducedMotion()) {
           g.fromTo(next.children, { x: 48 * dir, opacity: 0 }, { x: 0, opacity: 1, duration: 0.22, stagger: 0.035, ease: 'expo.out', clearProps: 'transform,opacity' });
@@ -90,7 +89,7 @@
       const cloud = { syncing: I('sync', { size: 14 }), ok: I('cloud', { size: 14 }), error: I('warn', { size: 14 }) }[YC.ProfileStore.cloud] || '';
       acc.innerHTML = `<div class="avatar">${user && user.photoURL ? `<img src="${esc(user.photoURL)}" alt="">` : esc((p.displayName || 'D')[0].toUpperCase())}</div>`
         + `<div class="acc-txt"><b>${esc(p.displayName)}</b><small>${user ? (user.isAnonymous ? 'Convidado' : 'Google') : 'Só neste navegador'} ${cloud}</small></div>`;
-      acc.onclick = () => Hub.go('online');
+      acc.onclick = () => YC.PlayMenu.open('online');
     },
 
     /** As 3 melhores cartas do baralho ativo (para o expositor do palco). */
@@ -103,22 +102,10 @@
       const root = document.getElementById('screen-arena');
       const p = YC.ProfileStore.profile, deck = YC.Economy.activeDeck(p), E = YC.Economy;
       const v = E.validateDeck(p, deck.cards);
-      const epicIn = Math.max(1, E.EPIC_PITY + 1 - p.pityEpic), legIn = Math.max(1, E.LEGEND_HARD - p.pityLegendary);
       const st = p.stats || {}, games = (st.wins || 0) + (st.losses || 0) + (st.draws || 0);
-      const lvl = LEVELS.find((l) => l[0] === Hub.level);
       root.innerHTML = `
         <div class="home">
-          <aside class="arena-side panel">
-            <div class="panel-head">${I('chest')}<h3>Garantias da Loja</h3></div>
-            <div class="pity-row"><span>Épica garantida em</span><b>${epicIn}</b><small>pacote(s)</small></div>
-            <div class="meter"><i style="width:${Math.round((1 - (epicIn - 1) / E.EPIC_PITY) * 100)}%"></i></div>
-            <div class="pity-row"><span>Lendária garantida em</span><b>${legIn}</b><small>pacote(s)</small></div>
-            <div class="meter gold"><i style="width:${Math.round((1 - (legIn - 1) / E.LEGEND_HARD) * 100)}%"></i></div>
-            <div class="tray arena-stats">
-              <div><b>${st.wins || 0}</b><small>Vitórias</small></div><div><b>${st.losses || 0}</b><small>Derrotas</small></div><div><b>${games}</b><small>Partidas</small></div>
-            </div>
-            <button class="btn small secondary" data-a="rules">${I('info', { size: 18 })}Como se joga</button>
-          </aside>
+          <aside class="arena-side panel arena-rank"></aside>
           <section class="arena-stage">
             <div class="stage-cards"></div>
             <div class="pedestal"><div class="pedestal-board"></div>
@@ -132,14 +119,7 @@
               <div class="panel-head">${I('cards')}<h3>${esc(deck.name)}</h3><span class="deck-n ${v.ok ? 'ok' : ''}">${deck.cards.length}/${YC.Cards.RULES.DECK_SIZE}</span></div>
               <div class="tray dock-cards"></div>
               ${v.ok ? '' : `<p class="warn">${I('warn', { size: 16 })} ${esc(v.errors[0])}</p>`}
-              <button class="btn small secondary" data-a="decks">Editar baralho</button>
-            </div>
-            <div class="panel mode-pick">
-              <div class="seg">${[['bot', 'robot', 'Vs. Bot'], ['online', 'globe', 'Online']].map(([m, ic, l]) => `<button class="seg-b ${Hub.mode === m ? 'on' : ''}" data-mode="${m}">${I(ic, { size: 20 })}${l}</button>`).join('')}</div>
-              ${Hub.mode === 'bot' ? `<div class="pick-row"><span class="muted">Bot</span>${LEVELS.map(([id, label, tip]) => `<button class="chip ${Hub.level === id ? 'on' : ''}" data-level="${id}" title="${tip}">${label}</button>`).join('')}</div>
-              <div class="pick-row"><span class="muted">${I('timer', { size: 18 })}</span>${CLOCKS.map(([c, label]) => `<button class="chip ${Hub.clock === c ? 'on' : ''}" data-clock="${c}">${label}</button>`).join('')}</div>
-              <p class="muted small">${lvl[2]} Vitória: +120 ouro e +25 poeira.</p>`
-                : '<p class="muted small">Ranqueada com rating Elo (conta Google) ou sala privada com um código para jogar com um amigo.</p>'}
+              <div class="row-btns tight"><button class="btn small secondary" data-a="decks">Editar baralho</button><button class="btn small secondary" data-a="rules">${I('info', { size: 18 })}Como se joga</button></div>
             </div>
             <button class="btn big play-btn" data-a="play">${I('play', { size: 26 })}JOGAR</button>
           </aside>
@@ -157,10 +137,8 @@
         sc.appendChild(slot);
       });
       Hub.renderStage();
-      root.querySelectorAll('[data-level]').forEach((b) => b.onclick = () => { Hub.level = b.dataset.level; Hub.save(); Hub.renderArena(); });
-      root.querySelectorAll('[data-clock]').forEach((b) => b.onclick = () => { Hub.clock = Number(b.dataset.clock); Hub.save(); Hub.renderArena(); });
-      root.querySelectorAll('[data-mode]').forEach((b) => b.onclick = () => { Hub.mode = b.dataset.mode; Hub.save(); Hub.renderArena(); });
-      root.querySelector('[data-a="play"]').onclick = () => (Hub.mode === 'online' ? Hub.go('online') : Hub.app.startBot(Hub.level, Hub.clock));
+      YC.ArenaRanking.render(root.querySelector('.arena-rank'));
+      root.querySelector('[data-a="play"]').onclick = () => YC.PlayMenu.open();
       root.querySelector('[data-a="decks"]').onclick = () => Hub.go('decks');
       root.querySelector('[data-a="rules"]').onclick = () => Hub.rules();
       const g = G();

@@ -1,5 +1,6 @@
-/* OnlineLobby.js — separador Online: login (Google, convidado, convidado → Google), rating, fila ranqueada,
-   salas privadas por código/link e classificação. Ao entrar, o perfil da coleção passa a gravar no Firestore. */
+/* OnlineLobby.js — a parte "Online" do menu JOGAR (PlayMenu): login com Google (obrigatório para jogar online),
+   rating, fila ranqueada e salas privadas por código/link. A classificação está no pódio da Arena (ArenaRanking).
+   Ao entrar, o perfil da coleção passa a gravar no Firestore. */
 (function (YC) {
   'use strict';
 
@@ -26,23 +27,21 @@
 
     render(root) {
       Lobby.root = root;
-      if (!FB().ready) {
-        root.innerHTML = `<div class="lobby panel"><h2>Multijogador online</h2>
-          <p>Joga contra pessoas reais: <b>ranqueadas</b> com rating Elo ou <b>salas privadas</b> com um código. Com login, a tua coleção e os baralhos ficam guardados na nuvem.</p>
-          <button class="btn big pink" data-a="connect">Ligar ao online</button><p class="lobby-error" hidden></p></div>`;
-        root.querySelector('[data-a="connect"]').onclick = async () => {
-          Lobby.view('loading', 'A ligar ao Firebase…');
-          try { await Lobby.connect(); } catch (err) { Lobby.view('error', `Não consegui ligar: ${FB().explain(err)}`); }
-        };
+      if (!FB().ready || !Lobby.unsubUser) {
+        Lobby.view('loading', 'A ligar ao online…');
+        Lobby.connect().then(() => { if (Lobby.current === 'loading' && !FB().user) Lobby.view('signin'); })
+          .catch((err) => Lobby.view('error', `Não consegui ligar: ${FB().explain(err)}`));
         return;
       }
-      Lobby.view(Lobby.profile ? (Lobby.waiting ? 'waiting' : 'home') : FB().user ? 'loading' : 'signin', Lobby.waiting);
+      const guest = FB().user && FB().user.isAnonymous;
+      Lobby.view(Lobby.profile && !guest ? (Lobby.waiting ? 'waiting' : 'home') : FB().user && !guest ? 'loading' : 'signin', Lobby.waiting);
     },
 
     async onUser(user) {
       YC.ProfileStore.attach(user).then(() => YC.Hub.renderNav());
       YC.Hub.renderNav();
       if (!user) { Lobby.profile = null; return Lobby.view('signin'); }
+      if (user.isAnonymous) { Lobby.profile = null; return Lobby.view('signin'); }   // online só com conta Google
       Lobby.view('loading', 'A abrir o teu perfil…');
       try {
         Lobby.profile = await YC.Ranking.ensureProfile(user, Lobby.pendingName || YC.ProfileStore.profile.displayName);
@@ -61,7 +60,7 @@
     body() {
       if (!Lobby.root || !Lobby.root.isConnected) return null;
       let b = Lobby.root.querySelector('.lobby');
-      if (!b) { Lobby.root.innerHTML = '<div class="lobby panel"></div>'; b = Lobby.root.querySelector('.lobby'); }
+      if (!b) { Lobby.root.innerHTML = '<div class="lobby"></div>'; b = Lobby.root.querySelector('.lobby'); }
       return b;
     },
 
@@ -77,41 +76,40 @@
     },
 
     viewSignin(b) {
-      b.innerHTML = `<h2>Entrar</h2>
-        <p>Com conta Google jogas <b>ranqueadas</b> e a coleção fica guardada na nuvem. Como convidado jogas salas privadas.</p>
-        <label class="lbl">Nome no placar</label><input class="text-in" id="lobby-name" maxlength="20" value="${esc(YC.ProfileStore.profile.displayName)}">
-        <div class="row-btns"><button class="btn" data-a="google">Entrar com Google</button><button class="btn violet" data-a="guest">Jogar como convidado</button></div>
-        <p class="lobby-error" hidden></p>`;
+      const guest = FB().user && FB().user.isAnonymous;
+      b.innerHTML = `<div class="ol-sign">
+          <div class="ol-sign-ico">${YC.Icon('globe', { size: 44 })}</div>
+          <h3>Entra para jogar online</h3>
+          <p>O online precisa de uma <b>conta Google</b>: o teu rating fica no pódio e a coleção e os baralhos ficam guardados na nuvem.</p>
+          <label class="lbl">Nome no pódio</label><input class="text-in" id="lobby-name" maxlength="20" value="${esc(YC.ProfileStore.profile.displayName)}">
+          <button class="btn big ol-google" data-a="google">${YC.Icon('play', { size: 22 })}${guest ? 'Ligar a minha conta Google' : 'Entrar com Google'}</button>
+          <p class="lobby-error" hidden></p></div>`;
       const err = b.querySelector('.lobby-error');
-      const go = async (fn) => {
+      b.querySelector('[data-a="google"]').onclick = async () => {
         Lobby.pendingName = b.querySelector('#lobby-name').value;
         YC.ProfileStore.update((p) => { if (Lobby.pendingName.trim().length >= 2) p.displayName = Lobby.pendingName.trim().slice(0, 20); });
         err.hidden = true;
-        try { await fn(); } catch (e) { err.textContent = FB().explain(e); err.hidden = false; }
+        try { await (guest ? FB().linkGoogle() : FB().signInGoogle()); } catch (e) { err.textContent = FB().explain(e); err.hidden = false; }
       };
-      b.querySelector('[data-a="google"]').onclick = () => go(() => FB().signInGoogle());
-      b.querySelector('[data-a="guest"]').onclick = () => go(() => FB().signInGuest());
     },
 
     viewHome(b) {
-      const p = Lobby.profile;
+      const p = Lobby.profile, letter = esc((String(p.name || '?').trim()[0] || '?').toUpperCase());
       b.innerHTML = `
-        <div class="lobby-top">
-          <div class="lobby-who"><label class="lbl">Nome</label><div class="row-btns tight"><input class="text-in" id="lobby-rename" maxlength="20" value="${esc(p.name)}"><button class="btn small" data-a="rename">Guardar</button></div>
-            <small>${p.guest ? 'Convidado · só salas privadas' : 'Conta Google'} · coleção ${YC.ProfileStore.cloud === 'ok' ? 'guardada na nuvem' : 'a sincronizar…'}</small>
-            ${p.guest ? '<button class="btn small teal" data-a="link">Converter em conta Google</button>' : ''}</div>
-          <div class="lobby-rating"><b>${p.rating}</b><small>rating</small></div>
-          <div class="lobby-record">${p.wins}V · ${p.losses}D · ${p.draws}E<small>${p.games} ranqueadas</small></div>
+        <div class="ol-me">
+          <span class="rk-ava big">${letter}</span>
+          <div class="ol-name"><div class="row-btns tight"><input class="text-in" id="lobby-rename" maxlength="20" value="${esc(p.name)}" aria-label="Nome"><button class="icon-btn" data-a="rename" title="Guardar nome">${YC.Icon('check', { size: 20 })}</button></div>
+            <small>${p.wins}V · ${p.losses}D · ${p.draws}E · coleção ${YC.ProfileStore.cloud === 'ok' ? 'guardada na nuvem' : 'a sincronizar…'}</small></div>
+          <div class="ol-elo"><b>${p.rating}</b><small>Elo</small></div>
         </div>
-        <div class="lobby-actions">
-          <button class="btn big pink" data-a="ranked" ${p.guest ? 'disabled title="Precisa de conta Google"' : ''}>${YC.Icon('swords', { size: 24 })}Procurar ranqueada</button>
-          <button class="btn big violet" data-a="private">Criar sala privada</button>
-          <div class="lobby-join"><label class="lbl">Código da sala</label><div class="row-btns tight"><input class="text-in code-in" id="lobby-code" maxlength="5" placeholder="ABCDE" autocomplete="off"><button class="btn" data-a="join">Entrar</button></div></div>
+        <div class="ol-actions">
+          <button class="btn big ol-ranked" data-a="ranked">${YC.Icon('swords', { size: 26 })}<span>Ranqueada<small>Ganha ou perde Elo</small></span></button>
+          <button class="btn big secondary ol-private" data-a="private">${YC.Icon('cards', { size: 24 })}<span>Sala privada<small>Joga com um amigo</small></span></button>
         </div>
-        <p class="muted small">Jogas com o teu baralho ativo («${esc(YC.Economy.activeDeck(YC.ProfileStore.profile).name)}»). Cada turno tem 2 minutos.</p>
+        <div class="ol-join tray"><label class="lbl" for="lobby-code">Tens um código?</label><input class="text-in code-in" id="lobby-code" maxlength="5" placeholder="ABCDE" autocomplete="off"><button class="btn" data-a="join">Entrar</button></div>
+        <p class="muted small">Jogas com o baralho «${esc(YC.Economy.activeDeck(YC.ProfileStore.profile).name)}». Cada turno tem 2 minutos.</p>
         <p class="lobby-error" hidden></p>
-        <h3>Classificação</h3><ol class="leaderboard"><li class="empty">A carregar…</li></ol>
-        <button class="btn small ghost" data-a="signout">Terminar sessão</button>`;
+        <button class="btn small ghost ol-out" data-a="signout">Terminar sessão</button>`;
       const err = b.querySelector('.lobby-error');
       Lobby.showError = (msg) => { err.textContent = msg; err.hidden = !msg; };
       const on = (a, fn) => { const el = b.querySelector(`[data-a="${a}"]`); if (el) el.onclick = fn; };
@@ -119,23 +117,11 @@
         try { Lobby.profile.name = await YC.Ranking.rename(p.uid, b.querySelector('#lobby-rename').value); YC.ProfileStore.update((pp) => { pp.displayName = Lobby.profile.name; }); Lobby.showError(''); YC.UI.toast('Nome guardado.'); }
         catch (e) { Lobby.showError(e.code ? FB().explain(e) : e.message); }
       });
-      on('link', async () => { try { await FB().linkGoogle(); YC.UI.toast('Conta Google ligada!'); } catch (e) { Lobby.showError(FB().explain(e)); } });
       on('ranked', () => Lobby.queueRanked());
       on('private', () => Lobby.createPrivate());
       on('join', () => Lobby.joinByCode(b.querySelector('#lobby-code').value));
       b.querySelector('#lobby-code').onkeydown = (e) => { if (e.key === 'Enter') Lobby.joinByCode(e.target.value); };
       on('signout', () => FB().signOut());
-      Lobby.loadLeaderboard(b.querySelector('.leaderboard'));
-    },
-
-    async loadLeaderboard(list) {
-      try {
-        const rows = await YC.Ranking.leaderboard(20);
-        if (!list.isConnected) return;
-        list.innerHTML = rows.length
-          ? rows.map((r, i) => `<li class="${r.uid === Lobby.profile.uid ? 'me' : ''}"><span class="pos">${i + 1}</span><span class="nm">${esc(r.name)}</span><b>${r.rating}</b><small>${r.wins}V ${r.losses}D</small></li>`).join('')
-          : '<li class="empty">Ainda ninguém jogou ranqueadas. Sê o primeiro!</li>';
-      } catch (err) { if (list.isConnected) list.innerHTML = `<li class="empty">${esc(FB().explain(err))}</li>`; }
     },
 
     viewWaiting(b, w) {
@@ -233,6 +219,8 @@
       }
       if (!match || !match.black) return Lobby.view('error', 'A sala desapareceu antes de começar.');
       Lobby.view('home');
+      if (YC.PlayMenu) YC.PlayMenu.close();
+      if (YC.ArenaRanking) YC.ArenaRanking.at = 0;
       await YC.App.startOnline(match, Lobby.profile);
     }
   };
