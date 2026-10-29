@@ -132,6 +132,25 @@ Row 4, left to right: 13) Pure white empty background. 14) Pure white empty back
 
 ## Vídeos das 9 Lendárias novas (Veo)
 
+Estado (2026-10-29): feito o do **Trineu Glaciar** (`assets/video/trineu_glaciar.mp4`). Os outros 8 ficaram à espera do
+limite diário de vídeos do Gemini ("I can create more videos as soon as your limit resets"). Até lá essas cartas usam a
+animação em CSS (`.hc-alive` em `cards.css`: o objeto flutua, o brilho pulsa e há estrelinhas).
+
+Como fazer cada um (mesmo método dos vídeos antigos — imagem inicial + "Animate this exact cartoon object…"):
+1. `python tools/legend-video.py start ICONE '#cor'` → `_tmp_art/start_<icone>.png`.
+2. Gemini → "+" → **Criar vídeo** → anexar a imagem e colar o prompt (modelo abaixo) → esperar ~2 min.
+3. Descarregar o vídeo e correr `python tools/legend-video.py pack video.mp4 ICONE` → `assets/video/<icone>.mp4`.
+4. Acrescentar o ícone a `ItemToken.VIDEO`.
+
+Ícones e cores: EXOESQUELETO_ROBO #D90429 · CANHAO_CIRCO #FFB703 · TRUQUE_MAGICA #7C3AED · SORO_ALFA #2EC4B6 ·
+VETO_SUPREMO #9333EA · QUEBRA_CONTRATO #FB8500 · BUSSOLA_DOURADA #FFB703 · ESCUDO_ANTITUMULTO #00B4D8.
+
+Modelo de prompt (o do Trineu): *Animate this exact cartoon object, a regal crystalline ice bobsled throne with platinum
+runners, keeping the same design, thick dark outline and colors. It hovers slowly up and down over the dark background;
+a ring of cartoon frost mist expands from it and tiny snowflakes orbit around it. A cyan glow pulses behind it. Static
+camera, object centered, smooth seamless loop, 2D cartoon game asset look. No text, no logos, no people.* — trocar a
+descrição do objeto e a animação pelas da tabela abaixo.
+
 Texto do relatório (tabela copiada tal como veio). Gravar em `assets/video/<icone em minúsculas>.mp4` e acrescentar o ícone a `ItemToken.VIDEO`.
 
 ```

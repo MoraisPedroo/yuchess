@@ -16,13 +16,15 @@
     // vídeo do objeto (só Lendárias, assets/video): toca ao passar o rato, no zoom e na Chain
     const vid = opts.size !== 'xs' && opts.size !== 'sm' && YC.ItemToken && YC.ItemToken.video(card);
     const video = vid ? `<video class="hc-video" muted loop playsinline preload="none" data-src="${vid}"></video>` : '';
+    // Lendária ainda sem vídeo: o objeto ganha vida em CSS (flutua, brilho a pulsar, estrelinhas) nos mesmos sítios
+    const alive = !vid && card.rarity === 'LEGENDARY' && opts.size !== 'xs' && opts.size !== 'sm' ? '<div class="hc-alive"><i></i><i></i><i></i><i></i></div>' : '';
     // nomes compridos ("Botas de Vento Supersónico") encolhem a letra em vez de ficarem cortados
     const len = card.name.length, fit = len > 25 ? ' n-xxl' : len > 21 ? ' n-xl' : len > 15 ? ' n-l' : '';
     const ic = (n, o) => (YC.Icon ? YC.Icon(n, o) : '');
     // insígnias de raridade (dupla codificação: forma e número, não só cor)
     const gems = { COMMON: ic('gemCommon'), RARE: ic('gemRare'), EPIC: ic('gemEpic').repeat(3), LEGENDARY: ic('crown') }[card.rarity];
     return `<div class="hc-face">`
-      + `<div class="hc-art" style="--c1:${card.theme.primary};--c2:${card.theme.secondary}"><div class="hc-rays"></div>${YC.ItemToken ? YC.ItemToken.cardArt(card) : YC.CardArt.svg(card)}${video}</div>`
+      + `<div class="hc-art" style="--c1:${card.theme.primary};--c2:${card.theme.secondary}"><div class="hc-rays"></div>${YC.ItemToken ? YC.ItemToken.cardArt(card) : YC.CardArt.svg(card)}${video}${alive}</div>`
       + `<div class="hc-speed s${card.ss}" title="${SS_LABEL[card.ss]}">${ic(SPEED_ICON[card.ss])}<b>${card.ss}</b></div>`
       + `<div class="hc-ribbon"><span class="hc-name${fit}">${esc(card.name)}</span><span class="hc-kind">${YC.Cards.KIND_LABEL[card.kind]}</span></div>`
       + `<div class="hc-text">${esc(card.text)}</div>`
@@ -51,6 +53,9 @@
     if (el.querySelector('.hc-video')) {
       if (opts.autoplay) playVideo(el);
       else { el.addEventListener('mouseenter', () => playVideo(el)); el.addEventListener('mouseleave', () => stopVideo(el)); }
+    } else if (el.querySelector('.hc-alive')) {
+      if (opts.autoplay) el.classList.add('aplay');
+      else { el.addEventListener('mouseenter', () => el.classList.add('aplay')); el.addEventListener('mouseleave', () => el.classList.remove('aplay')); }
     }
     return el;
   }

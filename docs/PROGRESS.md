@@ -30,7 +30,7 @@
 
 - O Pedro está a testar a versão publicada e vai enviar os erros que encontrar (sobretudo: velocidade das animações, arrastar cartas no telemóvel, legibilidade do zoom).
 - Falta publicar o `firestore.rules` no Firebase (ver "Configuração pendente") para o online funcionar. As regras aceitam agora baralhos de 22 (e de 12, para clientes antigos em cache).
-- Vídeos das 9 Lendárias novas por fazer (prompts no fim de `docs/ART-PROMPTS.md`). A arte das 89 cartas novas já está em `assets/items/` (folhas C a H geradas a 2026-10-29).
+- **Vídeos das Lendárias novas**: feito o do Trineu Glaciar; faltam 8 (limite diário de vídeos do Gemini). Passos e ícones em `docs/ART-PROMPTS.md` (secção "Vídeos das 9 Lendárias novas") com `tools/legend-video.py`. Até lá estas cartas têm a animação CSS `.hc-alive`. A arte das 89 cartas novas já está em `assets/items/`.
 
 ## Próximos passos (por prioridade)
 
@@ -62,6 +62,7 @@
 - **Avisos da partida** passam para a esquerda (por baixo do histórico) e as dicas de alvo já não aparecem em aviso (estão na barra de ação, que fica abaixo do tabuleiro).
 - **Firebase**: Google e Anónimo já estavam ativos; faltava `yuchess.vercel.app` nos domínios autorizados (por isso o login Google falhava no site) — acrescentado na consola.
 - **Arena + Online juntos**: a doca fica com Loja, Baralhos e Arena. O painel da esquerda da Arena é agora "Melhores jogadores" (`src/ui/ArenaRanking.js`): pódio 2.º·1.º·3.º com avatar, nome e Elo, a tua posição e "Ver todos" (classificação completa numa janela; lê `players` e guarda 60 s). O JOGAR abre o `PlayMenu` (`src/ui/PlayMenu.js`): "Contra o bot" (offline, nível e relógio) ou "Online" (o `OnlineLobby`, refeito: só com conta Google — o convidado pode ligar a conta —, perfil com Elo, Ranqueada, Sala privada e código). O botão da conta e os links `?sala=` abrem o Online. Estilos em `styles/play.css`. As garantias da loja saíram da Arena (estão na Loja).
+- **Lendárias**: vídeo novo do Trineu Glaciar (Veo, mesma técnica dos antigos: imagem inicial + "Animate this exact cartoon object", comprimido para 480×270). Os outros 8 não deu: o Gemini chegou ao limite diário de vídeos. Para não ficarem paradas, as Lendárias sem vídeo ganharam uma animação em CSS (`.hc-alive`): o objeto flutua e roda um pouco, o brilho pulsa e 4 estrelinhas cintilam, ao passar o rato, no zoom e na Chain. Ferramenta `tools/legend-video.py` (imagem inicial e compressão).
 - **Como testar**: Arena → pódio e "Ver todos"; JOGAR → as duas opções (no telemóvel também); Online sem sessão mostra "Entrar com Google". O fluxo com sessão (ranqueada/sala) não foi testado com conta real: o Pedro tem de entrar com o Google no site.
 
 ### 2026-10-27 (noite, 3) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`

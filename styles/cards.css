@@ -37,6 +37,20 @@
 .hc-art .card-icon { position: relative; width: 80%; height: 80%; object-fit: contain; filter: drop-shadow(0 calc(var(--cw) * .025) calc(var(--cw) * .02) rgba(0, 0, 0, .5)); }
 .hc-video { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .35s; pointer-events: none; }
 .hcard.vplay .hc-video { opacity: 1; }
+/* Lendárias sem vídeo: o objeto flutua e roda um pouco, o brilho da carta pulsa e 4 estrelinhas cintilam */
+.hc-alive { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .3s; }
+.hc-alive i { position: absolute; width: 9%; aspect-ratio: 1; background: #FFD166; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); filter: drop-shadow(0 0 3px rgba(255, 209, 102, .9)); transform: scale(0); }
+.hc-alive i:nth-child(1) { left: 14%; top: 18%; } .hc-alive i:nth-child(2) { right: 12%; top: 26%; width: 7%; }
+.hc-alive i:nth-child(3) { left: 22%; bottom: 14%; width: 6%; } .hc-alive i:nth-child(4) { right: 20%; bottom: 18%; width: 10%; }
+.hcard.aplay .hc-alive { opacity: 1; }
+.hcard.aplay .hc-alive i { animation: alive-twinkle 1.6s ease-in-out infinite; }
+.hcard.aplay .hc-alive i:nth-child(2) { animation-delay: .4s; } .hcard.aplay .hc-alive i:nth-child(3) { animation-delay: .8s; } .hcard.aplay .hc-alive i:nth-child(4) { animation-delay: 1.2s; }
+.hcard.aplay .hc-art .card-icon { animation: alive-float 2.4s ease-in-out infinite; }
+.hcard.aplay .hc-art::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 55%, var(--c1), transparent 62%); mix-blend-mode: screen; animation: alive-glow 2.4s ease-in-out infinite; pointer-events: none; }
+.hcard.aplay .hc-rays { animation-duration: 8s; }
+@keyframes alive-float { 0%, 100% { transform: translateY(4%) rotate(-3deg); } 50% { transform: translateY(-6%) rotate(3deg) scale(1.05); } }
+@keyframes alive-glow { 0%, 100% { opacity: .15; } 50% { opacity: .55; } }
+@keyframes alive-twinkle { 0%, 100% { transform: scale(0) rotate(0); } 40% { transform: scale(1) rotate(45deg); } 70% { transform: scale(.4) rotate(90deg); } }
 /* silhuetas por tipo */
 .k-REACTIVE .hc-art { clip-path: polygon(11% 0, 89% 0, 100% 15%, 100% 85%, 89% 100%, 11% 100%, 0 85%, 0 15%); }
 .k-QUICK .hc-art { border-radius: 50% 50% calc(var(--cw) * .055) calc(var(--cw) * .055) / 30% 30% calc(var(--cw) * .055) calc(var(--cw) * .055); }
