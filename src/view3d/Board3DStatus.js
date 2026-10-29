@@ -41,6 +41,41 @@
       }
     },
 
+    /** Ameaça na janela de resposta: anel vermelho na casa em perigo, anel laranja em quem ataca e seta entre
+        os dois. Fica numa camada própria (o mark() limpa layers.marks) até clearThreat(). */
+    showThreat(pairs) {
+      const THREE = T();
+      this.clearThreat();
+      if (!this.threatLayer) { this.threatLayer = new THREE.Group(); this.layers.traps.parent.add(this.threatLayer); }
+      const ring = (sq, hex) => {
+        const p = this.sqWorld(sq);
+        const r = new THREE.Mesh(new THREE.RingGeometry(0.34, 0.47, 40), new THREE.MeshBasicMaterial({ color: T3().glow(hex, 1.25), transparent: true, opacity: 0.95, depthWrite: false, side: THREE.DoubleSide }));
+        r.rotation.x = -Math.PI / 2; r.position.set(p.x, 0.035, p.z); r.raycast = () => {};
+        this.threatLayer.add(r);
+        return r;
+      };
+      const pulse = [];
+      for (const { from, to } of pairs) {
+        if (to >= 0) pulse.push(ring(to, 0xD90429));
+        if (from < 0 || from === to) continue;
+        pulse.push(ring(from, 0xFB8500));
+        const a = this.sqWorld(from), b = this.sqWorld(to), dx = b.x - a.x, dz = b.z - a.z, len = Math.hypot(dx, dz);
+        const shape = new THREE.Shape(), L = len - 0.5, w = 0.09;
+        shape.moveTo(0.3, -w); shape.lineTo(L, -w); shape.lineTo(L, -0.22); shape.lineTo(len - 0.2, 0); shape.lineTo(L, 0.22); shape.lineTo(L, w); shape.lineTo(0.3, w); shape.closePath();
+        const arrow = new THREE.Mesh(new THREE.ShapeGeometry(shape), new THREE.MeshBasicMaterial({ color: T3().glow(0xD90429, 1.2), transparent: true, opacity: 0.9, depthWrite: false, side: THREE.DoubleSide }));
+        arrow.rotation.x = -Math.PI / 2; arrow.rotation.z = Math.atan2(-dz, dx); arrow.position.set(a.x, 0.045, a.z); arrow.raycast = () => {};
+        this.threatLayer.add(arrow);
+      }
+      if (window.gsap && pulse.length) this.threatTween = window.gsap.to(pulse.map((r) => r.scale), { x: 1.18, y: 1.18, duration: 0.55, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+    },
+
+    clearThreat() {
+      if (this.threatTween) { this.threatTween.kill(); this.threatTween = null; }
+      if (!this.threatLayer) return;
+      for (const o of this.threatLayer.children) { o.geometry.dispose(); o.material.dispose(); }
+      this.threatLayer.clear();
+    },
+
     /** Etiqueta do estado mais importante por cima da peça (ou nenhuma). */
     syncStatus(g, p, h) {
       const THREE = T(), st = TAG.find(([k]) => p[k]);

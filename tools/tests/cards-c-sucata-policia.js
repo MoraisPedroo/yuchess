@@ -220,6 +220,16 @@ module.exports = ({ test, setup, uid, at, move, nextTurn, eq, YC, C, sq, FILL })
     eq(m.players.b.hand.length, 0, 'sem compra');
   });
 
+  test('Íman: com 2 equipamentos, rouba o que o jogador escolher', async () => {
+    const m = setup('4k3/8/8/3n4/8/8/8/2B1K3 w - - 0 1', { hand: { w: ['ct_ima_equipamento'] } });
+    at(m, 'd5').equips.push('eq_capa_magnetica', 'eq_armadura_espinhos');
+    const pairs = YC.CardEffects.stealPairs(m, 'w').filter((p) => p.from === sq('d5') && p.to === sq('c1'));
+    eq(pairs.length, 2, 'dois equipamentos à escolha');
+    await act(m, 'w', 'ct_ima_equipamento', { from: sq('d5'), to: sq('c1'), id: 'eq_armadura_espinhos' });
+    eq(at(m, 'c1').equips.join(), 'eq_armadura_espinhos', 'o escolhido');
+    eq(at(m, 'd5').equips.join(), 'eq_capa_magnetica', 'o outro fica');
+  });
+
   test('Bigorna (ajustada): também congela as peças à volta', async () => {
     const m = setup('4k3/8/8/8/2N5/8/8/3RK3 w - - 0 1');
     trap(m, 'gt_guilhotina_bigorna', 'b', 'd4');

@@ -7,6 +7,20 @@
 .rb-head { display: flex; flex-direction: column; max-width: 240px; }
 .rb-head b { font-family: var(--font-display); font-weight: 400; font-size: 1.2rem; line-height: 1.1; color: var(--text-main); -webkit-text-stroke: 1.2px var(--border-ink); paint-order: stroke fill; }
 .rb-head span { font-size: .85rem; color: var(--text-muted); font-weight: 600; }
+.pick-item .pick-row { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+.pick-item .pick-card { cursor: pointer; transition: transform 160ms var(--ease-out-snappy); }
+.pick-item .pick-card:hover { transform: translateY(-8px); }
+.rb-head .rb-sub { color: #FCA5A5; font-weight: 800; margin: 2px 0; }
+.rb-secs { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-style: normal; font-weight: 700; color: var(--color-primary); text-align: center; }
+.respond-bar .rb-min { position: absolute; top: -18px; right: -14px; width: 36px; height: 36px; transform: rotate(90deg); }
+/* minimizada: só o título, o tempo e o botão para abrir — o tabuleiro fica à vista */
+.respond-bar.mini { cursor: pointer; padding: 8px 14px; gap: 10px; bottom: 8px !important; }
+.respond-bar.mini .rb-cards, .respond-bar.mini .rb-head span:not(.rb-sub), .respond-bar.mini .rb-timer { display: none; }
+.respond-bar.mini .rb-head { max-width: 420px; }
+.respond-bar.mini .rb-min { transform: rotate(-90deg); }
+/* avisos da partida à esquerda, por baixo do histórico, para não taparem o tabuleiro */
+body.in-match #toasts { left: 16px; top: 200px; transform: none; align-items: flex-start; }
+body.in-match .toast { max-width: 300px; }
 .rb-cards { display: flex; gap: 10px; }
 .rb-cards .hcard { cursor: pointer; }
 .rb-cards .hcard:hover { transform: translateY(-6px); transition: transform 160ms var(--ease-out-snappy); }

@@ -30,7 +30,7 @@
 
 - O Pedro está a testar a versão publicada e vai enviar os erros que encontrar (sobretudo: velocidade das animações, arrastar cartas no telemóvel, legibilidade do zoom).
 - Falta publicar o `firestore.rules` no Firebase (ver "Configuração pendente") para o online funcionar. As regras aceitam agora baralhos de 22 (e de 12, para clientes antigos em cache).
-- **Arte das 89 cartas novas**: falta gerar no Gemini as folhas C a H (prompts no fim de `docs/ART-PROMPTS.md`) e recortá-las com `python tools/slice-items.py folha.png C` (… H). Até lá as cartas novas mostram o emblema da família (`src/view/CardArtFamilies.js`). Vídeos das 9 Lendárias novas também por fazer (prompts no mesmo ficheiro).
+- Vídeos das 9 Lendárias novas por fazer (prompts no fim de `docs/ART-PROMPTS.md`). A arte das 89 cartas novas já está em `assets/items/` (folhas C a H geradas a 2026-10-29).
 
 ## Próximos passos (por prioridade)
 
@@ -53,6 +53,14 @@
 - Num separador escondido o navegador quase para as animações (requestAnimationFrame); o motor espera no máximo 4 s por animação, por isso o jogo nunca bloqueia, só fica lento.
 
 ## Registo de sessões
+
+### 2026-10-29 · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Lance perto de armadilhas** (queixa do Pedro): o cubo da armadilha flutuava e, em perspetiva, tapava ~¼ da casa de trás; o clique ia para a armadilha e abria o cartão dela. Agora o cubo nunca apanha o rato (`Board3D.target` usa a casa por baixo e só devolve a armadilha na própria casa), o cartão da armadilha não aparece com uma peça/alvo escolhido e o cubo está mais baixo.
+- **Arte das 89 cartas novas**: folhas C a H geradas no Gemini do Pedro (mesma conversa, "Ice Game Item Icons Grid"), recortadas com `tools/slice-items.py` → 121 imagens em `assets/items/`.
+- **Janela de resposta da Chain** (`src/ui/MatchRespond.js`, saiu do `MatchInput`): diz quem ataca e de que casa ("O Bispo inimigo em C1 ataca o teu Cavalo em B8"), marca no tabuleiro a casa em perigo (anel vermelho), o atacante (anel laranja) e uma seta entre eles (`board.showThreat`/`clearThreat`, 3D e CSS); 17 s em vez de 12 com contagem em segundos; botão para minimizar (e minimiza sozinha se tapar as casas em jogo).
+- **Íman**: com mais do que um equipamento que serve, aparece "Qual equipamento?" e o alvo leva `id` (`stealPairs` dá um par por equipamento; `validTarget` e o efeito respeitam a escolha). Teste novo (126/126).
+- **Avisos da partida** passam para a esquerda (por baixo do histórico) e as dicas de alvo já não aparecem em aviso (estão na barra de ação, que fica abaixo do tabuleiro).
+- **Firebase**: Google e Anónimo já estavam ativos; faltava `yuchess.vercel.app` nos domínios autorizados (por isso o login Google falhava no site) — acrescentado na consola.
 
 ### 2026-10-27 (noite, 3) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Pedido do Pedro**: aplicar o relatório do Deep Research das cartas (conversa "Prompt para Expansão de Cartas" no Gemini do Pedro) para ter pelo menos 120 cartas.

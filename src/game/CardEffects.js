@@ -45,17 +45,19 @@
         if (!ep || ep.color === team || !ep.equips.length) continue;
         for (let t = 0; t < 64; t++) {
           const mine = b[t];
-          if (!mine || mine.color !== team) continue;
-          const id = E.stealPick(ep, mine, team);
-          if (!id) continue;
-          if (guard) {
-            const i = ep.equips.indexOf(id);
-            ep.equips.splice(i, 1); mine.equips.push(id);
-            const bad = C().inCheck(m.pos, enemy);
-            mine.equips.pop(); ep.equips.splice(i, 0, id);
-            if (bad) continue;
+          if (!mine || mine.color !== team || mine.untargetable) continue;
+          // um par por equipamento que a peça pode usar: com 2 equipamentos o jogador escolhe qual rouba
+          for (const id of ep.equips.slice()) {
+            if (!E.canEquip(YC.Cards.get(id), mine, team)) continue;
+            if (guard) {
+              const i = ep.equips.indexOf(id);
+              ep.equips.splice(i, 1); mine.equips.push(id);
+              const bad = C().inCheck(m.pos, enemy);
+              mine.equips.pop(); ep.equips.splice(i, 0, id);
+              if (bad) continue;
+            }
+            out.push({ from: f, to: t, id });
           }
-          out.push({ from: f, to: t, id });
         }
       }
       return out;
@@ -284,7 +286,8 @@
       if (id === 'ct_ima_equipamento') {
         const from = m.pieceAt(l.target.from), to = m.pieceAt(l.target.to);
         if (!from || !to || from.color === team || to.color !== team) return;
-        const eq = E.stealPick(from, to, team);
+        const want = l.target.id, ok = want && from.equips.includes(want) && E.canEquip(YC.Cards.get(want), to, team);
+        const eq = ok ? want : E.stealPick(from, to, team);
         if (!eq) return;
         from.equips.splice(from.equips.indexOf(eq), 1);
         to.equips.push(eq);

@@ -54,6 +54,12 @@
     sqEl(sq) { return this.squares[this.flipped ? 63 - sq : sq]; }
     rect(sq) { return this.sqEl(sq).getBoundingClientRect(); }
     boardRect() { return this.wrap.getBoundingClientRect(); }
+    /** Ameaça na janela de resposta (casa em perigo e quem ataca). */
+    showThreat(pairs) {
+      this.clearThreat();
+      for (const { from, to } of pairs) { if (to >= 0) this.sqEl(to).classList.add('threat-to'); if (from >= 0 && from !== to) this.sqEl(from).classList.add('threat-from'); }
+    }
+    clearThreat() { this.squares.forEach((s) => s.classList.remove('threat-to', 'threat-from')); }
     place(el, sq) { const [r, c] = this.rc(sq); el.style.left = `${c * 12.5}%`; el.style.top = `${r * 12.5}%`; el.dataset.sq = sq; }
     pctPos(sq) { const [r, c] = this.rc(sq); return { left: `${c * 12.5}%`, top: `${r * 12.5}%` }; }
 

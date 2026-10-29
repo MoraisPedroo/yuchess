@@ -230,8 +230,7 @@
         // carta de 2 alvos (Íman, Malabarismo, Tirolesa, Helicóptero): o 1.º já está escolhido, falta o 2.º
         d.ghost.remove(); d.el.classList.remove('dragging');
         this.selCard = d.inst; this.tgtFrom = act.pick1; this.mode = 'tgt2';
-        this.renderSoft();
-        return this.toast(this.tgtHint(YC.Cards.get(d.inst.id), true));
+        return this.renderSoft();
       }
       if (act) {
         const vis = d.form === 'item' ? d.item : d.cardWrap.querySelector('.hcard'), r = vis.getBoundingClientRect();

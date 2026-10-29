@@ -78,7 +78,8 @@
         case 'ct_emp_cartoon': return one(m.pos.board.map((_, i) => i), 'trap');
         case 'ct_ima_equipamento': {
           const pairs = YC.CardEffects.stealPairs(m, team);
-          return { two: true, first: [...new Set(pairs.map((p) => p.from))], second: (f) => pairs.filter((p) => p.from === f).map((p) => p.to), mark: 'pick' };
+          return { two: true, first: [...new Set(pairs.map((p) => p.from))], second: (f) => [...new Set(pairs.filter((p) => p.from === f).map((p) => p.to))], mark: 'pick',
+            choose: (f, t) => pairs.filter((p) => p.from === f && p.to === t).map((p) => p.id) };
         }
         case 'qs_sopro_invernal': return one(E2.theirs(m, team, (p) => !p.equips.length));
         case 'qs_raio_desestabilizador': return one(E2.theirs(m, team, (p) => !p.noCap));
@@ -102,7 +103,10 @@
       const spec = E2.targetSpec(m, team, def);
       if (!spec) return true;
       if (!target) return false;
-      if (spec.two) return spec.first.includes(target.from) && spec.second(target.from).includes(target.to);
+      if (spec.two) {
+        if (!spec.first.includes(target.from) || !spec.second(target.from).includes(target.to)) return false;
+        return !target.id || !spec.choose || spec.choose(target.from, target.to).includes(target.id);
+      }
       return Number.isInteger(target.sq) && spec.first.includes(target.sq);
     },
 

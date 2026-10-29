@@ -1,12 +1,11 @@
 /* MatchInput.js — interação do jogador humano na partida (acrescenta métodos ao MatchUI):
    selecionar peça → lances; escolher carta → equipar / armar / virar / ativar; promoção;
-   janela de resposta da Chain com relógio; agente humano para o Match (e para o lockstep online). */
+   agente humano para o Match (e para o lockstep online). A janela de resposta da Chain está em MatchRespond.js. */
 (function (YC) {
   'use strict';
 
   const C = () => YC.Chess;
   const E = () => YC.CardEffects;
-  const RESPOND_MS = 12000;
   const S = (n) => YC.Sound && YC.Sound.play(n);
 
   Object.assign(YC.MatchUI.prototype, {
@@ -63,14 +62,17 @@
       if (!spec) return;
       const r = this.mode.startsWith('r-') ? 'r-' : '';
       if (this.mode.endsWith('tgt2')) {
-        if (spec.second(this.tgtFrom).includes(sq)) return done({ from: this.tgtFrom, to: sq });
+        if (spec.second(this.tgtFrom).includes(sq)) {
+          const from = this.tgtFrom, ids = spec.choose ? spec.choose(from, sq) : [];
+          if (ids.length < 2) return done({ from, to: sq, ...(ids[0] ? { id: ids[0] } : {}) });
+          return this.pickItem(ids).then((id) => (id ? done({ from, to: sq, id }) : null));
+        }
         if (spec.first.includes(sq)) { this.tgtFrom = sq; return this.renderSoft(); }
         return this.toast(this.tgtHint(def, true));
       }
       if (!spec.first.includes(sq)) return this.toast(this.tgtHint(def, false));
       if (!spec.two) return done({ sq });
       this.tgtFrom = sq; this.mode = `${r}tgt2`;
-      this.toast(this.tgtHint(def, true));
       return this.renderSoft();
     },
 
@@ -124,7 +126,7 @@
     cardAct(act, inst) {
       const def = YC.Cards.get(inst.id);
       if (act === 'set') return this.send({ type: 'SET_CARD', uid: inst.uid });
-      if (def.target) { this.mode = 'tgt1'; this.selCard = inst; this.cardActs = null; this.toast(this.tgtHint(def, false)); this.renderSoft(); return; }
+      if (def.target) { this.mode = 'tgt1'; this.selCard = inst; this.cardActs = null; this.renderSoft(); return; }
       return this.send({ type: 'ACTIVATE', uid: inst.uid });
     },
 
@@ -182,6 +184,24 @@
       return this.send({ type: 'MOVE', from, to, promo, lance: lance || undefined });
     },
 
+    /** Escolher qual dos equipamentos (Íman, quando a peça tem mais do que um que serve). */
+    pickItem(ids) {
+      return new Promise((resolve) => {
+        const back = document.createElement('div');
+        back.className = 'modal-back';
+        back.innerHTML = `<div class="modal pick-item"><h2>Qual equipamento?</h2><p>A peça tem mais do que um equipamento que a tua pode usar.</p><div class="pick-row"></div></div>`;
+        const row = back.querySelector('.pick-row');
+        for (const id of ids) {
+          const c = YC.HoloCard.create(id, { size: 'md', static: true });
+          c.classList.add('pick-card');
+          c.onclick = () => { back.remove(); resolve(id); };
+          row.appendChild(c);
+        }
+        document.body.appendChild(back);
+        back.onclick = (e) => { if (e.target === back) { back.remove(); resolve(null); } };
+      });
+    },
+
     pickPromotion() {
       return new Promise((resolve) => {
         const back = document.createElement('div');
@@ -223,75 +243,6 @@
           if (this.pendingResolve) this.finishResponse(null);
         });
       }
-    },
-
-    // ───────────── respostas (Chain) ─────────────
-    askResponse(ctx) {
-      return new Promise((resolve) => {
-        this.cancelMode();
-        this.respondCtx = ctx;
-        this.pendingResolve = resolve;
-        this.showRespondBar(ctx);
-        this.renderSoft();
-        S('check');
-      });
-    },
-
-    showRespondBar(ctx) {
-      const bar = this.q('.respond-bar'), m = this.match;
-      let title;
-      const cap = (s) => s[0].toUpperCase() + s.slice(1);
-      if (ctx.window === 'CAPTURE') { const t = ctx.event.target.type; title = `${cap(YC.yourPiece(t))} vai ser ${YC.PIECE_FEM[t] ? 'capturada' : 'capturado'}!`; }
-      else if (ctx.window === 'DESTROYED') title = `Perdeste ${YC.yourPiece(m.realType(ctx.event.piece))}…`;
-      else if (ctx.window === 'CHECK') title = 'O teu Rei está em xeque!';
-      else title = `${this.nameOf(ctx.top.team)} ativou «${ctx.top.def.name}»`;
-      bar.innerHTML = `<div class="rb-head"><b>${title}</b><span>Queres responder com uma carta?</span></div><div class="rb-cards"></div>
-        <div class="rb-side"><button class="btn small ghost" data-a="pass">Passar</button><div class="rb-timer"><i></i></div></div>`;
-      const cards = bar.querySelector('.rb-cards');
-      for (const o of ctx.options) {
-        const c = YC.HoloCard.create(o.id, { size: 'sm' });
-        c.classList.add('respond');
-        c.onclick = () => this.pickResponse(o.uid);
-        this.attachInspect(c, o.id);
-        cards.appendChild(c);
-      }
-      bar.querySelector('[data-a="pass"]').onclick = () => this.finishResponse(null);
-      bar.hidden = false;
-      YC.FX.fromTo(bar, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: 'back.out(2)' });
-      const fill = bar.querySelector('.rb-timer i'), start = Date.now();
-      clearInterval(this.respondTimer);
-      this.respondTimer = setInterval(() => {
-        const left = 1 - (Date.now() - start) / RESPOND_MS;
-        fill.style.transform = `scaleX(${Math.max(0, left)})`;
-        if (left <= 0 || m.over) this.finishResponse(null);
-      }, 100);
-    },
-
-    pickResponse(uid) {
-      const ctx = this.respondCtx;
-      const o = ctx && ctx.options.find((x) => x.uid === uid);
-      if (!o) return;
-      if (!o.needsTarget) return this.finishResponse({ uid });
-      this.respondPick = o;
-      this.mode = 'r-tgt1';
-      this.toast(this.tgtHint(o.def, false));
-      this.renderSoft();
-    },
-
-    respondTarget(sq) {
-      const o = this.respondPick;
-      return this.tgtClick(sq, (target) => this.finishResponse({ uid: o.uid, target }));
-    },
-
-    finishResponse(resp) {
-      clearInterval(this.respondTimer);
-      YC.CardZoom.hide();
-      const resolve = this.pendingResolve;
-      this.respondCtx = null; this.pendingResolve = null; this.respondPick = null;
-      const bar = this.q('.respond-bar');
-      if (bar) bar.hidden = true;
-      this.cancelMode();
-      if (resolve) resolve(resp);
     }
   });
 })(typeof window !== 'undefined' ? (window.YC = window.YC || {}) : (globalThis.YC = globalThis.YC || {}));

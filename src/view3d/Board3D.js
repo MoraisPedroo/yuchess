@@ -167,23 +167,30 @@
     }
 
     /** O que está debaixo do rato: peça, casa, lugar da Zona ou pilha. Em perspetiva uma peça alta pode tapar a
-        casa de trás: se a casa debaixo do rato é um destino marcado (lance, equipar, armar…), ganha a casa. */
+        casa de trás: se a casa debaixo do rato é um destino marcado (lance, equipar, armar…), ganha a casa.
+        O cubo de uma armadilha nunca apanha o rato (tapava a frente da casa de trás): conta a casa por baixo,
+        e a casa da armadilha devolve a armadilha (para o cartão ao passar o rato). */
     target(e) {
       let first = null, ground = null;
       for (const h of this.hits(e)) {
         let o = h.object, t = null;
         if (o.isInstancedMesh && o.userData.sqs) t = { kind: 'square', sq: o.userData.sqs[h.instanceId] };
         else { while (o && !o.userData.pick) o = o.parent; if (o) t = o.userData.pick; }
-        if (!t) continue;
+        if (!t || t.kind === 'trap') continue;
         if (!first) first = t;
         if (t.kind === 'square') { ground = t; break; }
       }
       const W = this.wanted;
+      let out = first;
       if (first && ground && W && W.size && first.sq !== ground.sq && W.has(ground.sq) && first.sq !== this.selSq
-        && !((first.kind === 'piece' || first.kind === 'trap') && W.has(first.sq))) {
-        return this.pieceAtSq(ground.sq) ? { kind: 'piece', sq: ground.sq } : ground;
+        && !(first.kind === 'piece' && W.has(first.sq))) {
+        out = this.pieceAtSq(ground.sq) ? { kind: 'piece', sq: ground.sq } : ground;
       }
-      return first;
+      if (out && out.kind === 'square') {
+        const trap = this.layers.traps.children.find((g) => g.userData.trapSq === out.sq);
+        if (trap) return trap.userData.pick;
+      }
+      return out;
     }
 
     pick(e) { this.setHover(e ? this.target(e) : null); }
@@ -209,6 +216,7 @@
     onClick(e) {
       const t = this.target(e);
       if (!t) return;
+      if (t.kind !== 'zone' && t.kind !== 'pile' && YC.CardZoom) YC.CardZoom.hide();
       if (t.kind === 'piece' || t.kind === 'square' || t.kind === 'trap') this.cb.onSquare(t.sq);
       else if (t.kind === 'zone') this.cb.onZoneClick(t);
       else if (t.kind === 'pile') this.cb.onPileClick(t);

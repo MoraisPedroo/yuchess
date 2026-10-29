@@ -162,7 +162,7 @@
         const grp = new THREE.Group();
         grp.add(cube, icon);
         const p = this.sqWorld(t.sq);
-        grp.position.set(p.x, 0.38, p.z);
+        grp.position.set(p.x, 0.3, p.z);
         grp.userData = { spin: cube, trapSq: t.sq, pick: { kind: 'trap', sq: t.sq, id: t.id, mine } };
         icon.raycast = () => {};
         layer.add(grp);
