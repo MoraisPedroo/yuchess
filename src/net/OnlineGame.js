@@ -145,8 +145,9 @@
       clearInterval(this.tick);
       const m = this.match, uid = this.uid;
       const claim = winner === 'DRAW' ? 'DRAW' : YC.TEAM_NAME[winner];
-      // quem desistiu já registou a claim com a desistência (no mesmo pedido)
-      if (!(m.claims && m.claims[uid]) && !this.session.resigned) {
+      // quem desistiu já registou a claim com a desistência (no mesmo pedido): espera que chegue ao servidor
+      if (this.session.resigned) await this.session.resignSent;
+      else if (!(m.claims && m.claims[uid])) {
         try { await YC.Online.claim(m.id, uid, claim); } catch (err) { console.warn('[online] claim', err); }
       }
       if (!this.ranked || !this.escrowed) return null;

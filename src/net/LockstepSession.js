@@ -87,7 +87,7 @@
     resign() {
       if (this.closed || this.resigned || this.game.state.winner) return;
       this.resigned = true;
-      this.transport.send({ kind: 'RESIGN' });
+      this.resignSent = Promise.resolve(this.transport.send({ kind: 'RESIGN' }));
       this.game.resign(this.localTeam);
       this.inbox.interrupt();
     }

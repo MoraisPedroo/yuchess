@@ -20,17 +20,14 @@
 
 ## Configuração pendente (fazer uma vez, na consola)
 
-- [ ] **Firebase → Authentication → «Começar» (Get started)**. Hoje a autenticação nunca foi ligada: o Firebase responde `CONFIGURATION_NOT_FOUND` e por isso nem o convidado nem o Google conseguem entrar. Depois disso, em **Sign-in method**, ativar **Anónimo** e **Google**.
-- [ ] **Firebase → Firestore → Regras**: colar o `firestore.rules` **desta branch** e publicar. Hoje as regras do projeto ainda estão abertas (leitura sem login funciona) e as novas são necessárias para `users/{uid}` e para as salas com baralho.
-- [ ] **Firebase → Authentication → Sign-in method**: Google e Anónimo ativos (confirmar).
-- [ ] **Firebase → Authentication → Settings → Authorized domains**: `yuchess.vercel.app` (confirmar).
+- [x] Authentication ligada (Anónimo e Google) e `yuchess.vercel.app` nos domínios autorizados — no site, o convidado entra e a coleção grava na nuvem.
+- [x] **`firestore.rules` publicado na consola a 2026-10-29** (pelo Claude Code, no Chrome do Pedro). Antes estavam as regras de "modo de teste" (tudo aberto, a expirar a 22/11/2026 — depois disso o Firebase recusaria todos os pedidos). Confirmado no site: perfil lê e grava, pódio carrega. **Sempre que mudares o `firestore.rules`, publica-o outra vez** (Firestore → Regras → colar → Publicar, ou `npx firebase-tools deploy --only firestore:rules`).
 - [ ] Testar com dois navegadores: sala privada, ranqueada, desistência, abandono, e ver se a coleção passa entre dispositivos com a mesma conta Google.
-- [ ] **Publicar o `firestore.rules` de 2026-10-29 (abandono novo)**: Firebase → Firestore → Regras → colar o ficheiro → Publicar (ou `npx firebase-tools deploy --only firestore:rules`). Sem isto, o abandono de quem sai a meio da vez (depois de jogar uma carta) ou depois do fim da partida não é aceite se as regras antigas estiverem publicadas.
 
 ## Em curso / a meio
 
 - O Pedro está a testar a versão publicada e vai enviar os erros que encontrar (sobretudo: velocidade das animações, arrastar cartas no telemóvel, legibilidade do zoom).
-- Falta publicar o `firestore.rules` no Firebase (ver "Configuração pendente") para o online funcionar. As regras aceitam agora baralhos de 22 (e de 12, para clientes antigos em cache).
+- As regras do Firestore estão publicadas (2026-10-29). Falta o teste real do online com dois jogadores (desistência, abandono, ranqueada).
 - ~~Vídeos das Lendárias novas~~: feitos os 9 (2026-10-29); as 13 Lendárias têm vídeo em `assets/video/`. A animação CSS `.hc-alive` fica só como reserva para Lendárias futuras sem vídeo (passos em `docs/ART-PROMPTS.md`, secção "Vídeos das 9 Lendárias novas", com `tools/legend-video.py`).
 
 ## Próximos passos (por prioridade)
@@ -59,6 +56,7 @@
 - **Queixa do Pedro**: no online, quando o adversário desiste ou para de jogar, o tempo dele acaba e a vez não passa nem ele é desligado.
 - **Causas**: (1) o lance automático aos 2:00 só o faz o jogo de quem está a jogar — se ele fechou o separador/ficou sem rede, ninguém joga e do outro lado o relógio ficava em 0:00; só havia um botão "Reclamar vitória" escondido; (2) esse botão só aparecia na vez dele e contava desde o último lance DELE: nunca aparecia se ele saísse a meio da vez (depois de uma carta) ou durante uma resposta da Chain, e podia aparecer cedo demais (se tu demorasses na tua vez); (3) quem perdia por abandono, se voltasse, continuava a jogar; (4) depois de um xeque-mate, se o perdedor saísse sem confirmar, o vencedor ficava com o rating pendente (as regras só aceitavam o abandono com a partida a decorrer).
 - **Correções**: `LockstepSession.waitMs()` diz há quanto tempo o jogo espera por uma mensagem do adversário; `OnlineGame` (reescrito) ganha sozinho por abandono quando essa espera passa 2:30 ou o adversário está sem sinal há 1:30 (tenta de 5 em 5 s até o servidor aceitar), avisa quando o tempo dele acaba ("Se não jogar em 0:28, ganhas por abandono") e mostra na placa dele "não joga · ganhas em 0:25" / "sem sinal há 1:10" (a laranja, também no telemóvel). Mensagem nova `FORFEIT` (o transporte vê `forfeit` de outro na sala) acaba o jogo de quem abandonou. Fechar/recarregar a página a meio (`pagehide`) envia a desistência. Quem desistiu não volta a mandar "claim" (evita a corrida com a desistência). `firestore.rules` → `validForfeit`: 150 s desde o NOSSO último lance ou 90 s sem sinal, e também com a partida acabada sem claim do adversário (**publicar — ver "Configuração pendente"**). `simulate-online.js` ganhou o caso "as Brancas desaparecem" (#1 e #5 → Abandono nos dois lados).
+- **Regras publicadas** na consola do Firebase (as que estavam eram as de "modo de teste", abertas e a expirar a 22/11/2026). Quem desiste agora espera que a desistência chegue ao servidor antes de fechar o rating (`LockstepSession.resignSent`), para a derrota não ficar pendente.
 - **Como testar**: dois navegadores numa sala privada; um fecha o separador na vez dele → o outro vê a contagem e ganha por abandono (≤ 1:30 sem sinal, ou 2:30 de espera); outro caso: carregar em Desistir → o outro ganha logo.
 
 ### 2026-10-29 (13h) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
