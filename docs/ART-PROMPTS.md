@@ -132,8 +132,8 @@ Row 4, left to right: 13) Pure white empty background. 14) Pure white empty back
 
 ## Vídeos das 9 Lendárias novas (Veo)
 
-Estado (2026-10-29): feitos **Trineu Glaciar**, **Exoesqueleto Robô**, **Canhão de Circo** e **Truque de Desaparecimento**
-(`assets/video/`). Faltam 5: Soro Alfa, Veto Supremo, Quebra de Contrato, Bússola Dourada e Escudo Antitumulto. O Gemini
+Estado (2026-10-29): feitos 7 de 9 (`assets/video/`): Trineu Glaciar, Exoesqueleto Robô, Canhão de Circo, Truque de
+Desaparecimento, Soro Alfa, Veto Supremo e Quebra de Contrato. Faltam a Bússola Dourada e o Escudo Antitumulto. O Gemini
 (plano Pro) dá ~3 vídeos por janela de uso; quando acaba responde "I can create more videos as soon as your limit resets"
 e `gemini.google.com/usage` → "Uso atual" diz a hora a que reinicia. Até lá essas cartas usam a animação em CSS
 (`.hc-alive` em `cards.css`: o objeto flutua, o brilho pulsa e há estrelinhas).
@@ -146,12 +146,12 @@ object centered, smooth seamless loop, 2D cartoon game asset look. No text, no l
   sizzles, then puffs a ring of star-shaped cartoon smoke from the barrel* (golden).
 - TRUQUE_MAGICA (feito): *a navy magician top hat with gold stars and a white dove on top … the hat hops and tilts while the
   dove flaps its wings and rises a little, then settles back, as golden magic sparkles swirl around it* (purple).
-- SORO_ALFA: *a golden laboratory syringe with a rainbow liquid glass barrel and three round pressure gauges … floats and
+- SORO_ALFA (feito): *a golden laboratory syringe with a rainbow liquid glass barrel and three round pressure gauges … floats and
   vibrates slightly while glowing rainbow plasma bubbles swirl inside the barrel and the gauge needles bounce* (teal).
-- VETO_SUPREMO: *a golden judge gavel crackling with purple lightning over an open old law book … lifts and slams down onto
+- VETO_SUPREMO (feito): *a golden judge gavel crackling with purple lightning over an open old law book … lifts and slams down onto
   the book, sending out a circular purple shockwave and sparks, then rises back up* (purple).
-- QUEBRA_CONTRATO: *a torn parchment contract with a round seal, burning along the tear … the two halves sway apart and back
-  while bright orange cartoon flames flicker along the torn edges and tiny embers float up* (orange).
+- QUEBRA_CONTRATO (feito): *a torn parchment contract with a round seal and orange cartoon flames on the torn edges … the
+  two paper halves wobble gently while the cartoon flames flicker and small glowing sparks float upward* (orange).
 - BUSSOLA_DOURADA: *an ornate golden pirate pocket compass with a colorful compass rose … sways gently on its ring while the
   needle spins quickly and settles, and golden sparkles twinkle around it* (golden).
 - ESCUDO_ANTITUMULTO: *a chunky blue and transparent riot shield with a blue handle strap … hovers slowly while a hexagonal
