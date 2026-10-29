@@ -67,10 +67,12 @@
       this.send({ kind: 'ACTION', action: clean });
     }
 
-    /** Recebe mensagens do adversário (podem chegar fora de ordem; entregamos por `seq`). */
+    /** Recebe mensagens do adversário (podem chegar fora de ordem; entregamos por `seq`).
+        RESIGN: o adversário desistiu. FORFEIT: o adversário ganhou por abandono nosso (estivemos parados ou sem sinal). */
     receive(msg) {
       if (this.closed || !msg) return;
       if (msg.kind === 'RESIGN') { this.game.resign(this.remoteTeam); this.inbox.interrupt(); return; }
+      if (msg.kind === 'FORFEIT') { this.game.resign(this.localTeam, 'Abandono'); this.inbox.interrupt(); return; }
       if (msg.seq < this.seq) return; // duplicado
       this.pending.set(msg.seq, msg);
       while (this.pending.has(this.seq)) {
@@ -83,14 +85,20 @@
 
     /** Desistência local: avisa o adversário (fora da numeração) e fecha a partida. */
     resign() {
-      if (this.closed) return;
+      if (this.closed || this.resigned || this.game.state.winner) return;
+      this.resigned = true;
       this.transport.send({ kind: 'RESIGN' });
       this.game.resign(this.localTeam);
       this.inbox.interrupt();
     }
 
+    /** Há quanto tempo (ms) o jogo está parado à espera de uma mensagem do adversário (0 se não está). */
+    waitMs() { return this.waitSince && !this.closed && !this.game.state.winner ? Date.now() - this.waitSince : 0; }
+
     async nextRemote(kind) {
+      if (!this.inbox.items.length) this.waitSince = Date.now();
       const msg = await this.inbox.next();
+      this.waitSince = 0;
       if (!msg) return null;
       if (msg.kind !== kind) this.desync('tipo inesperado', { esperado: kind, recebido: msg.kind, seq: msg.seq });
       const h = this.game.stateHash();

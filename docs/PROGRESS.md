@@ -25,6 +25,7 @@
 - [ ] **Firebase → Authentication → Sign-in method**: Google e Anónimo ativos (confirmar).
 - [ ] **Firebase → Authentication → Settings → Authorized domains**: `yuchess.vercel.app` (confirmar).
 - [ ] Testar com dois navegadores: sala privada, ranqueada, desistência, abandono, e ver se a coleção passa entre dispositivos com a mesma conta Google.
+- [ ] **Publicar o `firestore.rules` de 2026-10-29 (abandono novo)**: Firebase → Firestore → Regras → colar o ficheiro → Publicar (ou `npx firebase-tools deploy --only firestore:rules`). Sem isto, o abandono de quem sai a meio da vez (depois de jogar uma carta) ou depois do fim da partida não é aceite se as regras antigas estiverem publicadas.
 
 ## Em curso / a meio
 
@@ -53,6 +54,12 @@
 - Num separador escondido o navegador quase para as animações (requestAnimationFrame); o motor espera no máximo 4 s por animação, por isso o jogo nunca bloqueia, só fica lento.
 
 ## Registo de sessões
+
+### 2026-10-29 (14h) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Queixa do Pedro**: no online, quando o adversário desiste ou para de jogar, o tempo dele acaba e a vez não passa nem ele é desligado.
+- **Causas**: (1) o lance automático aos 2:00 só o faz o jogo de quem está a jogar — se ele fechou o separador/ficou sem rede, ninguém joga e do outro lado o relógio ficava em 0:00; só havia um botão "Reclamar vitória" escondido; (2) esse botão só aparecia na vez dele e contava desde o último lance DELE: nunca aparecia se ele saísse a meio da vez (depois de uma carta) ou durante uma resposta da Chain, e podia aparecer cedo demais (se tu demorasses na tua vez); (3) quem perdia por abandono, se voltasse, continuava a jogar; (4) depois de um xeque-mate, se o perdedor saísse sem confirmar, o vencedor ficava com o rating pendente (as regras só aceitavam o abandono com a partida a decorrer).
+- **Correções**: `LockstepSession.waitMs()` diz há quanto tempo o jogo espera por uma mensagem do adversário; `OnlineGame` (reescrito) ganha sozinho por abandono quando essa espera passa 2:30 ou o adversário está sem sinal há 1:30 (tenta de 5 em 5 s até o servidor aceitar), avisa quando o tempo dele acaba ("Se não jogar em 0:28, ganhas por abandono") e mostra na placa dele "não joga · ganhas em 0:25" / "sem sinal há 1:10" (a laranja, também no telemóvel). Mensagem nova `FORFEIT` (o transporte vê `forfeit` de outro na sala) acaba o jogo de quem abandonou. Fechar/recarregar a página a meio (`pagehide`) envia a desistência. Quem desistiu não volta a mandar "claim" (evita a corrida com a desistência). `firestore.rules` → `validForfeit`: 150 s desde o NOSSO último lance ou 90 s sem sinal, e também com a partida acabada sem claim do adversário (**publicar — ver "Configuração pendente"**). `simulate-online.js` ganhou o caso "as Brancas desaparecem" (#1 e #5 → Abandono nos dois lados).
+- **Como testar**: dois navegadores numa sala privada; um fecha o separador na vez dele → o outro vê a contagem e ganha por abandono (≤ 1:30 sem sinal, ou 2:30 de espera); outro caso: carregar em Desistir → o outro ganha logo.
 
 ### 2026-10-29 (13h) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Pedido do Pedro**: ver para onde uma peça inimiga pode ir e o que pode capturar (por causa dos itens que mudam lances ou saltam peças), ao passar o rato ou clicar; e perceber porque é que um lance não dá (ex.: uma peça que não pode capturar por causa de uma carta).

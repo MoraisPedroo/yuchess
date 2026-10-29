@@ -149,16 +149,22 @@ service cloud.firestore {
         && (!o.ranked || isGoogle());
     }
 
-    // Abandono: é a vez do adversário e ele não joga há mais de 150 s (relógio do servidor).
+    // Abandono (relógio do servidor), com a partida a decorrer ou já acabada sem a "claim" do adversário:
+    //  • estamos à espera dele (o nosso último lance é mais recente que o dele) há mais de 150 s desde o NOSSO
+    //    último lance — a vez dele tem 120 s e o jogo dele joga sozinho no fim; ou
+    //  • ele está sem sinal (batimento a cada 20 s) há mais de 90 s.
     function validForfeit(o, d, me) {
       let opp = oppOf(o, me);
       let start = o.startedAt;
       let mine = o.lastAction.get(me, start);
       let theirs = o.lastAction.get(opp, start);
+      let seen = o.lastSeen.get(opp, start);
       let waitingOnThem = mine > theirs || (theirs == start && o.white.uid == opp);
-      return o.status == 'playing' && d.forfeit.keys().hasOnly(['by', 'at']) && d.forfeit.by == me
-        && waitingOnThem && request.time > theirs + duration.value(150, 's')
-        && d.claims[me] == teamOf(o, me);
+      let open = o.status == 'playing' || (o.status == 'finished' && !(opp in o.claims));
+      return open && !('forfeit' in o) && d.forfeit.keys().hasOnly(['by', 'at']) && d.forfeit.by == me
+        && d.claims[me] == teamOf(o, me)
+        && ((waitingOnThem && request.time > mine + duration.value(150, 's'))
+          || request.time > seen + duration.value(90, 's'));
     }
 
     function validPlayerUpdate() {

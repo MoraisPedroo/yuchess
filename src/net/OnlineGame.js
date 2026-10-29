@@ -1,12 +1,17 @@
-/* OnlineGame.js — liga uma sala do Firestore a um Match: sessão lockstep, batimento, relógio de 2 min
-   por turno (ao esgotar joga-se um lance automático), vitória por abandono, "claims" e acerto do rating.
-   A interface (MatchUI) fornece: bus, toast(), cancelMode(), renderOnline(), createHumanAgent(team).
-   O relógio que aparece no topo da arena vem de `turnLeft()`. */
+/* OnlineGame.js — liga uma sala do Firestore a um Match: sessão lockstep, batimento, relógio de 2 min por turno
+   (ao esgotar, o jogo de quem está a jogar faz um lance automático), vitória por abandono, "claims" e rating.
+   Abandono (automático): se o jogo está parado à espera do adversário há 2:30 desde o nosso último envio (o tempo
+   dele acabou e o jogo dele não jogou sozinho — fechou o separador, ficou sem rede…) ou se ele está sem sinal há
+   1:30, ganhamos sozinhos (Online.forfeit; as regras do Firestore confirmam com o relógio do servidor). Quem perde
+   por abandono, se voltar, vê a partida acabar (mensagem FORFEIT). Fechar a página a meio conta como desistir.
+   A interface (MatchUI) fornece: bus, toast(), cancelMode(), renderOnline(), createHumanAgent(team). */
 (function (YC) {
   'use strict';
 
   const TURN_MS = 120000;
+  const RETRY_MS = 5000;
   const FB = () => YC.Firebase;
+  const fmt = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
 
   class OnlineGame {
     constructor({ match, profile, ui }) {
@@ -20,6 +25,7 @@
       this.turnKey = null;
       this.deadline = 0;
       this.closed = false;
+      this.nextClaim = 0;
     }
 
     get opp() { return this.team === 'w' ? this.match.black : this.match.white; }
@@ -44,6 +50,9 @@
       YC.Online.heartbeat(m.id, this.uid);
       this.hb = setInterval(() => YC.Online.heartbeat(m.id, this.uid), 20000);
       this.tick = setInterval(() => this.onTick(), 1000);
+      // fechar ou recarregar a página a meio da partida conta como desistir (o adversário ganha logo, sem esperar)
+      this.onHide = () => { if (!this.closed && !game.state.winner) this.session.resign(); };
+      window.addEventListener('pagehide', this.onHide);
       if (this.ranked) {
         try { this.escrowed = await YC.Ranking.escrow(m, this.uid); }
         catch (err) { ui.toast(`Ranking indisponível: ${FB().explain(err)}`); console.warn('[ranking] escrow', err); }
@@ -51,25 +60,41 @@
       return game;
     }
 
+    // ───────────── estado do adversário ─────────────
+    /** Há quanto tempo o jogo está parado à espera do adversário (0 se não está). */
+    waitMs() { return this.session ? this.session.waitMs() : 0; }
+    goneMs() { return YC.Online.goneMs(this.match, this.uid); }
+
+    /** Já podemos ganhar por abandono? Só quando estamos mesmo à espera dele. */
+    abandonDue() {
+      const s = this.game && this.game.state, w = this.waitMs();
+      return !!s && !s.winner && !this.closed && w > 0 && (w > YC.Online.FORFEIT_MS || this.goneMs() > YC.Online.GONE_MS);
+    }
+
+    /** Quanto falta para ganhar por abandono (ms), depois de o tempo dele acabar ou de ficar sem sinal; senão null. */
+    abandonLeft() {
+      const w = this.waitMs(), gone = this.goneMs();
+      if (!w || (w < TURN_MS && gone < 45000)) return null;
+      return Math.max(0, Math.min(YC.Online.FORFEIT_MS - w, gone >= 45000 ? YC.Online.GONE_MS - gone : Infinity));
+    }
+
     oppStatus() {
-      const seen = FB().millis(this.match.lastSeen && this.match.lastSeen[this.opp.uid]);
-      return { name: this.opp.name, rating: this.opp.rating, online: !seen || Date.now() - seen < 60000 };
+      const gone = this.goneMs(), left = this.abandonLeft(), off = gone > 60000;
+      let state = off ? `sem sinal há ${fmt(gone)}` : 'ligado';
+      if (left != null) state = `${off ? 'sem sinal' : 'não joga'} · ganhas em ${fmt(left)}`;
+      return { name: this.opp.name, rating: this.opp.rating, online: !off, state };
     }
 
     clockText() {
       const s = this.game && this.game.state;
       if (!s || s.winner || s.active !== this.team || !this.deadline) return '';
-      const left = Math.max(0, Math.ceil((this.deadline - Date.now()) / 1000));
-      return `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+      return fmt(this.deadline - Date.now());
     }
 
     /** Tempo que falta no turno de quem está a jogar (os dois lados contam desde que viram o turno começar). */
     turnLeft() { return this.turnStart ? Math.max(0, TURN_MS - (Date.now() - this.turnStart)) : TURN_MS; }
 
-    canClaimForfeit() {
-      const s = this.game && this.game.state;
-      return !!s && !s.winner && s.active === this.oppTeam && YC.Online.stallMs(this.match, this.uid) > YC.Online.FORFEIT_MS + 3000;
-    }
+    canClaimForfeit() { return this.abandonDue(); }
 
     onTick() {
       const g = this.game, s = g && g.state;
@@ -81,20 +106,35 @@
         this.ui.toast('Tempo esgotado: foi jogado um lance automático.');
         g.dispatch({ type: 'AUTO_MOVE', team: this.team });
       }
+      // o tempo do adversário acabou e o jogo dele não jogou: avisa uma vez e, chegada a hora, ganha sozinho
+      const since = this.session.waitSince;
+      if (since && this.waitMs() > TURN_MS + 2000 && this.warned !== since) {
+        this.warned = since;
+        this.ui.toast(`O tempo do adversário acabou. Se não jogar em ${fmt(YC.Online.FORFEIT_MS - this.waitMs())}, ganhas por abandono.`);
+      }
+      if (this.abandonDue() && !this.claiming && Date.now() >= this.nextClaim) this.claimForfeit(true);
       this.ui.renderOnline();
     }
 
-    async claimForfeit() {
-      if (!this.canClaimForfeit()) return false;
+    /** Vitória por abandono (automática no onTick; o botão "Reclamar vitória" chama-a à mão). */
+    async claimForfeit(auto = false) {
+      if (!this.abandonDue() || this.claiming) return false;
+      this.claiming = true;
       try {
         await YC.Online.forfeit(this.match.id, this.uid, this.team);
         this.match.forfeit = { by: this.uid };
+        if (this.game.state.winner) return true;
+        this.ui.toast('O adversário abandonou a partida: ganhaste!');
         this.game.resign(this.oppTeam, 'Abandono');
         this.session.inbox.interrupt();
         return true;
       } catch (err) {
-        this.ui.toast(`Ainda não dá para reclamar: ${FB().explain(err)}`);
+        // as regras do servidor ainda não aceitam (relógios desacertados): tenta outra vez daqui a pouco
+        this.nextClaim = Date.now() + RETRY_MS;
+        if (!auto) this.ui.toast(`Ainda não dá para reclamar: ${FB().explain(err)}`);
         return false;
+      } finally {
+        this.claiming = false;
       }
     }
 
@@ -105,7 +145,8 @@
       clearInterval(this.tick);
       const m = this.match, uid = this.uid;
       const claim = winner === 'DRAW' ? 'DRAW' : YC.TEAM_NAME[winner];
-      if (!(m.claims && m.claims[uid])) {
+      // quem desistiu já registou a claim com a desistência (no mesmo pedido)
+      if (!(m.claims && m.claims[uid]) && !this.session.resigned) {
         try { await YC.Online.claim(m.id, uid, claim); } catch (err) { console.warn('[online] claim', err); }
       }
       if (!this.ranked || !this.escrowed) return null;
@@ -119,7 +160,9 @@
           const forfeitMine = mm.forfeit && mm.forfeit.by === uid;
           if (theirs === claim || forfeitMine) return { before, delta: await YC.Ranking.settle(mm, uid, outcome) };
           if (theirs && theirs !== claim) return { before, delta: null, conflict: true };
-          if (outcome === 'WIN' && YC.Online.stallMs(mm, uid) > YC.Online.FORFEIT_MS + 3000) {
+          // ganhámos, mas o adversário saiu sem confirmar: abandono (depois de 2:30 do nosso último lance ou 1:30 sem sinal)
+          const quiet = Date.now() - (this.transport.lastSent || Date.now());
+          if (outcome === 'WIN' && !mm.forfeit && (quiet > YC.Online.FORFEIT_MS || this.goneMs() > YC.Online.GONE_MS)) {
             try { await YC.Online.forfeit(mm.id, uid, this.team); this.match.forfeit = { by: uid }; } catch (err) { /* ainda cedo */ }
           }
           await new Promise((r) => setTimeout(r, 2000));
@@ -135,6 +178,7 @@
       this.closed = true;
       clearInterval(this.hb);
       clearInterval(this.tick);
+      window.removeEventListener('pagehide', this.onHide);
       if (this.session) this.session.close();
     }
   }

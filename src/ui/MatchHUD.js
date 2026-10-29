@@ -107,7 +107,10 @@
       const f = this.q('[data-act="forfeit"]');
       if (f) f.hidden = !this.online.canClaimForfeit();
       const st = this.online.oppStatus(), sub = this.q('.hud-p.opp .hud-sub');
-      if (sub) sub.textContent = `${st.rating} pts · ${st.online ? 'ligado' : 'sem sinal…'}`;
+      if (sub) {
+        sub.textContent = `${st.rating} pts · ${st.state}`;
+        sub.classList.toggle('warn', !st.online || this.online.abandonLeft() != null);
+      }
       this.paintClocks();
     }
   });

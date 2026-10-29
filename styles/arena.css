@@ -54,6 +54,7 @@ body.in-match { overflow: hidden; }
 .hud-stats { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; gap: 2px; }
 .hud-name { font-weight: 800; font-size: clamp(13px, 1.02vw, 19px); letter-spacing: .02em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hud-sub { font-size: clamp(10px, .66vw, 12px); color: var(--text-muted); margin-top: -2px; font-weight: 700; }
+.hud-sub.warn { color: var(--color-warning); }   /* adversário sem sinal ou a ficar sem tempo (abandono) */
 .hud-mat { font-weight: 800; font-size: clamp(12px, .95vw, 17px); color: var(--text-muted); letter-spacing: .03em; }
 .hud-mat span { font-family: var(--font-num); font-weight: 700; color: var(--text-main); font-size: 1.15em; font-variant-numeric: tabular-nums; }
 .hud-mat em { font-style: normal; font-family: var(--font-num); font-size: .85em; color: var(--color-success); }
@@ -244,7 +245,7 @@ body.in-match { overflow: hidden; }
   .hud-mid { display: none; }
   .hud-p, .hud-p.me { width: auto; height: 74px; padding: 4px; gap: 6px; }
   .hud-col { width: 44px; } .hud-ava { aspect-ratio: 1; } .hud-caps, .hud-hand { display: none; }
-  .hud-name { font-size: 12px; } .hud-sub { display: none; } .hud-mat { font-size: 11px; } .hud-clock { font-size: 14px; padding: 2px 4px; letter-spacing: .02em; }
+  .hud-name { font-size: 12px; } .hud-sub { display: none; } .hud-sub.warn { display: block; font-size: 10px; line-height: 1.15; } .hud-mat { font-size: 11px; } .hud-clock { font-size: 14px; padding: 2px 4px; letter-spacing: .02em; }
   .feed { top: 86px; left: 4vw; width: 92vw; min-height: 34px; padding: 4px 10px; }
   .feed p:first-child:not(:last-child) { display: none; }
   .opp-hand { top: 124px; }

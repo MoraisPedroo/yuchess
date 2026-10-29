@@ -8,7 +8,10 @@
   const FB = () => YC.Firebase;
   const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
   const FRESH_MS = 30000;        // sala em espera conta como viva se deu sinal nos últimos 30 s
-  const FORFEIT_MS = 150000;     // abandono: adversário sem jogar há 2 min 30 s quando é a vez dele
+  // abandono (iguais às regras do firestore.rules): à espera do adversário há 2:30 desde o nosso último lance
+  // (o tempo da vez dele é 2:00 e o jogo dele joga sozinho no fim), ou adversário sem sinal (batimento) há 1:30
+  const FORFEIT_MS = 150000;
+  const GONE_MS = 90000;
   const VERSION = 2;             // salas do Chess-Gi-Oh! (as do protótipo antigo são ignoradas)
 
   function randomCode(n = 5) {
@@ -20,7 +23,7 @@
   }
 
   const Online = {
-    FORFEIT_MS,
+    FORFEIT_MS, GONE_MS,
     matchRef(id) { return FB().doc('matches', id); },
     seat(profile, deck) { return { uid: profile.uid, name: profile.name, rating: profile.rating, deck: deck.slice(0, YC.Cards.RULES.DECK_SIZE) }; },
 
@@ -113,15 +116,11 @@
       });
     },
 
-    /** Quanto tempo o adversário está parado na vez dele (ms) — 0 se não for caso de abandono. */
-    stallMs(match, uid) {
-      const fb = FB(), opp = match.players.find((p) => p !== uid);
-      if (!opp || !match.lastAction) return 0;
-      const start = fb.millis(match.startedAt);
-      const mine = fb.millis(match.lastAction[uid]) || start;
-      const theirs = fb.millis(match.lastAction[opp]) || start;
-      const waitingOnThem = mine > theirs || (theirs === start && match.white.uid === opp);
-      return waitingOnThem && theirs ? Math.max(0, Date.now() - theirs) : 0;
+    /** Há quanto tempo (ms) o adversário não dá sinal de vida (batimento a cada 20 s); 0 se não se sabe. */
+    goneMs(match, uid) {
+      const opp = match.players && match.players.find((p) => p !== uid);
+      const seen = opp && FB().millis(match.lastSeen && match.lastSeen[opp]);
+      return seen ? Math.max(0, Date.now() - seen) : 0;
     }
   };
 
@@ -137,6 +136,7 @@
     send(msg) {
       const fb = FB(), F = fb.F;
       if (msg.kind === 'RESIGN') return Online.resign(this.id, this.uid, this.myTeam).catch(this.onError);
+      this.lastSent = Date.now();   // o abandono do adversário conta a partir do nosso último envio
       const batch = F.writeBatch(fb.db);
       batch.set(fb.doc('matches', this.id, 'actions', String(msg.seq)), {
         seq: msg.seq, by: this.uid, kind: msg.kind, payload: JSON.stringify(msg), at: fb.now()
@@ -159,6 +159,8 @@
       this.unsubs.push(Online.watch(this.id, (m) => {
         if (!m) return;
         if (m.resign && m.resign !== this.uid) cb({ kind: 'RESIGN' });
+        // o adversário ganhou por abandono nosso (estivemos parados/sem sinal): o nosso jogo também acaba
+        if (m.forfeit && m.forfeit.by && m.forfeit.by !== this.uid) cb({ kind: 'FORFEIT' });
         if (this.onMatch) this.onMatch(m);
       }, (err) => this.onError(err)));
     }
