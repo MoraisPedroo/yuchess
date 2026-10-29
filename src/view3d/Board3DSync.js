@@ -114,6 +114,7 @@
         if (this.syncStatus) this.syncStatus(g, p, h);
         g.userData.h = h;
         g.userData.checked = sq === checked;
+        if (this.syncUltimate) this.syncUltimate(g, p, viewer);   // peça transformada na personagem da Ultimate
       });
       for (const [id, g] of this.pieceEls) {
         if (!seen.has(id) && !this.busy.has(id)) { this.layers.pieces.remove(g); this.pieceEls.delete(id); }

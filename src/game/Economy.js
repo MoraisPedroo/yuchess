@@ -125,6 +125,22 @@
       return cards;
     },
 
+    // ── Ultimates: animação especial de uma Lendária (só visual), desbloqueada com ouro por quem tem a carta.
+    //    Ficam em p.stats.ultimates (o "stats" já é gravado na nuvem e as regras não validam o conteúdo). ──
+    ULTIMATES: { eq_cetro_usurpador: 1000 },
+    ultimateCost(id) { return Economy.ULTIMATES[id] || 0; },
+    hasUltimate(p, id) { return !!(p.stats && p.stats.ultimates && p.stats.ultimates.includes(id)); },
+    unlockUltimate(p, id) {
+      const cost = Economy.ultimateCost(id);
+      if (!cost) throw new Error('Esta carta não tem animação Ultimate.');
+      if (Economy.hasUltimate(p, id)) throw new Error('Já desbloqueaste esta Ultimate.');
+      if (Economy.owned(p, id) < 1) throw new Error('Primeiro tens de ter a carta: abre pacotes ou cria-a.');
+      if (p.gold < cost) throw new Error(`Precisas de ${cost} de ouro.`);
+      p.gold -= cost;
+      p.stats.ultimates = [...(p.stats.ultimates || []), id];
+      return id;
+    },
+
     craftCost(id) { return Cards().RARITY[Cards().get(id).rarity].craft; },
     canCraft(p, id) { return Economy.owned(p, id) < Economy.cap(id) && p.stardust >= Economy.craftCost(id); },
     craft(p, id) {

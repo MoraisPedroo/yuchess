@@ -14,7 +14,7 @@
       this.offs = [];
       // no palco 3D as animações das peças são as de Anim3D.js (o resto é igual)
       if (board.is3D && YC.Anim3D) Object.assign(this, YC.Anim3D);
-      const on = (ev, fn) => this.offs.push(bus.on(ev, (p) => this.guard(fn.call(this, p || {}))));
+      const on = (ev, fn, ms) => this.offs.push(bus.on(ev, (p) => this.guard(fn.call(this, p || {}), ms)));
       on('match:start', () => this.sync());
       on('turn:start', this.turnStart);
       on('card:draw', this.cardDraw);
@@ -27,11 +27,12 @@
       on('chain:negate', this.chainNegate);
       on('chain:fizzle', ({ link }) => { this.ui.chainState(link, 'fizzle'); return FX().wait(200); });
       on('chain:end', () => { this.ui.chainClear(); return FX().wait(120); });
-      on('equip:attach', this.equipAttach);
+      // Ultimate (Ultimates.js): a invocação e o golpe têm vídeo, por isso o limite de segurança é maior
+      on('equip:attach', (p) => (YC.Ultimate ? YC.Ultimate.onEquip(this, p) : this.equipAttach(p)), 16000);
       on('equip:strip', ({ sq }) => this.at(sq, 'SPLOSH!', '#F538A0', 'explosion_bam', { colors: ['#F538A0', '#FFB4C8', '#fff'] }));
       on('equip:steal', ({ from, to }) => this.equipSteal(from, to));
       on('equip:proc', ({ sq, id }) => this.pop(sq, id === 'eq_espada_ganancia' ? '+1 CARTA!' : 'CACTO!', id === 'eq_espada_ganancia' ? '#FCC934' : '#81C995', id === 'eq_espada_ganancia' ? 'sword_draw' : 'explosion_bam'));
-      on('capture:declare', this.captureDeclare);
+      on('capture:declare', (p) => (YC.Ultimate ? YC.Ultimate.onCapture(this, p) : this.captureDeclare(p)), 12000);
       on('piece:move', this.pieceMove);
       on('piece:promote', ({ piece, sq }) => this.promote(piece, sq));
       on('capture:snapback', this.snapback);
@@ -60,7 +61,7 @@
 
     dispose() { this.offs.forEach((off) => off()); this.offs = []; }
     // o limite acompanha a velocidade: a 0,5 as animações demoram o dobro e cortá-las a meio fazia as peças saltarem
-    guard(p) { return Promise.race([Promise.resolve(p).catch((e) => console.error('[anim]', e)), new Promise((r) => setTimeout(r, SAFE_MS / Math.min(1, FX().speed || 1)))]).then(() => this.sync()); }
+    guard(p, ms = SAFE_MS) { return Promise.race([Promise.resolve(p).catch((e) => console.error('[anim]', e)), new Promise((r) => setTimeout(r, ms / Math.min(1, FX().speed || 1)))]).then(() => this.sync()); }
     sync() { this.board.sync(this.ui.match, { viewer: this.ui.viewer }); this.ui.renderSoft(); }
     xy(sq) { const c = this.board.center(sq); return [c.x, c.y]; }
     pel(piece) { return piece ? this.board.el(piece.id) : null; }

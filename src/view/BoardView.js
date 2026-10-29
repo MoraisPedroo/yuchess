@@ -108,6 +108,11 @@
         if (!el) el = this.makePiece(p);
         if (this.busy.has(p.id)) return;
         this.renderType(el, p);
+        // Ultimate (Ultimates.js): a peça passa a ser a personagem
+        const ult = YC.Ultimate && YC.Ultimate.forPiece(p, viewer);
+        if (ult && !el.querySelector('.ult-fig')) el.querySelector('.squash').innerHTML = `<img class="ult-fig" src="${YC.Ultimate.hero(ult)}" alt="" draggable="false">`;
+        else if (!ult && el.querySelector('.ult-fig')) { el.dataset.type = ''; this.renderType(el, p); }
+        el.classList.toggle('ult-form', !!ult);
         if (Number(el.dataset.sq) !== sq || !el.style.left) this.place(el, sq);
         el.classList.toggle('mine', p.color === viewer);
         const frozen = p.frozenUntil > turn;

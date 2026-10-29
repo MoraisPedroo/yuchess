@@ -127,6 +127,38 @@ body.in-match .toast { max-width: 300px; }
 .pi-chips .chip-threat { box-shadow: inset 3px 0 0 #FF4D5E; }
 .pi-chips .chip-reach { box-shadow: inset 3px 0 0 #FB8500; }
 
+/* efeitos ativos ao lado da placa do jogador (MatchBuffs): do lado de dentro (para o centro), onde não há nada;
+   por baixo ficava tapada pelos avisos */
+.hud-fx { position: absolute; top: 2px; left: calc(100% + 8px); display: flex; flex-wrap: wrap; align-content: flex-start; gap: 5px; width: 176px; }
+.hud-p.me .hud-fx { left: auto; right: calc(100% + 8px); flex-direction: row-reverse; }
+.fx-chip { position: relative; width: 38px; height: 38px; padding: 3px; display: grid; place-items: center; cursor: help; border-radius: 10px;
+  background: var(--surface-2); border: 2.5px solid var(--border-ink); box-shadow: 0 3px 0 #090C10, inset 0 2px 0 var(--border-highlight); }
+.fx-chip .card-icon, .fx-chip svg { width: 100%; height: 100%; object-fit: contain; }
+.fx-chip.k-forbid { background: #4A1420; box-shadow: 0 3px 0 #090C10, inset 0 0 0 2px var(--color-danger); }
+.fx-chip.k-punish { background: #4A2A0A; box-shadow: 0 3px 0 #090C10, inset 0 0 0 2px var(--color-warning); }
+.fx-chip.k-buff { box-shadow: 0 3px 0 #090C10, inset 0 0 0 2px var(--color-accent); }
+.fx-chip.k-status { background: var(--surface-1); color: #8FD3FF; }
+.fx-chip.k-off { filter: grayscale(1) brightness(.7); }
+.fx-chip em { position: absolute; right: -6px; top: -6px; width: 17px; height: 17px; display: grid; place-items: center; border-radius: 50%;
+  background: var(--color-danger); border: 2px solid var(--border-ink); }
+.fx-chip.k-punish em { background: var(--color-warning); }
+.fx-chip:hover { transform: translateY(-2px); }
+.fx-tip { position: fixed; z-index: 95; width: 260px; padding: 10px 12px; pointer-events: none; border-radius: var(--radius-sm); color: var(--text-main);
+  background: var(--surface-2); border: 2.5px solid var(--border-ink); box-shadow: 0 5px 0 #090C10, inset 4px 0 0 var(--color-accent); font-family: var(--font-sans); }
+.fx-tip.k-forbid { box-shadow: 0 5px 0 #090C10, inset 4px 0 0 var(--color-danger); }
+.fx-tip.k-punish { box-shadow: 0 5px 0 #090C10, inset 4px 0 0 var(--color-warning); }
+.fx-tip b { display: block; font-weight: 800; font-size: .9rem; }
+.fx-tip .fx-where { display: block; font-size: .74rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
+.fx-tip .fx-note { margin: 0 0 4px; font-weight: 700; font-size: .82rem; line-height: 1.3; }
+.fx-tip small { display: block; font-size: .74rem; line-height: 1.3; color: #CBD5E1; }
+@media (max-aspect-ratio: 4/5) {
+  /* telemóvel: as placas ocupam a largura toda; os efeitos ficam por cima da borda de baixo da placa */
+  .hud-fx, .hud-p.me .hud-fx { top: auto; bottom: -20px; left: 50px; right: auto; width: auto; gap: 3px; flex-direction: row; }
+  .hud-p.me .hud-fx { left: auto; right: 50px; flex-direction: row-reverse; }
+  .fx-chip { width: 26px; height: 26px; padding: 2px; border-radius: 7px; border-width: 2px; }
+  .fx-chip em { width: 13px; height: 13px; right: -4px; top: -4px; }
+}
+
 /* "porque é que não dá" junto da casa debaixo do rato (MatchHints) */
 .move-why { position: fixed; z-index: 93; max-width: 300px; display: flex; align-items: flex-start; gap: 8px; padding: 8px 12px; pointer-events: none;
   border-radius: var(--radius-sm); background: var(--surface-2); border: 2.5px solid var(--border-ink); box-shadow: 0 4px 0 #090C10, inset 3px 0 0 var(--color-danger);

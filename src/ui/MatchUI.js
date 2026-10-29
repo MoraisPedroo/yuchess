@@ -105,6 +105,7 @@
       window.removeEventListener('resize', this.onResize);
       YC.PieceInspector.hide(); YC.CardZoom.hide();
       if (this.hideWhy) this.hideWhy();
+      if (this.hideBuffTip) this.hideBuffTip();
       if (this.board && this.board.dispose) this.board.dispose();
       this.root.innerHTML = '';
       this.stage = null;
@@ -184,6 +185,7 @@
         let el = this.handEls.get(inst.uid);
         if (!el) {
           el = H().create(inst.id, { size: 'md', uid: inst.uid });
+          if (YC.Ultimate) YC.Ultimate.decorate(el, inst.id);   // fita "ULTIMATE" se a desbloqueaste
           el.classList.add('in-hand', 'enter');
           el.insertAdjacentHTML('beforeend', this.handTip(inst.id));
           el.addEventListener('click', () => { if (!this.dragJustEnded) this.onHandCard(inst); });

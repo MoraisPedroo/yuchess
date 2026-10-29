@@ -246,9 +246,9 @@ body.in-match { overflow: hidden; }
   .hud-p, .hud-p.me { width: auto; height: 74px; padding: 4px; gap: 6px; }
   .hud-col { width: 44px; } .hud-ava { aspect-ratio: 1; } .hud-caps, .hud-hand { display: none; }
   .hud-name { font-size: 12px; } .hud-sub { display: none; } .hud-sub.warn { display: block; font-size: 10px; line-height: 1.15; } .hud-mat { font-size: 11px; } .hud-clock { font-size: 14px; padding: 2px 4px; letter-spacing: .02em; }
-  .feed { top: 86px; left: 4vw; width: 92vw; min-height: 34px; padding: 4px 10px; }
+  .feed { top: 98px; left: 4vw; width: 92vw; min-height: 34px; padding: 4px 10px; }   /* espaço para os efeitos ativos (MatchBuffs) */
   .feed p:first-child:not(:last-child) { display: none; }
-  .opp-hand { top: 124px; }
+  .opp-hand { top: 136px; }
   .arena-btns { top: auto; bottom: 150px; right: 4vw; width: 92vw; flex-direction: row; gap: 6px; }
   .turn-btn { min-height: 44px; flex: 1.4; flex-direction: row; gap: 6px; }
   .turn-btn small { display: none; }

@@ -94,6 +94,16 @@
         el.onclick = () => View.add(c.id);
         YC.CardZoom.attach(el, c.id, { width: 300 });
         cell.appendChild(el);
+        // Ultimate (Ultimates.js): fita na carta e botão para ver/desbloquear a animação especial
+        if (YC.Ultimate && YC.Ultimate.def(c.id)) {
+          const has = E().hasUltimate(p, c.id);
+          YC.Ultimate.decorate(el, c.id, { locked: !has });
+          const ub = document.createElement('button');
+          ub.className = `btn small ${has ? 'secondary' : 'ult-btn'}`;
+          ub.innerHTML = has ? `${YC.Icon('play', { size: 16 })}Ver Ultimate` : `${YC.Icon('star', { size: 16 })}Ultimate · ${E().ultimateCost(c.id)}`;
+          ub.onclick = (e) => { e.stopPropagation(); YC.Ultimate.preview(c.id, { onChange: () => View.render() }); };
+          cell.appendChild(ub);
+        }
         if (owned < E().cap(c.id)) {
           const cost = E().craftCost(c.id);
           const b = document.createElement('button');

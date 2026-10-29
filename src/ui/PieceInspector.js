@@ -57,17 +57,20 @@
         return `<li style="--c1:${c.theme.primary};--c2:${c.theme.secondary}"><span class="pi-eq-ico">${YC.ItemToken ? YC.ItemToken.cardArt(c) : YC.CardArt.svg(c)}</span><span><b>${esc(c.name)}</b><small>${esc(c.text)}</small></span></li>`;
       }).join('');
       const states = ['equipped', 'shielded', 'frozen', 'checked'].filter((k) => anchor.classList.contains(k)).join(' ');
+      // peça transformada pela Ultimate (Ultimates.js): mostra a personagem
+      const ult = YC.Ultimate && YC.Ultimate.forPiece(p, ui.viewer);
+      const fig = ult ? `<img class="ult-fig" src="${YC.Ultimate.hero(ult)}" alt="">` : YC.pieceHTML(p.type, p.color);
       const el = document.createElement('div');
-      el.className = `piece-insp ${p.color}`;
-      el.innerHTML = `<div class="pi-stage"><div class="pi-disc"></div><div class="pi-figure piece ${p.color} ${states}"><div class="squash">${YC.pieceHTML(p.type, p.color)}</div><div class="shield-dome"></div></div></div>
-        <div class="pi-body"><div class="pi-title"><b>${YC.PIECE_NAME[real]}</b><span>${TEAM[p.color]}${p.color === ui.viewer ? ' · tua' : ''} · ${YC.Chess.sqName(sq).toUpperCase()}</span></div>
+      el.className = `piece-insp ${p.color}${ult ? ' ult' : ''}`;
+      el.innerHTML = `<div class="pi-stage"><div class="pi-disc"></div><div class="pi-figure piece ${p.color} ${states}"><div class="squash">${fig}</div><div class="shield-dome"></div></div></div>
+        <div class="pi-body"><div class="pi-title"><b>${ult ? `${esc(ult.name)} <small>(${YC.PIECE_NAME[real]})</small>` : YC.PIECE_NAME[real]}</b><span>${TEAM[p.color]}${p.color === ui.viewer ? ' · tua' : ''} · ${YC.Chess.sqName(sq).toUpperCase()}</span></div>
         ${chips.length ? `<div class="pi-chips">${chips.map(([k, ic, t]) => `<span class="chip-${k}">${YC.Icon(ic, { size: 15 })}${esc(t)}</span>`).join('')}</div>` : ''}
         <div class="pi-eq-title">Equipamentos (${p.equips.length}/2)</div>
         ${equips ? `<ul class="pi-eq">${equips}</ul>` : '<p class="pi-none">Sem equipamentos.</p>'}</div>`;
       document.body.appendChild(el);
       Insp.el = el;
       // a peça dá um salto com pirueta (sprite sheet feita da peça 3D) enquanto o rato está em cima
-      if (YC.Portraits3D && ui.use3D) YC.Portraits3D.play(el.querySelector('.pi-figure .squash'), p.type, p.color, 'loop');
+      if (YC.Portraits3D && ui.use3D && !ult) YC.Portraits3D.play(el.querySelector('.pi-figure .squash'), p.type, p.color, 'loop');
       const r = anchor.getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight, gap = 16;
       // fora do tabuleiro (na margem do lado da peça) para nunca tapar as casas onde se quer jogar
       const br = ui.board.boardRect ? ui.board.boardRect() : null;

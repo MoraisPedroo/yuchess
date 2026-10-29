@@ -52,6 +52,12 @@
 
 ## Registo de sessões
 
+### 2026-10-29 (tarde) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Efeitos ativos ao lado da placa** (`src/ui/MatchBuffs.js`): Equipamentos de cada jogador (vermelho = proíbe-te algo, ex. Escudo Tático; laranja = castiga quem o captura; azul = vantagem), estados das peças e ações de carta a mais/menos; passar o rato/tocar explica onde está e o que faz.
+- **Ultimate do Cetro do Falso Monarca** ("Akane, a Rainha Rubi", personagem original feita no Gemini): desbloqueio por 1000 de ouro nos Baralhos (precisa da carta; `Economy.unlockUltimate`, guardado em `p.stats.ultimates`), pré-visualização com os 2 vídeos, fita "ULTIMATE" na carta, cut-in de invocação ao equipar (depois o Peão vira a figura da Akane no 3D e no CSS), cut-in do golpe sempre que ela captura. Só visual; no online só o dono vê. Arte em `assets/ultimate/royal_scepter/` (`tools/ultimate-art.py`). O Veo recusou o primeiro prompt de invocação ("wink", "petals") e deu erro no "swings the scepter"; passaram "twirls the golden scepter… column of golden light" e "points the scepter… fires a bright beam of red and gold magic light".
+- **Por fazer**: secção "Ultimate" no `docs/ART-PROMPTS.md`; Ultimates para outras Lendárias; mostrar a Ultimate ao adversário no online (exige campo novo no lugar da sala + regras).
+- **Como testar**: Baralhos → Lendárias → Cetro → "Ultimate · 1000" → Desbloquear; numa partida, equipar o Cetro num Peão e capturar com ele.
+
 ### 2026-10-29 (14h) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Queixa do Pedro**: no online, quando o adversário desiste ou para de jogar, o tempo dele acaba e a vez não passa nem ele é desligado.
 - **Causas**: (1) o lance automático aos 2:00 só o faz o jogo de quem está a jogar — se ele fechou o separador/ficou sem rede, ninguém joga e do outro lado o relógio ficava em 0:00; só havia um botão "Reclamar vitória" escondido; (2) esse botão só aparecia na vez dele e contava desde o último lance DELE: nunca aparecia se ele saísse a meio da vez (depois de uma carta) ou durante uma resposta da Chain, e podia aparecer cedo demais (se tu demorasses na tua vez); (3) quem perdia por abandono, se voltasse, continuava a jogar; (4) depois de um xeque-mate, se o perdedor saísse sem confirmar, o vencedor ficava com o rating pendente (as regras só aceitavam o abandono com a partida a decorrer).

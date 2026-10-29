@@ -46,6 +46,7 @@
           caps.innerHTML = lost.length ? lost.map((t) => `<i title="${YC.PIECE_NAME[t]}">${YC.pieceHTML(t, YC.other(team))}</i>`).join('') : '<small>—</small>';
           caps.title = lost.length ? `Capturou ${lost.length} peça(s)` : 'Ainda não capturou peças';
         }
+        if (this.renderBuffs) this.renderBuffs(box, team);   // efeitos ativos ao lado da foto (MatchBuffs)
       }
       const jl = this.q('.jumbo.left'), jr = this.q('.jumbo.right');
       if (jl) jl.innerHTML = `<div class="jb-bar"><span>TURNO</span><span>${Math.max(1, s.turnCount)}</span></div><div class="jb-title">${m.over ? 'FIM' : s.active === this.viewer ? 'A TUA VEZ' : 'ADVERSÁRIO'}</div>`;
