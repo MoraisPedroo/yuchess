@@ -54,6 +54,7 @@
       const decks = { [me]: deck.cards.slice(), [bot]: botDeck };
       const names = { [me]: p.displayName, [bot]: BOT_NAMES[level] };
       const match = new YC.Match({ bus, seed: Math.floor(rng() * 2 ** 31), decks, names, mode: 'BOT' });
+      match.ults = { [me]: ((p.stats || {}).ultimates || []).slice(), [bot]: [] };   // Ultimates (só visual)
       const labels = { [me]: 'Tu', [bot]: `Bot · ${YC.BotAI.LEVELS[level].label}` };
       const team = (t) => (t === 'w' ? 'Brancas' : 'Pretas');
       App.starting = true;

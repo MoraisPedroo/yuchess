@@ -21,6 +21,8 @@ async function pair(i) {
     return { game, s };
   };
   const A = mk('w', ta), B = mk('b', tb);
+  // as Ultimates (só visuais) das Brancas têm de chegar às Pretas dentro das mensagens
+  A.game.ults = { w: ['eq_cetro_usurpador'], b: [] };
   // a meio, um dos lados desiste (testa a mensagem RESIGN)
   const resignAt = i % 4 === 3 ? 40 : -1;
   if (resignAt > 0) A.game.bus.on('turn:start', ({ turnCount }) => { if (turnCount === resignAt) setTimeout(() => A.s.resign(), 0); });
@@ -44,6 +46,7 @@ async function pair(i) {
   await new Promise((r) => setTimeout(r, 30));
   const same = A.game.stateHash() === B.game.stateHash() && A.game.state.winner === B.game.state.winner;
   const vanished = !!A.gone;
+  if (!(B.game.ults && B.game.ults.w && B.game.ults.w.includes('eq_cetro_usurpador'))) return { same: false, A: A.game, B: B.game, desync: { ultimates: 'não chegaram' } };
   if (vanished && (A.game.state.reason !== 'Abandono' || B.game.state.winner !== 'b')) return { same: false, A: A.game, B: B.game, desync: { abandono: 'falhou' } };
   return { same, A: A.game, B: B.game, desync: A.game.desync || B.game.desync, resigned: resignAt > 0 || vanished };
 }

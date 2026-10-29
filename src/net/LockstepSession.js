@@ -56,6 +56,9 @@
       if (this.closed) return;
       msg.seq = this.seq++;
       msg.h = this.game.stateHash();
+      // Ultimates desbloqueadas por quem joga deste lado (só visual; game.ults não entra no estado nem no hash)
+      const mine = this.game.ults && this.game.ults[this.localTeam];
+      if (mine && mine.length) msg.ults = mine;
       return this.transport.send(msg);
     }
 
@@ -73,6 +76,11 @@
       if (this.closed || !msg) return;
       if (msg.kind === 'RESIGN') { this.game.resign(this.remoteTeam); this.inbox.interrupt(); return; }
       if (msg.kind === 'FORFEIT') { this.game.resign(this.localTeam, 'Abandono'); this.inbox.interrupt(); return; }
+      if (Array.isArray(msg.ults)) {
+        // as Ultimates do adversário (para as ver também deste lado)
+        this.game.ults = this.game.ults || {};
+        this.game.ults[this.remoteTeam] = msg.ults.filter((x) => typeof x === 'string').slice(0, 20);
+      }
       if (msg.seq < this.seq) return; // duplicado
       this.pending.set(msg.seq, msg);
       while (this.pending.has(this.seq)) {

@@ -58,7 +58,7 @@
       }).join('');
       const states = ['equipped', 'shielded', 'frozen', 'checked'].filter((k) => anchor.classList.contains(k)).join(' ');
       // peça transformada pela Ultimate (Ultimates.js): mostra a personagem
-      const ult = YC.Ultimate && YC.Ultimate.forPiece(p, ui.viewer);
+      const ult = YC.Ultimate && YC.Ultimate.forPiece(p, m);
       const fig = ult ? `<img class="ult-fig" src="${YC.Ultimate.hero(ult)}" alt="">` : YC.pieceHTML(p.type, p.color);
       const el = document.createElement('div');
       el.className = `piece-insp ${p.color}${ult ? ' ult' : ''}`;

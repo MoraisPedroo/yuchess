@@ -30,7 +30,7 @@
       // Ultimate (Ultimates.js): a invocação e o golpe têm vídeo, por isso o limite de segurança é maior
       on('equip:attach', (p) => (YC.Ultimate ? YC.Ultimate.onEquip(this, p) : this.equipAttach(p)), 16000);
       on('equip:strip', ({ sq }) => this.at(sq, 'SPLOSH!', '#F538A0', 'explosion_bam', { colors: ['#F538A0', '#FFB4C8', '#fff'] }));
-      on('equip:steal', ({ from, to }) => this.equipSteal(from, to));
+      on('equip:steal', (p) => (YC.Ultimate ? YC.Ultimate.onSteal(this, p) : this.equipSteal(p.from, p.to)), 16000);
       on('equip:proc', ({ sq, id }) => this.pop(sq, id === 'eq_espada_ganancia' ? '+1 CARTA!' : 'CACTO!', id === 'eq_espada_ganancia' ? '#FCC934' : '#81C995', id === 'eq_espada_ganancia' ? 'sword_draw' : 'explosion_bam'));
       on('capture:declare', (p) => (YC.Ultimate ? YC.Ultimate.onCapture(this, p) : this.captureDeclare(p)), 12000);
       on('piece:move', this.pieceMove);

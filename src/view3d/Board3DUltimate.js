@@ -1,8 +1,10 @@
-/* Board3DUltimate.js — no palco 3D, a peça com uma Ultimate ativa (Ultimates.js) transforma-se na personagem: uma
-   figura de cartão (sprite sempre virado para a câmara) com a arte recortada, em pé no pedestal. O corpo da peça fica
-   escondido mas continua a apanhar o rato; os ícones de equipamento por cima somem (a figura já mostra o objeto).
-   A figura vive dentro do "hold", por isso salta e respira com a animação parada como as outras peças.
-   Sem luzes novas e com materiais de sprite (já compilados pelas etiquetas): não congela o jogo. */
+/* Board3DUltimate.js — Ultimates no palco 3D (Ultimates.js):
+   • a peça com uma Ultimate ativa transforma-se na personagem: uma figura de cartão (sprite sempre virado para a
+     câmara) com a arte recortada, em pé no pedestal; o corpo da peça fica escondido mas continua a apanhar o rato e os
+     ícones de equipamento por cima somem. A figura vive dentro do "hold", por isso salta e respira como as outras.
+   • a barreira do guardião (Kaito): enquanto ele tiver Escudo, o Rei da cor dele fica dentro de uma cúpula de
+     hexágonos ciano a rodar, com faíscas em órbita; quando o Escudo parte, a cúpula estilhaça.
+   Sem luzes novas e só com materiais que o palco já usa (sprites, básico com wireframe): não congela o jogo. */
 (function (YC) {
   'use strict';
 
@@ -11,8 +13,8 @@
   const textures = {};
 
   Object.assign(YC.Board3D.prototype, {
-    syncUltimate(g, p, viewer) {
-      const U = YC.Ultimate, d = U && U.forPiece(p, viewer);
+    syncUltimate(g, p, m) {
+      const U = YC.Ultimate, d = U && U.forPiece(p, m);
       const hold = g.getObjectByName('hold');
       if (!hold) return;
       const body = hold.getObjectByName('body');
@@ -21,7 +23,6 @@
         if (fig) hold.remove(fig);
         const THREE = T();
         const tex = textures[d.icon] || (textures[d.icon] = new THREE.TextureLoader().load(U.hero(d), (t) => {
-          // proporção da arte, quando a imagem carrega
           for (const gg of this.pieceEls.values()) {
             const f = gg.getObjectByName('ultFigure');
             if (f && f.userData.icon === d.icon) f.scale.set(FIG_H * (t.image.width / t.image.height), FIG_H, 1);
@@ -34,7 +35,7 @@
         fig.userData.icon = d.icon;
         fig.center.set(0.5, 0);
         fig.position.y = 0.1;
-        const ratio = tex.image ? tex.image.width / tex.image.height : 0.62;
+        const ratio = tex.image ? tex.image.width / tex.image.height : 0.55;
         fig.scale.set(FIG_H * ratio, FIG_H, 1);
         fig.raycast = () => {};
         hold.add(fig);
@@ -44,6 +45,48 @@
       const medals = g.getObjectByName('medals');
       if (medals) medals.visible = !d;
       if (d) g.userData.h = FIG_H;
+    },
+
+    /** Cúpula de hexágonos à volta de cada Rei protegido por um guardião. */
+    syncWards(m) {
+      const U = YC.Ultimate;
+      if (!U) return;
+      m.pos.board.forEach((p, sq) => {
+        if (!p || p.type !== 'k') return;
+        const g = this.el(p.id);
+        if (!g) return;
+        const on = U.wardFor(m, p.color);
+        const ward = this.accessory(g, 'ultWard', on, () => this.makeWard());
+        if (g.userData.wardOn && !on) {
+          // o Escudo do guardião partiu: a barreira estilhaça
+          const w = this.sqWorld(sq);
+          if (this.shards3D) this.shards3D(w.x, 0.8, w.z, 0x48CAE4, { n: 22, size: 0.09, sp: 3, glow: true });
+          if (this.sparks) this.sparks(w.x, 0.8, w.z, 0x48CAE4, { n: 18, speed: 2.4 });
+        }
+        g.userData.wardOn = on;
+        if (ward) ward.position.y = 0.62;
+      });
+    },
+
+    makeWard() {
+      const THREE = T(), grp = new THREE.Group();
+      const geo = new THREE.IcosahedronGeometry(0.72, 1);
+      const wire = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: YC.T3.glow(0x48CAE4, 1.8), wireframe: true, transparent: true, opacity: 0.7 }));
+      const fill = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0x0096C7, transparent: true, opacity: 0.12, depthWrite: false }));
+      wire.scale.set(1, 1.25, 1); fill.scale.copy(wire.scale);
+      grp.add(wire, fill);
+      // faíscas em órbita (os sprites do palco; ficam vivos enquanto a barreira existir)
+      if (this.sprite) for (let i = 0; i < 6; i++) {
+        const s = this.sprite(i % 2 ? 0x48CAE4 : 0xffffff, 0.22, 0.9);
+        const a = (i / 6) * Math.PI * 2;
+        s.position.set(Math.cos(a) * 0.8, (i % 3 - 1) * 0.35, Math.sin(a) * 0.8);
+        grp.add(s);
+      }
+      if (window.gsap) {
+        window.gsap.to(grp.rotation, { y: Math.PI * 2, duration: 7, repeat: -1, ease: 'none' });
+        window.gsap.to(wire.material, { opacity: 0.35, duration: 1.1, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+      }
+      return grp;
     }
   });
 })(typeof window !== 'undefined' ? (window.YC = window.YC || {}) : (globalThis.YC = globalThis.YC || {}));

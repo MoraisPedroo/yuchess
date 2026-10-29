@@ -114,7 +114,7 @@
         if (this.syncStatus) this.syncStatus(g, p, h);
         g.userData.h = h;
         g.userData.checked = sq === checked;
-        if (this.syncUltimate) this.syncUltimate(g, p, viewer);   // peça transformada na personagem da Ultimate
+        if (this.syncUltimate) this.syncUltimate(g, p, m);   // peça transformada na personagem da Ultimate
       });
       for (const [id, g] of this.pieceEls) {
         if (!seen.has(id) && !this.busy.has(id)) { this.layers.pieces.remove(g); this.pieceEls.delete(id); }
@@ -123,6 +123,7 @@
       for (const g of this.pieceEls.values()) this.pickables.push(g);
       this.syncTraps(m, viewer);
       if (this.syncBlocks) this.syncBlocks(m);
+      if (this.syncWards) this.syncWards(m);   // barreira do Kaito à volta do Rei (Board3DUltimate)
       this.syncSides(m, viewer);
     },
 

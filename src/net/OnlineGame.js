@@ -40,6 +40,8 @@
       });
       this.game = game;
       game.online = this;
+      // Ultimates (só visual): as minhas já; as do adversário chegam nas mensagens dele (LockstepSession)
+      game.ults = { [this.team]: ((YC.ProfileStore.profile.stats || {}).ultimates || []).slice(), [this.oppTeam]: [] };
       this.transport = new YC.Online.FirestoreTransport(m.id, this.uid, YC.TEAM_NAME[this.team]);
       this.transport.onMatch = (mm) => { this.match = { ...this.match, ...mm, id: m.id }; ui.renderOnline(); };
       this.transport.onError = (err) => ui.toast(`Ligação: ${FB().explain(err)}`);

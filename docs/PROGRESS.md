@@ -52,6 +52,14 @@
 
 ## Registo de sessões
 
+### 2026-10-29 (noite) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Ultimates para os dois jogadores**: `match.ults = { w, b }` (o que cada um desbloqueou; contra o bot só o teu; no online cada mensagem do lockstep leva as Ultimates de quem a envia — `LockstepSession.send/receive`, fora do estado e do hash, sem mudar as regras do Firebase). Se um dos dois desbloqueou, a Ultimate vale para qualquer peça com essa carta e as animações aparecem nos dois ecrãs (`Ultimate.active/forPiece(peça, match)`).
+- **Íman**: roubar uma carta com Ultimate (`equip:steal`) faz o cut-in de invocação e a peça de quem roubou transforma-se (`Ultimate.onSteal`).
+- **Golpe da Akane**: depois do cut-in, uma bola de energia vermelha e dourada sai dela e voa até à peça inimiga (rasto, explosão "BAM!", clarão, tremor) — `Ultimate.bolt`.
+- **Ultimate nova: Kaito, o Guardião Azul** (Escudo Tático Antitumulto; personagem e 2 vídeos feitos no Gemini; 1000 de ouro): invocação → cut-in → a peça vira o Kaito e uma corrente de energia leva uma barreira de hexágonos ao Rei (cúpula ciano a rodar com faíscas, `Board3DUltimate.syncWards`) que fica enquanto o Escudo dele aguentar; quando o atacam → cut-in dele a defender; se o Escudo parte, a barreira estilhaça. Akane contra Kaito: golpe dela e depois a defesa dele.
+- `simulate-online.js` verifica que as Ultimates de um lado chegam ao outro. Prompts e passos em `docs/ART-PROMPTS.md` (secção "Ultimate").
+- **Como testar**: Baralhos → Lendárias → Cetro / Escudo Tático → desbloquear; numa partida, equipar e capturar; no online, o adversário vê as tuas Ultimates depois da tua primeira ação.
+
 ### 2026-10-29 (tarde) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Efeitos ativos ao lado da placa** (`src/ui/MatchBuffs.js`): Equipamentos de cada jogador (vermelho = proíbe-te algo, ex. Escudo Tático; laranja = castiga quem o captura; azul = vantagem), estados das peças e ações de carta a mais/menos; passar o rato/tocar explica onde está e o que faz.
 - **Ultimate do Cetro do Falso Monarca** ("Akane, a Rainha Rubi", personagem original feita no Gemini): desbloqueio por 1000 de ouro nos Baralhos (precisa da carta; `Economy.unlockUltimate`, guardado em `p.stats.ultimates`), pré-visualização com os 2 vídeos, fita "ULTIMATE" na carta, cut-in de invocação ao equipar (depois o Peão vira a figura da Akane no 3D e no CSS), cut-in do golpe sempre que ela captura. Só visual; no online só o dono vê. Arte em `assets/ultimate/royal_scepter/` (`tools/ultimate-art.py`). O Veo recusou o primeiro prompt de invocação ("wink", "petals") e deu erro no "swings the scepter"; passaram "twirls the golden scepter… column of golden light" e "points the scepter… fires a bright beam of red and gold magic light".

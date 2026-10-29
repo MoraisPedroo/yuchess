@@ -60,6 +60,11 @@ html.reduce-motion .ult-lines, html.reduce-motion .ult-still { animation: none; 
 .ult-owned { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; color: var(--color-success); }
 @media (max-width: 760px) { .ult-prev { grid-template-columns: 1fr; } }
 
+/* ───────── barreira do guardião no Rei (tabuleiro CSS de reserva; no 3D é uma cúpula) ───────── */
+.piece.ult-ward .base-disc { box-shadow: 0 0 0 3px #48CAE4, 0 0 18px 6px rgba(72, 202, 228, .7); animation: ult-ward 1.2s ease-in-out infinite alternate; }
+@keyframes ult-ward { to { box-shadow: 0 0 0 3px #9BE7FF, 0 0 26px 10px rgba(72, 202, 228, .9); } }
+html.reduce-motion .piece.ult-ward .base-disc { animation: none; }
+
 /* ───────── a personagem no lugar da peça ───────── */
 .piece.ult-form .squash { display: grid; place-items: end center; overflow: visible; }
 .piece .ult-fig { height: 175%; width: auto; max-width: none; translate: 0 4%; filter: drop-shadow(0 4px 3px rgba(0, 0, 0, .5)); pointer-events: none; }

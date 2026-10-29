@@ -263,3 +263,35 @@ Força Policial
 
 	"4-second seamless loop animation, glossy 3D vinyl toy style, slight 3/4 view on a neutral studio background (#F8FAFC): a chunky blue and transparent polycarbonate riot shield projecting a hexagonal cyan energy barrier that deflects a bouncing cartoon spark, no text."
 ```
+
+## Ultimate (personagens de anime das Lendárias)
+
+Animação especial só visual (`src/ui/Ultimates.js`), desbloqueada com 1000 de ouro nos Baralhos. Arte em
+`assets/ultimate/<icone>/`: `hero.png` (recortada), `summon.mp4` (invocação) e `strike.mp4` (golpe/defesa), feita com
+`tools/ultimate-art.py` a partir de imagens e vídeos do Gemini.
+
+Como fazer: Gemini → "+" → **Criar imagem** (3:4) com o prompt da personagem (fundo branco) → copiar a imagem (a página
+guarda-a num `blob:` legível; desenhar num canvas e mandar ao recetor local — o botão "Baixar" do Gemini grava nas
+Transferências) → `python tools/ultimate-art.py hero imagem.png ICONE '#cor'` → Gemini → **Criar vídeo** com
+`_tmp_art/ult_<icone>_start.png` → `python tools/ultimate-art.py pack video.mp4 ICONE summon|strike início duração`.
+O Veo recusa pedidos com pessoas mais "expressivos" ("wink", "petals") e às vezes dá erro com "swings": o que passou
+foi sempre "Animate this 2D cartoon game illustration. The character …" com uma ação simples.
+
+- **Akane, a Rainha Rubi** (Cetro do Falso Monarca, ataque, `#D90429`): imagem — *Full-body character illustration of
+  an original anime heroine … a cheerful, mischievous young woman who crowned herself queen. Long crimson hair in two
+  high ponytails, a small tilted golden crown … modest regal outfit: a red and gold royal tunic dress with white fur
+  trim, a short red cape … white gloves, white tights and golden boots … golden royal scepter topped with a big faceted
+  red ruby … plain pure white background*. Invocação (2,6 s + 4,8 s) — *The character slowly twirls the golden scepter
+  and raises it high, the ruby on top shines, her cape and hair sway gently, and a soft column of golden light with
+  sparkles rises behind her.* Golpe (3,5 s + 4,0 s) — *The character points the golden scepter forward and the ruby on
+  top glows brighter and brighter, then fires a bright beam of red and gold magic light with sparkles and a glowing
+  burst, while her cape and long hair blow in the magical wind.*
+- **Kaito, o Guardião Azul** (Escudo Tático Antitumulto, guarda, `#0096C7`): imagem — *… a calm, brave young man who is
+  the royal guardian of the king. Short spiky silver-blue hair, determined bright cyan eyes … modest blue and white
+  guardian armor with silver shoulder plates, a dark blue coat with glowing cyan lines … a large rounded-rectangle
+  transparent light-blue shield with a thick blue strap band across its middle and a faint glowing cyan hexagon
+  pattern … plain pure white background*. Invocação (2,2 s + 4,6 s) — *The character raises the transparent blue shield
+  high and a large dome of glowing cyan hexagon light expands around him, the hexagon tiles lighting up one by one …*
+  Defesa (1,0 s + 3,6 s) — *The character braces behind the transparent blue shield as bright orange cartoon sparks fly
+  at it from the front; a glowing cyan hexagon barrier flashes and ripples across the shield and the sparks bounce
+  away harmlessly …*
