@@ -295,3 +295,15 @@ foi sempre "Animate this 2D cartoon game illustration. The character …" com um
   Defesa (1,0 s + 3,6 s) — *The character braces behind the transparent blue shield as bright orange cartoon sparks fly
   at it from the front; a glowing cyan hexagon barrier flashes and ripples across the shield and the sparks bounce
   away harmlessly …*
+- **Akaito, a Fusão Real** (Cetro + Escudo na mesma peça; fundo com brilho vermelho à esquerda e ciano à direita): imagem
+  — *… an original anime hero … born from the fusion of a ruby queen and a blue royal guardian: … long crimson hair streaked
+  with silver-blue locks in a high ponytail, a small golden crown, one amber eye and one cyan eye … the left half is a red
+  and gold royal coat with white fur trim, the right half is blue and silver guardian armor with glowing cyan lines … golden
+  royal scepter topped with a big faceted red ruby, on the left arm a transparent light-blue shield … plain pure white
+  background*. Entrada (2,5 s + 5,4 s) — *A swirling spiral of red-gold and cyan light wraps around the character from the
+  ground up, the character spins the ruby scepter and raises the hexagon shield, and a bright burst of red and blue light
+  explodes outward …* Golpe (4,0 s + 4,6 s) — *… a swirling ball of red and cyan energy charges at the ruby, then fires as a
+  twisting double beam of red and blue light …* **Defesa (por fazer, limite do Gemini)** — *The character braces behind the
+  hexagon shield as bright orange cartoon sparks fly at it from the front; a double barrier of glowing red and cyan hexagons
+  flashes around the character and the sparks bounce away harmlessly, then the character twirls the ruby scepter and smiles
+  confidently.* → `python tools/ultimate-art.py pack video.mp4 FUSAO_REAL guard 1.0 3.6`.

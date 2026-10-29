@@ -52,6 +52,14 @@
 
 ## Registo de sessões
 
+### 2026-10-29 (noite, 2) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Fusão de Ultimates** (`src/ui/UltimateFusion.js`): a mesma peça com o Cetro e o Escudo Tático (um Peão, que aceita os dois) vira **Akaito, a Fusão Real** — personagem nova feita no Gemini (metade rainha rubi, metade guardião azul). Vale se as Ultimates forem do mesmo jogador ou uma de cada (`match.ults`), e se a segunda carta chegar por equipar ou pelo Íman (`Ultimate.transform`).
+- **Entrada épica**: as faixas da Akane (esquerda) e do Kaito (direita) entram, chocam no centro (clarão, duas ondas de choque, tremor, "FUSÃO!") e depois entra o vídeo da fusão; a figura aparece e a energia vai ao Rei.
+- **Golpe da fusão**: vídeo próprio ("Raio Real Duplo!") e no tabuleiro duas bolas (vermelha e ciano) em espiral até ao alvo, com estilhaços das duas cores e "KABOOM!". **Defesa**: "Muralha Rubi-Safira!" com barreira de hexágonos a pulsar no cut-in.
+- **Partículas no campo**: anéis no chão à volta da fusão (dourado e ciano, a rodar ao contrário) com faíscas em órbita; barreira do Rei dupla (cúpula ciano por fora, vermelha por dentro, cada uma a rodar para o seu lado).
+- Baralhos: as pré-visualizações do Cetro e do Escudo têm a linha "Fusão Akaito" (Fusão, Golpe, Defesa) e "Ecrã inteiro" toca a entrada completa. O separador do Kaito passou a "Defesa" (antes pedia um "Golpe" que não existe).
+- **Por fazer**: o vídeo da defesa da fusão (`assets/ultimate/fusao_real/guard.mp4`) — o Gemini chegou ao limite; até lá a defesa usa a arte parada com a barreira de hexágonos (o ficheiro entra sozinho quando existir). Prompt em `docs/ART-PROMPTS.md`.
+
 ### 2026-10-29 (noite) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Ultimates para os dois jogadores**: `match.ults = { w, b }` (o que cada um desbloqueou; contra o bot só o teu; no online cada mensagem do lockstep leva as Ultimates de quem a envia — `LockstepSession.send/receive`, fora do estado e do hash, sem mudar as regras do Firebase). Se um dos dois desbloqueou, a Ultimate vale para qualquer peça com essa carta e as animações aparecem nos dois ecrãs (`Ultimate.active/forPiece(peça, match)`).
 - **Íman**: roubar uma carta com Ultimate (`equip:steal`) faz o cut-in de invocação e a peça de quem roubou transforma-se (`Ultimate.onSteal`).

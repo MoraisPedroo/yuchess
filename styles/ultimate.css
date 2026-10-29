@@ -30,7 +30,33 @@
   background: linear-gradient(90deg, transparent, #fff 18%, var(--c2) 55%, var(--c1) 80%, transparent); box-shadow: 0 0 24px var(--c1), 0 0 64px var(--c2); pointer-events: none; }
 .ult-flash { position: absolute; inset: 0; opacity: 0; pointer-events: none; background: radial-gradient(circle, #fff, color-mix(in srgb, var(--c2) 60%, transparent) 45%, transparent 75%); }
 .ult-skip { position: absolute; right: 16px; bottom: 14px; font: 700 .78rem var(--font-sans); color: var(--text-muted); }
+/* defesa: barreira de hexágonos a pulsar por cima (na fusão, vermelha por dentro e ciano por fora) */
+.ult-hex { position: absolute; left: 50%; top: 50%; width: min(46vh, 40vw); aspect-ratio: 1.1; translate: -50% -50%; rotate: 6deg; pointer-events: none;
+  clip-path: polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0 50%); background: radial-gradient(closest-side, transparent 72%, var(--c2) 80%, transparent 92%);
+  opacity: .9; animation: ult-hex 0.9s ease-out infinite; }
+.ult-hex.b { width: min(36vh, 32vw); background: radial-gradient(closest-side, transparent 70%, var(--c1) 80%, transparent 92%); animation-delay: .3s; }
+@keyframes ult-hex { from { scale: .6; opacity: 1; } to { scale: 1.25; opacity: 0; } }
+html.reduce-motion .ult-hex { animation: none; opacity: .5; }
 html.reduce-motion .ult-lines, html.reduce-motion .ult-still { animation: none; }
+
+/* ───────── entrada da fusão (UltimateFusion.js): duas faixas chocam no centro ───────── */
+.ult-fuse { position: fixed; inset: 0; z-index: 97; overflow: clip; cursor: pointer; user-select: none; }
+.fz-veil { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(27, 38, 56, .7), rgba(9, 12, 16, .95) 72%); }
+.fz-band { position: absolute; left: -5vw; right: -5vw; height: 36vh; display: flex; align-items: center; gap: 2vw; padding: 0 8vw; overflow: hidden;
+  border-block: 5px solid var(--border-ink); box-shadow: 0 0 0 3px var(--c), 0 0 40px var(--c); }
+.fz-band.l { top: 9vh; rotate: -5deg; background: linear-gradient(90deg, var(--c), #2A0A10 55%, transparent); }
+.fz-band.r { bottom: 9vh; rotate: -5deg; justify-content: flex-end; background: linear-gradient(270deg, var(--c), #0A1A2A 55%, transparent); }
+.fz-band img { height: 150%; width: auto; margin-top: 18%; filter: drop-shadow(0 6px 0 rgba(9, 12, 16, .6)); }
+.fz-band b { font-family: var(--font-display); font-weight: 400; font-size: clamp(44px, 7vw, 96px); color: #fff; -webkit-text-stroke: 5px var(--border-ink); paint-order: stroke fill;
+  text-shadow: 0 6px 0 var(--border-ink), 0 0 24px var(--c); }
+.fz-flash { position: absolute; inset: 0; opacity: 0; pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, #fff 0%, rgba(255, 209, 102, .85) 18%, rgba(72, 202, 228, .6) 38%, transparent 70%); }
+.fz-ring { position: absolute; left: 50%; top: 50%; width: 80vmin; height: 80vmin; margin: -40vmin 0 0 -40vmin; border-radius: 50%; opacity: 0; pointer-events: none;
+  border: 10px solid #FFD166; box-shadow: 0 0 30px #D90429, inset 0 0 30px #D90429; }
+.fz-ring.b { border-color: #48CAE4; box-shadow: 0 0 30px #0096C7, inset 0 0 30px #0096C7; }
+.fz-word { position: absolute; left: 50%; top: 50%; translate: -50% -50%; opacity: 0; pointer-events: none; font-family: var(--font-display); font-weight: 400;
+  font-size: clamp(64px, 12vw, 170px); color: #fff; -webkit-text-stroke: 7px var(--border-ink); paint-order: stroke fill;
+  text-shadow: 0 8px 0 var(--border-ink), -6px 0 28px #D90429, 6px 0 28px #48CAE4; }
 
 /* ───────── fita nas cartas ───────── */
 .ult-ribbon { position: absolute; z-index: 6; left: 50%; top: calc(var(--cw) * -.07); translate: -50% 0; display: inline-flex; align-items: center; gap: 3px; padding: 1px 8px;
@@ -57,6 +83,8 @@ html.reduce-motion .ult-lines, html.reduce-motion .ult-still { animation: none; 
 .ult-prev li + li { margin-top: 3px; }
 .ult-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
 .ult-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.ult-tabs.fz { align-items: center; margin-top: -6px; }
+.ult-tabs.fz small { font-weight: 800; font-size: .78rem; color: var(--text-muted); margin-right: 2px; }
 .ult-owned { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; color: var(--color-success); }
 @media (max-width: 760px) { .ult-prev { grid-template-columns: 1fr; } }
 
