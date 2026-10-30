@@ -16,13 +16,14 @@
   let loader = null;
 
   // rim light: (1 - N·V)^3 na cor ciano do palco; fica abaixo do limiar do bloom
-  const RIM = `
-    float ycRim = pow(1.0 - clamp(dot(normalize(vViewPosition), normal), 0.0, 1.0), 3.0);
-    outgoingLight += vec3(0.32, 0.86, 1.0) * ycRim * 0.38;
+  // (nas Pretas mais forte: sem ele perdiam-se nas casas escuras do tabuleiro)
+  const rim = (k) => `
+    float ycRim = pow(1.0 - clamp(dot(normalize(vViewPosition), normal), 0.0, 1.0), 2.6);
+    outgoingLight += vec3(0.32, 0.86, 1.0) * ycRim * ${k};
     #include <opaque_fragment>`;
   // um pouco de luz própria a partir da cor da textura: com as luzes baixas do palco o marfim ficava cinzento
-  const GLOW = `#include <emissivemap_fragment>
-    totalEmissiveRadiance += diffuseColor.rgb * 0.32;`;
+  const glow = (k) => `#include <emissivemap_fragment>
+    totalEmissiveRadiance += diffuseColor.rgb * ${k};`;
   // Pretas a partir do modelo branco (docs/RELATORIO-VISUAL-3D.md): marfim → obsidiana #1E2235…#4A587D,
   // azul → carmesim #851928, ouro → prata #8D99AE; a pele, os olhos e a madeira ficam como estão
   const DARK_FN = `#include <common>
@@ -45,8 +46,9 @@
       vec3 o = h;
       bool bluish = hue > 170.0 && hue < 270.0;
       // azul forte (pano) → carmesim; o marfim do gerador tem sombras azuladas (pouco saturadas): essas são marfim
-      if (bluish && h.y > 0.42) o = vec3(0.978, min(1.0, h.y * 1.1), h.z * 0.78);
-      else if ((h.y < 0.22 || bluish) && h.z > 0.2) o = vec3(0.633, 0.34, 0.12 + (h.z - 0.2) / 0.8 * 0.36);
+      if (bluish && h.y > 0.42) o = vec3(0.978, min(1.0, h.y * 1.15), h.z * 0.92);
+      // ardósia azulada (não quase preto: de longe tem de se distinguir das casas escuras)
+      else if ((h.y < 0.22 || bluish) && h.z > 0.2) o = vec3(0.63, 0.26, 0.16 + (h.z - 0.2) / 0.8 * 0.38);
       // ouro (e o castanho-dourado que o gerador às vezes pinta); a pele é menos saturada e fica
       // prata neutra (sem tom azul: o ACES do fim puxava o cinzento-azulado brilhante para magenta)
       else if (hue >= 10.0 && hue < 65.0 && h.y > (hue < 27.0 ? 0.52 : 0.3) && h.z > 0.2) o = vec3(0.0, 0.0, h.z * 0.78);
@@ -72,7 +74,7 @@
       transparent: false, side: THREE.FrontSide
     });
     m.onBeforeCompile = (sh) => {
-      let f = sh.fragmentShader.replace('#include <opaque_fragment>', RIM).replace('#include <emissivemap_fragment>', GLOW);
+      let f = sh.fragmentShader.replace('#include <opaque_fragment>', rim(dark ? '0.6' : '0.42')).replace('#include <emissivemap_fragment>', glow(dark ? '0.3' : '0.36'));
       if (dark) f = f.replace('#include <common>', DARK_FN).replace('#include <map_fragment>', DARK_MAP);
       sh.fragmentShader = f;
     };

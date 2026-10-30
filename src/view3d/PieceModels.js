@@ -9,6 +9,9 @@
 
   // alturas dos modelos em casas (docs/RELATORIO-VISUAL-3D.md); as das peças por código ficam no Board3DSync
   const H = { p: 0.72, r: 0.95, n: 0.98, b: 1.1, q: 1.22, k: 1.28 };
+  // de longe (câmara alta do jogo) as figuras perdiam-se: maiores do que o relatório pedia e inclinadas para trás,
+  // para a cara e a frente ficarem viradas para a câmara (como as unidades do TFT)
+  const SCALE = 1.28, TILT = -0.32;
   const key = (type, color) => `piece:${type}${color}`;
   let started = false;
 
@@ -20,7 +23,7 @@
       if (started || !YC.ModelLib || !window.THREE_ADDONS) return;
       started = true;
       for (const [k, url] of Object.entries(YC.PIECE_MODEL_FILES || {})) {
-        YC.ModelLib.load(`piece:${k}`, url, { outline: 0.012 })
+        YC.ModelLib.load(`piece:${k}`, url, { outline: 0.017 })
           .then(() => window.dispatchEvent(new CustomEvent('yc-piece-models', { detail: k })))
           .catch(() => { /* fica a peça feita por código */ });
       }
@@ -39,12 +42,14 @@
       const g = new (window.THREE.Group)();
       g.name = 'body';
       g.userData.model = true;
+      root.scale.setScalar(SCALE);
+      root.rotation.x = TILT;
       g.add(root);
       return g;
     },
 
     /** Altura da peça (para pôr anéis, escudos e etiquetas por cima). */
-    height(type, color, fallback) { return PMod.avail(type, color) ? H[type] : fallback; },
+    height(type, color, fallback) { return PMod.avail(type, color) ? H[type] * SCALE * Math.cos(TILT) : fallback; },
 
     /** Chave do corpo atual (muda quando o modelo chega e o corpo tem de ser trocado). */
     bodyKey(type, color) { return `${type}${color}${PMod.has(type, color) ? 'm' : PMod.avail(type, color) ? 'd' : ''}`; }
