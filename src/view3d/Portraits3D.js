@@ -19,7 +19,7 @@
   // um modelo .glb de peça carregou (PieceModels): as fotos e sprites dessa peça refazem-se com ele
   if (typeof window !== 'undefined') window.addEventListener('yc-piece-models', (e) => {
     const k = e.detail;
-    for (const c of [cache, sprites]) for (const key of [...c.keys()]) if (key.startsWith(k)) c.delete(key);
+    for (const c of [cache, sprites]) for (const key of [...c.keys()]) if (key[0] === k[0]) c.delete(key);   // as Pretas usam o modelo branco
   });
 
   function setup() {

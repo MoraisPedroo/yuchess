@@ -28,9 +28,13 @@
 
     has(type, color) { return !!(YC.ModelLib && YC.ModelLib.has(key(type, color))); },
 
+    /** Há modelo para esta peça? As Pretas sem modelo próprio usam o das Brancas com outras cores. */
+    avail(type, color) { return PMod.has(type, color) || (color === 'b' && PMod.has(type, 'w')); },
+
     /** Corpo da peça (grupo "body"): o modelo, se já carregou, senão a peça feita por código. */
     make(type, color) {
-      const root = PMod.has(type, color) && YC.ModelLib.clone(key(type, color));
+      const own = PMod.has(type, color);
+      const root = own ? YC.ModelLib.clone(key(type, color)) : PMod.avail(type, color) && YC.ModelLib.clone(key(type, 'w'), true);
       if (!root) return YC.PieceMeshes.make(type, color);
       const g = new (window.THREE.Group)();
       g.name = 'body';
@@ -40,10 +44,10 @@
     },
 
     /** Altura da peça (para pôr anéis, escudos e etiquetas por cima). */
-    height(type, color, fallback) { return PMod.has(type, color) ? H[type] : fallback; },
+    height(type, color, fallback) { return PMod.avail(type, color) ? H[type] : fallback; },
 
     /** Chave do corpo atual (muda quando o modelo chega e o corpo tem de ser trocado). */
-    bodyKey(type, color) { return `${type}${color}${PMod.has(type, color) ? 'm' : ''}`; }
+    bodyKey(type, color) { return `${type}${color}${PMod.has(type, color) ? 'm' : PMod.avail(type, color) ? 'd' : ''}`; }
   };
 
   YC.PieceModels = PMod;

@@ -20,6 +20,40 @@
     float ycRim = pow(1.0 - clamp(dot(normalize(vViewPosition), normal), 0.0, 1.0), 3.0);
     outgoingLight += vec3(0.32, 0.86, 1.0) * ycRim * 0.38;
     #include <opaque_fragment>`;
+  // um pouco de luz própria a partir da cor da textura: com as luzes baixas do palco o marfim ficava cinzento
+  const GLOW = `#include <emissivemap_fragment>
+    totalEmissiveRadiance += diffuseColor.rgb * 0.32;`;
+  // Pretas a partir do modelo branco (docs/RELATORIO-VISUAL-3D.md): marfim → obsidiana #1E2235…#4A587D,
+  // azul → carmesim #851928, ouro → prata #8D99AE; a pele, os olhos e a madeira ficam como estão
+  const DARK_FN = `#include <common>
+    vec3 ycHsv(vec3 c) {
+      vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+      vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+      vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+      float d = q.x - min(q.w, q.y);
+      return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + 1e-10)), d / (q.x + 1e-10), q.x);
+    }
+    vec3 ycRgb(vec3 c) {
+      vec3 p = abs(fract(c.xxx + vec3(1.0, 2.0 / 3.0, 1.0 / 3.0)) * 6.0 - 3.0);
+      return c.z * mix(vec3(1.0), clamp(p - 1.0, 0.0, 1.0), c.y);
+    }
+    vec3 ycDark(vec3 lin) {
+      // tudo limitado: um NaN aqui (pow de um negativo minúsculo) o bloom espalhava em manchas rosa e pretas
+      vec3 h = ycHsv(pow(max(lin, vec3(0.0)), vec3(1.0 / 2.2)));
+      h.y = clamp(h.y, 0.0, 1.0);
+      float hue = fract(h.x) * 360.0;
+      vec3 o = h;
+      bool bluish = hue > 170.0 && hue < 270.0;
+      // azul forte (pano) → carmesim; o marfim do gerador tem sombras azuladas (pouco saturadas): essas são marfim
+      if (bluish && h.y > 0.42) o = vec3(0.978, min(1.0, h.y * 1.1), h.z * 0.78);
+      else if ((h.y < 0.22 || bluish) && h.z > 0.2) o = vec3(0.633, 0.34, 0.12 + (h.z - 0.2) / 0.8 * 0.36);
+      // ouro (e o castanho-dourado que o gerador às vezes pinta); a pele é menos saturada e fica
+      // prata neutra (sem tom azul: o ACES do fim puxava o cinzento-azulado brilhante para magenta)
+      else if (hue >= 10.0 && hue < 65.0 && h.y > (hue < 27.0 ? 0.52 : 0.3) && h.z > 0.2) o = vec3(0.0, 0.0, h.z * 0.78);
+      return pow(clamp(ycRgb(clamp(o, 0.0, 1.0)), vec3(1e-5), vec3(1.0)), vec3(2.2));
+    }`;
+  const DARK_MAP = `#include <map_fragment>
+    diffuseColor.rgb = ycDark(diffuseColor.rgb);`;
 
   function getLoader() {
     if (loader) return loader;
@@ -28,20 +62,30 @@
     return loader;
   }
 
-  /** Material estilizado a partir do material original do glTF (mantém a textura de cor). */
-  function stylize(src) {
+  /** Material estilizado a partir do material original do glTF (mantém a textura de cor). dark: versão preta. */
+  function stylize(src, dark = false) {
     const THREE = T();
     const m = new THREE.MeshStandardMaterial({
       map: src.map || null, color: src.map ? 0xffffff : (src.color || new THREE.Color(0xffffff)),
-      roughness: 0.6, metalness: 0.05, envMap: YC.T3 && YC.T3.env || null, envMapIntensity: 0.32,
-      // um pouco de luz própria a partir da textura: com as luzes baixas do palco o marfim ficava cinzento
-      emissive: src.map ? 0xffffff : 0x000000, emissiveMap: src.map || null, emissiveIntensity: 0.32,
+      // as Pretas ficam sem mapa de reflexos: com ele o shader convertido dava manchas magenta nos frisos
+      roughness: dark ? 0.5 : 0.6, metalness: 0.05, envMap: dark ? null : (YC.T3 && YC.T3.env || null), envMapIntensity: 0.32,
       transparent: false, side: THREE.FrontSide
     });
-    m.onBeforeCompile = (sh) => { sh.fragmentShader = sh.fragmentShader.replace('#include <opaque_fragment>', RIM); };
-    m.customProgramCacheKey = () => 'ycRim';
-    styled.push(m);
+    m.onBeforeCompile = (sh) => {
+      let f = sh.fragmentShader.replace('#include <opaque_fragment>', RIM).replace('#include <emissivemap_fragment>', GLOW);
+      if (dark) f = f.replace('#include <common>', DARK_FN).replace('#include <map_fragment>', DARK_MAP);
+      sh.fragmentShader = f;
+    };
+    m.customProgramCacheKey = () => (dark ? 'ycRimDark' : 'ycRim');
+    if (!dark) styled.push(m);
     return m;
+  }
+
+  const darkOf = new Map();   // material branco → a versão preta (partilhada por todas as cópias)
+  function darken(mat) {
+    if (Array.isArray(mat)) return mat.map(darken);
+    if (!darkOf.has(mat)) darkOf.set(mat, stylize(mat, true));
+    return darkOf.get(mat);
   }
 
   /** Prepara o glTF carregado: materiais estilizados, sem sombras reais, contorno escuro fino. */
@@ -77,12 +121,15 @@
 
     has(key) { return ready.has(key); },
 
-    /** Cópia nova do modelo (partilha geometria e materiais com o original), ou null se ainda não carregou. */
-    clone(key) {
+    /** Cópia nova do modelo (partilha geometria e materiais com o original), ou null se ainda não carregou.
+        dark: com as cores das Pretas (o contorno fica igual). */
+    clone(key, dark = false) {
       const gltf = ready.get(key);
       if (!gltf) return null;
       const SU = A().SkeletonUtils;
-      return gltf.userData.skinned && SU ? SU.clone(gltf.scene) : gltf.scene.clone(true);
+      const root = gltf.userData.skinned && SU ? SU.clone(gltf.scene) : gltf.scene.clone(true);
+      if (dark) root.traverse((o) => { if (o.isMesh && o.name !== 'outline') o.material = darken(o.material); });
+      return root;
     },
 
     /** Cópia com animações: { root, mixer, actions } (mixer null se o modelo não tiver clipes). */
