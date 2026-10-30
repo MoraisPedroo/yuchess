@@ -398,5 +398,4 @@ dele, faz a aterragem 3D depois do vídeo de invocação (que fica curto, 2,8 s)
 4. **Comprimir**: `gltf-transform optimize limpo.glb assets/models/ultimate/<icone>.glb --compress meshopt
    --texture-compress webp --texture-size 2048 --simplify false` e a linha no `UltModelList.js`.
 
-Imagens 3D feitas: Akane (`royal_scepter`), Kaito (`escudo_antitumulto`), Akaito (`fusao_real`), Riku
-(`exoesqueleto_robo`), Nova (`soro_alfa`).
+Imagens 3D feitas (as 14, 2026-10-30): Akane, Kaito (refeito com "IMPORTANT: chibi proportions exactly like Akane and Akaito"), Akaito, Riku, Nova, Marina, Yuki (sem o trenó), Lola (sem o canhão), Goro (sem a bigorna), Mira, Rin, Luna, Aiko e Ren, em `_tmp_art/ult3d/<icone>_3d.png`.
