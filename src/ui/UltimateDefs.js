@@ -36,12 +36,12 @@
     }),
     eq_elixir_mutacao_total: D({
       id: 'eq_elixir_mutacao_total', icon: 'soro_alfa', name: 'Nova', title: 'A Cientista Alfa', role: 'attack', c1: '#168AAD', c2: '#2EC4B6', fx: 'TOXIC',
-      say: { summon: 'Evolução total!', strike: 'Fórmula explosiva!' }, tabs: { summon: 'Mutação', strike: 'Golpe' },
+      say: { summon: 'Evolução total!', strike: 'Fórmula explosiva!' }, ms: { summon: 6000, strike: 4000 }, tabs: { summon: 'Mutação', strike: 'Golpe' },
       about: [['Invocar', 'ao equipares o Soro, a mutação vira o Peão na Dra. Nova (e continua a ser uma Dama para as regras).'], ...ATT('um frasco de energia verde-água rebenta na peça inimiga.')]
     }),
     eq_bussola_tesouro: D({
       id: 'eq_bussola_tesouro', icon: 'bussola_dourada', name: 'Marina', title: 'A Caçadora de Tesouros', role: 'attack', c1: '#0077B6', c2: '#FFB703', fx: 'COIN',
-      say: { summon: 'Rumo ao tesouro!', strike: 'Este saque é meu!' }, tabs: { summon: 'Invocação', strike: 'Golpe' },
+      say: { summon: 'Rumo ao tesouro!', strike: 'Este saque é meu!' }, ms: { summon: 6500, strike: 4000 }, tabs: { summon: 'Invocação', strike: 'Golpe' },
       about: [['Invocar', 'ao equipares a Bússola, a peça transforma-se na Marina.'], ...ATT('um raio dourado cheio de moedas acerta na peça inimiga (e rouba a carta, como diz a Bússola).')]
     }),
     eq_trono_glaciar: D({
@@ -52,7 +52,7 @@
     }),
     eq_canhao_homem_bala: D({
       id: 'eq_canhao_homem_bala', icon: 'canhao_circo', name: 'Lola', title: 'A Mestra do Circo', role: 'power', c1: '#D90429', c2: '#FFB703', fx: 'CONFETTI',
-      say: { summon: 'Senhoras e senhores!', strike: 'Fogo no canhão!' }, tabs: { summon: 'Invocação', strike: 'Poder' },
+      say: { summon: 'Senhoras e senhores!', strike: 'Fogo no canhão!' }, ms: { summon: 6500, strike: 4000 }, tabs: { summon: 'Invocação', strike: 'Poder' },
       about: [['Invocar', 'ao equipares o Canhão, a peça transforma-se na Lola.'], ['No tabuleiro', 'a peça passa a ser a própria Lola.'],
         ['Poder', 'quando o Canhão dispara, entra o vídeo dela e o Peão voa entre confetes.']]
     }),
@@ -85,7 +85,7 @@
     }),
     ct_clausula_rescisao: D({
       id: 'ct_clausula_rescisao', icon: 'quebra_contrato', name: 'Ren', title: 'O Advogado Implacável', role: 'card', c1: '#475569', c2: '#FB8500',
-      say: { summon: 'Contrato rescindido!' }, tabs: { summon: 'Ativação' },
+      say: { summon: 'Contrato rescindido!' }, ms: { summon: 6500 }, tabs: { summon: 'Ativação' },
       about: [['Ativar', 'quando ativas a Rescisão, entra o vídeo do Ren a rasgar o contrato.'], ['Depois', 'a carta do adversário é anulada e os Equipamentos dele partem-se.']]
     })
   };
