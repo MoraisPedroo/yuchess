@@ -31,22 +31,22 @@
     // ── Equipamentos novos ──
     eq_exoesqueleto_tita: D({
       id: 'eq_exoesqueleto_tita', icon: 'exoesqueleto_robo', name: 'Riku', title: 'O Piloto Mecânico', role: 'attack', c1: '#D90429', c2: '#FB8500', fx: 'EXPLOSION',
-      say: { summon: 'Sistemas a cem por cento!', strike: 'Punho Turbo!' }, ms: { summon: 5600, strike: 4000 }, tabs: { summon: 'Invocação', strike: 'Golpe' },
+      say: { summon: 'Sistemas a cem por cento!', strike: 'Punho Turbo!' }, ms: { summon: 5600, strike: 5000 }, hit: 0.5, tabs: { summon: 'Invocação', strike: 'Golpe' },
       about: [['Invocar', 'ao equipares o Exoesqueleto, o Peão liga o fato robô e transforma-se no Riku.'], ...ATT('um punho de energia laranja voa até à peça inimiga.')]
     }),
     eq_elixir_mutacao_total: D({
       id: 'eq_elixir_mutacao_total', icon: 'soro_alfa', name: 'Nova', title: 'A Cientista Alfa', role: 'attack', c1: '#168AAD', c2: '#2EC4B6', fx: 'TOXIC',
-      say: { summon: 'Evolução total!', strike: 'Fórmula explosiva!' }, ms: { summon: 6000, strike: 4000 }, tabs: { summon: 'Mutação', strike: 'Golpe' },
+      say: { summon: 'Evolução total!', strike: 'Fórmula explosiva!' }, ms: { summon: 6000, strike: 5500 }, hit: 0.55, tabs: { summon: 'Mutação', strike: 'Golpe' },
       about: [['Invocar', 'ao equipares o Soro, a mutação vira o Peão na Dra. Nova (e continua a ser uma Dama para as regras).'], ...ATT('um frasco de energia verde-água rebenta na peça inimiga.')]
     }),
     eq_bussola_tesouro: D({
       id: 'eq_bussola_tesouro', icon: 'bussola_dourada', name: 'Marina', title: 'A Caçadora de Tesouros', role: 'attack', c1: '#0077B6', c2: '#FFB703', fx: 'COIN',
-      say: { summon: 'Rumo ao tesouro!', strike: 'Este saque é meu!' }, ms: { summon: 6500, strike: 4000 }, tabs: { summon: 'Invocação', strike: 'Golpe' },
+      say: { summon: 'Rumo ao tesouro!', strike: 'Este saque é meu!' }, ms: { summon: 6500, strike: 6000 }, hit: 0.5, tabs: { summon: 'Invocação', strike: 'Golpe' },
       about: [['Invocar', 'ao equipares a Bússola, a peça transforma-se na Marina.'], ...ATT('um raio dourado cheio de moedas acerta na peça inimiga (e rouba a carta, como diz a Bússola).')]
     }),
     eq_trono_glaciar: D({
       id: 'eq_trono_glaciar', icon: 'trineu_glaciar', name: 'Yuki', title: 'A Princesa da Neve', role: 'power', c1: '#0077B6', c2: '#90E0EF', fx: 'ICE',
-      say: { summon: 'O inverno chegou!', strike: 'Tempestade Glaciar!' }, ms: { summon: 5400, strike: 4000 }, tabs: { summon: 'Invocação', strike: 'Poder' },
+      say: { summon: 'O inverno chegou!', strike: 'Tempestade Glaciar!' }, ms: { summon: 5400, strike: 5500 }, hit: 0.62, tabs: { summon: 'Invocação', strike: 'Poder' },
       about: [['Invocar', 'ao equipares o Trineu, a peça transforma-se na Yuki.'], ['No tabuleiro', 'a peça passa a ser a própria Yuki.'],
         ['Poder', 'sempre que congela as peças à volta, entra o vídeo dela e uma onda de gelo sai do Trineu.']]
     }),
