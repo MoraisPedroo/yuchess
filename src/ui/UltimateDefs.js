@@ -52,7 +52,7 @@
     }),
     eq_canhao_homem_bala: D({
       id: 'eq_canhao_homem_bala', icon: 'canhao_circo', name: 'Lola', title: 'A Mestra do Circo', role: 'power', c1: '#D90429', c2: '#FFB703', fx: 'CONFETTI',
-      say: { summon: 'Senhoras e senhores!', strike: 'Fogo no canhão!' }, ms: { summon: 6500, strike: 4000 }, tabs: { summon: 'Invocação', strike: 'Poder' },
+      say: { summon: 'Senhoras e senhores!', strike: 'Fogo no canhão!' }, ms: { summon: 6500, strike: 6000 }, hit: 0.43, tabs: { summon: 'Invocação', strike: 'Poder' },
       about: [['Invocar', 'ao equipares o Canhão, a peça transforma-se na Lola.'], ['No tabuleiro', 'a peça passa a ser a própria Lola.'],
         ['Poder', 'quando o Canhão dispara, entra o vídeo dela e o Peão voa entre confetes.']]
     }),
