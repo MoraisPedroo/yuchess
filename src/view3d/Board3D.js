@@ -26,12 +26,17 @@
       this.fx = fxLayer;
 
       const r = this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true, powerPreference: 'high-performance' });
-      r.setPixelRatio(Math.min(window.devicePixelRatio || 1, matchMedia('(pointer: coarse)').matches ? 1.25 : 1.5));
+      // nitidez: no computador desenha a 2× e o navegador reduz (as figuras pequenas ficavam "borradas" a 1×);
+      // se os quadros ficarem lentos, desce sozinho (adaptQuality); no telemóvel fica em 1,25×
+      this.prMax = matchMedia('(pointer: coarse)').matches ? Math.min(window.devicePixelRatio || 1, 1.25) : 2;
+      r.setPixelRatio(this.prMax);
       r.toneMapping = THREE.ACESFilmicToneMapping;
       r.toneMappingExposure = 1.35;
       this.scene = new THREE.Scene();
       this.camera = new THREE.PerspectiveCamera(40, 16 / 9, 0.1, 120);
       this.composer = new A.EffectComposer(r);
+      // o antialias do renderer não vale com pós-processamento: MSAA nos alvos do composer (WebGL2)
+      if (r.capabilities.isWebGL2) for (const t of [this.composer.renderTarget1, this.composer.renderTarget2]) t.samples = 4;
       this.composer.addPass(new A.RenderPass(this.scene, this.camera));
       // bloom fraco: só as faíscas e os efeitos (cores > 1) brilham; tabuleiro e HUD ficam mate
       this.bloom = new A.UnrealBloomPass(new THREE.Vector2(640, 360), 0.28, 0.15, 0.95);
@@ -115,9 +120,27 @@
       if (this.fitBackground) this.fitBackground();
     }
 
+    /** Qualidade adaptativa: a cada ~90 quadros, se a média passar de 22 ms, desce a resolução (2 → 1,5 → 1). */
+    adaptQuality(raw) {
+      if (document.hidden || raw > 0.25) return;   // separador escondido ou pausa: não conta
+      const q = this.q || (this.q = { n: 0, sum: 0 });
+      q.n++; q.sum += raw;
+      if (q.n < 90) return;
+      const avg = q.sum / q.n;
+      q.n = 0; q.sum = 0;
+      const pr = this.renderer.getPixelRatio();
+      if (avg > 0.022 && pr > 1) {
+        const next = Math.max(1, pr - 0.5);
+        this.renderer.setPixelRatio(next);
+        this.composer.setPixelRatio(next);
+        this.layout();
+      }
+    }
+
     tick() {
-      const t = this.clock.getElapsedTime(), dt = Math.min(0.05, t - (this.lastT || t));
+      const t = this.clock.getElapsedTime(), raw = t - (this.lastT || t), dt = Math.min(0.05, raw);
       this.lastT = t;
+      this.adaptQuality(raw);
       if (this.fxStep) this.fxStep(dt);
       if (this.crest) this.crest.material.uniforms.uTime.value = t;
       if (this.hoverDirty) { this.hoverDirty = false; this.pick(this.lastPointer); }

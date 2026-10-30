@@ -97,7 +97,7 @@
     gltf.scene.traverse((o) => { if (o.isMesh) meshes.push(o); });
     meshes.forEach((o) => {
       o.material = Array.isArray(o.material) ? o.material.map(stylize) : stylize(o.material);
-      if (o.material.map) o.material.map.anisotropy = 4;
+      if (o.material.map) o.material.map.anisotropy = 16;   // o Three limita ao máximo da placa
       o.castShadow = o.receiveShadow = false;
       if (opts.outline && !o.isSkinnedMesh && YC.T3) YC.T3.addOutline(o, opts.outline);
     });
