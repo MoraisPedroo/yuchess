@@ -65,22 +65,22 @@
     }),
     rt_espelho_magico: D({
       id: 'rt_espelho_magico', icon: 'rubber_mirror', name: 'Mira', title: 'A Ilusionista do Espelho', role: 'card', c1: '#12B5CB', c2: '#F538A0', fx: 'GLASS',
-      say: { summon: 'Devolve ao remetente!' }, tabs: { summon: 'Ativação' }, cast: { at: 'defender', to: 'attacker', text: 'BOING!' },
+      say: { summon: 'Devolve ao remetente!' }, ms: { summon: 5600 }, tabs: { summon: 'Ativação' }, cast: { at: 'defender', to: 'attacker', text: 'BOING!' },
       about: [['Ativar', 'quando o Espelho dispara, entra o vídeo da Mira.'], ['No tabuleiro', 'a Mira aparece na peça atacada e devolve o ataque a quem o fez.']]
     }),
     rt_truque_desaparecer: D({
       id: 'rt_truque_desaparecer', icon: 'truque_magica', name: 'Luna', title: 'A Mágica Relâmpago', role: 'card', c1: '#9D0208', c2: '#FFB703', fx: 'SMOKE',
-      say: { summon: 'Puf! Já não estou aqui!' }, tabs: { summon: 'Ativação' }, cast: { at: 'defender', text: 'PUF!' },
+      say: { summon: 'Puf! Já não estou aqui!' }, ms: { summon: 6000 }, tabs: { summon: 'Ativação' }, cast: { at: 'defender', text: 'PUF!' },
       about: [['Ativar', 'quando o Truque dispara, entra o vídeo da Luna.'], ['No tabuleiro', 'a Luna aparece na peça atacada e some com ela numa nuvem de fumo.']]
     }),
     rt_injuncao_suprema: D({
       id: 'rt_injuncao_suprema', icon: 'veto_supremo', name: 'Aiko', title: 'A Juíza Suprema', role: 'card', c1: '#9D0208', c2: '#E2E8F0', fx: 'IMPACT',
-      say: { summon: 'Veto! Captura anulada!' }, tabs: { summon: 'Ativação' }, cast: { at: 'defender', to: 'attacker', text: 'VETO!' },
+      say: { summon: 'Veto! Captura anulada!' }, ms: { summon: 5400 }, tabs: { summon: 'Ativação' }, cast: { at: 'defender', to: 'attacker', text: 'VETO!' },
       about: [['Ativar', 'quando o Veto dispara, entra o vídeo da Aiko.'], ['No tabuleiro', 'a Aiko aparece na peça atacada e o martelo dela acerta em quem atacou.']]
     }),
     ct_apito_juiz: D({
       id: 'ct_apito_juiz', icon: 'golden_whistle', name: 'Rin', title: 'A Árbitra Suprema', role: 'card', c1: '#FB8500', c2: '#FFE066',
-      say: { summon: 'Falta! Jogada anulada!' }, tabs: { summon: 'Ativação' },
+      say: { summon: 'Falta! Jogada anulada!' }, ms: { summon: 5500 }, tabs: { summon: 'Ativação' },
       about: [['Ativar', 'quando ativas o Apito, entra o vídeo da Rin a apitar.'], ['Depois', 'a carta do adversário é anulada como sempre (carimbo "NEGADO!").']]
     }),
     ct_clausula_rescisao: D({
