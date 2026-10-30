@@ -41,7 +41,9 @@ bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
 for o in [o for o in bpy.context.scene.objects if o.type == 'EMPTY']:
     bpy.data.objects.remove(o)
 
-# rotação à volta do eixo vertical (Blender: Z para cima; a frente do glTF +Z é -Y no Blender)
+# rotação à volta do eixo vertical (Blender: Z para cima; a frente do glTF +Z é -Y no Blender).
+# O importador do glTF usa quaterniões: passar a XYZ, senão a rotação em graus era ignorada.
+obj.rotation_mode = 'XYZ'
 obj.rotation_euler[2] += math.radians(opt['--rot'])
 bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
@@ -59,6 +61,16 @@ for v in me.vertices:
 k = opt['--height'] / h if h > 1e-6 else 1
 obj.scale = (k, k, k)
 bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+# as normais importadas (custom split normals) estragam o sombreado depois de decimar: fora com elas
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_all(action='SELECT')
+bpy.ops.mesh.remove_doubles(threshold=0.0005)
+bpy.ops.object.mode_set(mode='OBJECT')
+try:
+    bpy.ops.mesh.customdata_custom_splitnormals_clear()
+except RuntimeError:
+    pass
 
 # menos triângulos (colapso de arestas mantém a textura)
 tris = sum(len(p.vertices) - 2 for p in me.polygons)
@@ -90,13 +102,19 @@ if opt['--preview']:
     cam.data.ortho_scale = H * 2.3
     sc.collection.objects.link(cam)
     sc.camera = cam
-    # duas vistas lado a lado: frente (-Y no Blender = +Z no Three) e 3/4 por cima (como a câmara do jogo)
-    obj2 = obj.copy()
-    obj2.data = obj.data
-    sc.collection.objects.link(obj2)
-    obj.location.x = -H * 0.55
-    obj2.location.x = H * 0.55
-    obj2.rotation_euler[2] = math.radians(35)
+    # três vistas lado a lado: frente (-Y no Blender = +Z no Three), 3/4 e de lado
+    cam.data.ortho_scale = H * 3.4
+    sc.render.resolution_x = 1536
+    copies = [obj]
+    for _ in range(2):
+        o2 = obj.copy()
+        sc.collection.objects.link(o2)
+        copies.append(o2)
+    for i, (o2, ang) in enumerate(zip(copies, (0, 40, 90))):
+        o2.rotation_mode = 'XYZ'
+        o2.rotation_euler = (0, 0, math.radians(ang))
+        o2.location = ((i - 1) * H * 0.95, 0, 0)
+    bpy.context.view_layer.update()
     cam.location = (0, -10, H * 0.5)
     cam.rotation_euler = (math.radians(90), 0, 0)
     sc.render.filepath = opt['--preview']

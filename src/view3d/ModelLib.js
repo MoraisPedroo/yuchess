@@ -33,7 +33,9 @@
     const THREE = T();
     const m = new THREE.MeshStandardMaterial({
       map: src.map || null, color: src.map ? 0xffffff : (src.color || new THREE.Color(0xffffff)),
-      roughness: 0.68, metalness: 0.05, envMap: YC.T3 && YC.T3.env || null, envMapIntensity: 0.32,
+      roughness: 0.6, metalness: 0.05, envMap: YC.T3 && YC.T3.env || null, envMapIntensity: 0.32,
+      // um pouco de luz própria a partir da textura: com as luzes baixas do palco o marfim ficava cinzento
+      emissive: src.map ? 0xffffff : 0x000000, emissiveMap: src.map || null, emissiveIntensity: 0.32,
       transparent: false, side: THREE.FrontSide
     });
     m.onBeforeCompile = (sh) => { sh.fragmentShader = sh.fragmentShader.replace('#include <opaque_fragment>', RIM); };

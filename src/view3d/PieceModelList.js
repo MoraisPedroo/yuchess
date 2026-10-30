@@ -3,5 +3,7 @@
 (function (YC) {
   'use strict';
   YC.PIECE_MODEL_FILES = {
+    pw: 'assets/models/pieces/p_w.glb',
+    rw: 'assets/models/pieces/r_w.glb'
   };
 })(typeof window !== 'undefined' ? (window.YC = window.YC || {}) : (globalThis.YC = globalThis.YC || {}));
