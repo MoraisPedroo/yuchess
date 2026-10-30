@@ -72,7 +72,7 @@
 
     // ───────────── cut-in em ecrã inteiro ─────────────
     /** kind: 'summon' (invocação) | 'strike' (golpe/defesa). Resolve quando acaba (ou quando se toca para saltar). */
-    cutIn(d, kind = 'summon') {
+    cutIn(d, kind = 'summon', { maxMs = 0 } = {}) {
       return new Promise((done) => {
         const g = G(), quiet = calm(), fast = YC.FX && YC.FX.speed > YC.FX.NORMAL;
         const el = document.createElement('div');
@@ -99,7 +99,7 @@
           done();
         };
         el.addEventListener('click', finish);
-        const rate = fast ? 1.4 : 1, ms = quiet ? 1100 : d.ms[kind] / rate;
+        const rate = fast ? 1.4 : 1, ms = quiet ? 1100 : Math.min(d.ms[kind], maxMs || Infinity) / rate;
         if (v) {
           v.playbackRate = rate;
           v.addEventListener('playing', () => el.classList.add('vplay'), { once: true });
@@ -109,7 +109,7 @@
           v.addEventListener('error', still, { once: true });
           const p = v.play(); if (p && p.catch) p.catch(still);
         }
-        timer = setTimeout(finish, ms + 900);
+        timer = setTimeout(finish, ms + (maxMs ? 0 : 900));
         S(kind === 'summon' ? 'reveal_legend' : kind === 'guard' ? 'shield_clang' : 'sword_draw');
         if (g && !quiet) {
           g.fromTo(el.querySelector('.ult-veil'), { opacity: 0 }, { opacity: 1, duration: 0.2 });
@@ -190,7 +190,9 @@
           b.sparks(w.x, 0.8, w.z, h2, { n: 30, speed: 2.4 });
           b.text3D(w.x, 1.9, w.z, d.name.toUpperCase(), d.c2, 1);
           const fig = b.el(piece.id) && b.el(piece.id).getObjectByName('ultFigure');
-          if (fig && G()) await G().fromTo(fig.scale, { x: 0.01, y: 0.01 }, { x: fig.scale.x, y: fig.scale.y, duration: 0.6, ease: 'back.out(2)' });
+          // personagem em 3D: cai do alto e aterra (UltModels); de cartão: cresce no sítio
+          if (fig && fig.userData.kind === 'model' && b.ultLand) await b.ultLand(fig, sq, d);
+          else if (fig && G()) await G().fromTo(fig.scale, { x: 0.01, y: 0.01 }, { x: fig.scale.x, y: fig.scale.y, duration: 0.6, ease: 'back.out(2)' });
         } else {
           const [x, y] = an.xy(sq);
           YC.FX.ring(b.fx, x, y, d.c2, 0.4);
@@ -213,7 +215,9 @@
       try {
         await before();
         d = (U.fusionOf && U.fusionOf(piece, an.ui.match)) || DEFS[id];
-        await (d.role === 'fusion' && U.fusionIntro ? U.fusionIntro(d) : U.cutIn(d, 'summon'));
+        // com a personagem em 3D o vídeo fica curto (a transformação acontece no tabuleiro)
+        const in3D = YC.UltModels && YC.UltModels.has(d.icon);
+        await (d.role === 'fusion' && U.fusionIntro ? U.fusionIntro(d) : U.cutIn(d, 'summon', in3D ? { maxMs: 2800 } : {}));
       } finally { U.hold.delete(piece.id); }
       if (d) await U.revealAt(an, piece, d);
     },

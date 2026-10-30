@@ -94,6 +94,20 @@
     async ultPop(sq, d, hold = 800) {
       const THREE = window.THREE, g = G(), w = this.sqWorld(sq), H = 1.45;
       this.fxInit();
+      // personagem em 3D (UltModels): aparece na casa e aterra; senão a figura de cartão
+      const UM = YC.UltModels;
+      if (UM) UM.want(d.icon);
+      const fig = UM && UM.make(d.icon);
+      if (fig) {
+        fig.position.set(w.x, 0.02, w.z);
+        fig.traverse((o) => { o.raycast = () => {}; });
+        this.fxGroup.add(fig);
+        if (this.ultLand) await this.ultLand(fig, sq, d); else await wait(300);
+        await wait(hold);
+        if (g) await g.to(fig.scale, { x: 0.01, y: fig.scale.y * 1.3, z: 0.01, duration: 0.22, ease: 'power2.in' });
+        this.fxGroup.remove(fig);
+        return;
+      }
       const tex = this.ultTex(d);
       const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, color: 0xB8B8B8, transparent: true, alphaTest: 0.35, fog: false }));
       const ratio = tex.image && tex.image.width ? tex.image.width / tex.image.height : 0.55;

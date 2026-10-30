@@ -375,3 +375,28 @@ white background, no ground shadow, no text, no logo, no watermark. Square image
 | Bispo | *a cute chibi battle cleric … a tall rounded pointed mitre hat with the classic diagonal slit cut near the top and a small gold ball on the tip, a long flared robe … holding a short golden staff topped with a small sun orb* | feita |
 | Dama | *a cute chibi sorceress queen … a tall radiant gold crown with seven sharp points each tipped with a small round pearl … an elegant hourglass gown that flares wide at the bottom … a small glowing blue crystal orb floating above her open right hand* | feita |
 | Rei | *a cute chibi monarch … a tall imperial gold crown topped with a prominent cross, a big ermine-trimmed royal blue mantle, a friendly mustache, holding a short scepter* | feita |
+
+## Ultimates em 3D (modelos .glb, 2026-10-30)
+
+As personagens deixam de ser uma figura de cartão no tabuleiro: `src/view3d/UltModels.js` usa o modelo quando existe
+`assets/models/ultimate/<icone>.glb` (linha em `src/view3d/UltModelList.js`), carrega-o só quando a partida precisa
+dele, faz a aterragem 3D depois do vídeo de invocação (que fica curto, 2,8 s) e também a aparição das Armadilhas.
+
+1. **Imagem 3D da personagem** (Gemini, na conversa das peças, "Criar imagem" 1:1, a anexar
+   `_tmp_art/ult3d/<icone>_ref.png` = o `hero.png` sobre branco): *Create a new image: turn the attached anime character
+   illustration (<Nome>, <título>, with <adereços>) into a real 3D CGI character model of the same chess set as the pieces
+   above, NOT a 2D drawing: full 3D volume and soft 3D shading like the Pawn and the Rook figures, smooth vinyl-toy
+   materials, no ink outlines, no cel shading, no flat colors. Keep 100% of the character's design: the same face, hair
+   style and color, outfit, colors and props as the attached image. Chibi heroic proportions about 1:2.5, full body,
+   three-quarter front view, standing in a relaxed pose with the props held close to the body, centered, the entire
+   figure visible from head to feet, plain pure white background, no ground shadow, no text, no logo, no watermark.
+   Square image.* + *Use chibi proportions with a big head and a short body, like Akane.* (sem isto o Kaito saiu
+   alto). Sem "NOT a 2D drawing…" o Gemini devolvia outra vez um desenho com contorno a tinta. Guardar em
+   `_tmp_art/ult3d/<icone>_3d.png` (camada branca + 2 zooms + `stitch.py`).
+2. **3D**: `python tools/trellis.py _tmp_art/ult3d/<icone>_3d.png bruto.glb` (2 por dia na conta gratuita).
+3. **Limpar**: `blender … tools/blender-piece.py -- bruto.glb limpo.glb --height 1.2 --tris 12000 --preview vista.png`.
+4. **Comprimir**: `gltf-transform optimize limpo.glb assets/models/ultimate/<icone>.glb --compress meshopt
+   --texture-compress webp --texture-size 2048 --simplify false` e a linha no `UltModelList.js`.
+
+Imagens 3D feitas: Akane (`royal_scepter`), Kaito (`escudo_antitumulto`), Akaito (`fusao_real`), Riku
+(`exoesqueleto_robo`), Nova (`soro_alfa`).

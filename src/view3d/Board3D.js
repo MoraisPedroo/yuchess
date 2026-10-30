@@ -83,6 +83,7 @@
       // um modelo .glb de peça acabou de carregar (PieceModels): troca os corpos no próximo sync
       this.onModels = () => { if (this.match) this.sync(this.match, { viewer: this.viewer }); };
       window.addEventListener('yc-piece-models', this.onModels);
+      window.addEventListener('yc-ult-models', this.onModels);   // e o de uma personagem das Ultimates (UltModels)
 
       this.canvas.addEventListener('pointermove', (e) => { this.lastPointer = e; this.hoverDirty = true; });
       this.canvas.addEventListener('pointerleave', () => { this.lastPointer = null; this.setHover(null); });
@@ -259,6 +260,7 @@
       if (window.gsap) window.gsap.ticker.remove(this.tick); else cancelAnimationFrame(this.raf);
       window.removeEventListener('resize', this.onResize);
       window.removeEventListener('yc-piece-models', this.onModels);
+      window.removeEventListener('yc-ult-models', this.onModels);
       if (this.ro) this.ro.disconnect();
       if (this.envTex) this.envTex.dispose();
       if (YC.Portraits3D) YC.Portraits3D.detach(this.renderer);

@@ -20,7 +20,7 @@
       const tex = textures[d.icon] = new THREE.TextureLoader().load(YC.Ultimate.hero(d), (t) => {
         for (const gg of this.pieceEls.values()) {
           const f = gg.getObjectByName('ultFigure');
-          if (f && f.userData.icon === d.icon) f.scale.set(FIG_H * (t.image.width / t.image.height), FIG_H, 1);
+          if (f && f.userData.icon === d.icon && f.userData.kind === 'sprite') f.scale.set(FIG_H * (t.image.width / t.image.height), FIG_H, 1);
         }
       });
       tex.colorSpace = THREE.SRGBColorSpace;
@@ -33,18 +33,28 @@
       if (!hold) return;
       const body = hold.getObjectByName('body');
       let fig = hold.getObjectByName('ultFigure');
-      if (d && (!fig || fig.userData.icon !== d.icon)) {
+      // modelo 3D da personagem (UltModels) se já carregou; senão a figura de cartão
+      const UM = YC.UltModels;
+      if (d && UM) UM.want(d.icon);
+      const kind = d && UM && UM.has(d.icon) ? 'model' : 'sprite';
+      if (d && (!fig || fig.userData.icon !== d.icon || fig.userData.kind !== kind)) {
         if (fig) hold.remove(fig);
-        const THREE = T(), tex = this.ultTex(d);
-        // a exposição alta do palco (ACES, no fim do composer) desbota a arte: a cor escurecida compensa
-        fig = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, color: 0xB8B8B8, transparent: true, alphaTest: 0.35, fog: false }));
+        if (kind === 'model') {
+          fig = UM.make(d.icon);
+          fig.traverse((o) => { o.raycast = () => {}; });
+        } else {
+          const THREE = T(), tex = this.ultTex(d);
+          // a exposição alta do palco (ACES, no fim do composer) desbota a arte: a cor escurecida compensa
+          fig = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, color: 0xB8B8B8, transparent: true, alphaTest: 0.35, fog: false }));
+          fig.center.set(0.5, 0);
+          fig.position.y = 0.1;
+          const ratio = tex.image ? tex.image.width / tex.image.height : 0.55;
+          fig.scale.set(FIG_H * ratio, FIG_H, 1);
+          fig.raycast = () => {};
+          fig.userData.kind = 'sprite';
+        }
         fig.name = 'ultFigure';
         fig.userData.icon = d.icon;
-        fig.center.set(0.5, 0);
-        fig.position.y = 0.1;
-        const ratio = tex.image ? tex.image.width / tex.image.height : 0.55;
-        fig.scale.set(FIG_H * ratio, FIG_H, 1);
-        fig.raycast = () => {};
         hold.add(fig);
       }
       if (fig) fig.visible = !!d;
