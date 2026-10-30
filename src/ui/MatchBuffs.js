@@ -10,7 +10,7 @@
   const sqN = (sq) => YC.Chess.sqName(sq).toUpperCase();
   // o que cada Equipamento faz a quem joga CONTRA ele: [tipo, frase para o adversário, frase para o dono]
   const AGAINST = {
-    eq_escudo_choque: ['forbid', 'Não podes dar xeque ao Rei dele com lances enquanto esta peça tiver Escudo.', 'O adversário não pode dar xeque ao teu Rei com lances enquanto esta peça tiver Escudo.'],
+    eq_escudo_choque: ['forbid', 'Escudo de pé: não podes dar xeque ao Rei dele com lances. Parte o Escudo desta peça e a proteção acaba.', 'Escudo de pé: o adversário não pode dar xeque ao teu Rei com lances. Se o Escudo desta peça partir, a proteção acaba.'],
     eq_balanca_justica: ['forbid', 'Só tens 1 ação de carta por turno enquanto esta peça estiver em jogo.', 'O adversário só tem 1 ação de carta por turno.'],
     eq_capa_magnetica: ['forbid', 'Os teus Peões não podem capturar esta peça.', 'Os Peões inimigos não a podem capturar.'],
     eq_colete_balas: ['forbid', 'Os teus Peões não podem capturar esta peça.', 'Os Peões inimigos não a podem capturar.'],
@@ -40,7 +40,7 @@
           const kind = a ? a[0] : 'buff';
           let note = a ? a[mine ? 2 : 1] : '';
           if (p.silenced) note = `Desligado durante mais ${left(p.silencedUntil)}: não faz efeito.`;
-          else if (id === 'eq_escudo_choque' && !p.shield) note = 'A peça perdeu o Escudo: já não protege o Rei do xeque.';
+          else if (id === 'eq_escudo_choque' && !p.shield) note = mine ? 'O Escudo desta peça partiu: a carta continua equipada, mas o teu Rei já pode levar xeque.' : 'O Escudo desta peça partiu: já podes dar xeque ao Rei dele.';
           out.push({ key: `${id}@${sq}${off ? '-' : ''}`, card: c, kind: off ? 'off' : kind, where: piece, note, text: c.text });
         }
         for (const [k, icon, label, what] of STATUS) {

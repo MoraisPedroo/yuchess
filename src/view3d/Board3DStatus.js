@@ -7,6 +7,7 @@
   const T = () => window.THREE;
   const T3 = () => YC.T3;
   const TAG = [['untargetable', 'PRESA', '#FB8500'], ['noCap', 'SEM ATAQUE', '#F8FAFC'], ['silenced', 'DESLIGADA', '#94A3B8']];
+  const GUARD = ['guard', 'SEM XEQUE', '#48CAE4'];   // Rei protegido pelo Escudo Tático (enquanto o Escudo estiver de pé)
 
   /** Textura de barreira: listras amarelas e escuras na diagonal, com contorno. */
   const barrierTex = () => T3().canvasTex('barrier', 128, 128, (g, w) => {
@@ -16,6 +17,17 @@
     for (let x = -w; x < w * 2; x += 32) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x + 16, 0); g.lineTo(x + 16 - w, w); g.lineTo(x - w, w); g.closePath(); g.fill(); }
     g.restore();
     g.lineWidth = 8; g.strokeStyle = '#0F141C'; g.strokeRect(4, 4, w - 8, w - 8);
+  });
+
+  /** Placa do Rei protegido: pílula escura com contorno, risca ciano e texto branco (lê-se de longe). */
+  const guardTex = () => T3().canvasTex('guardPill', 256, 72, (g, w, h) => {
+    const r = 18, x = 6, y = 8, W = w - 12, H = h - 16;
+    g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + W, y, x + W, y + H, r); g.arcTo(x + W, y + H, x, y + H, r); g.arcTo(x, y + H, x, y, r); g.arcTo(x, y, x + W, y, r); g.closePath();
+    g.fillStyle = '#0B3A4A'; g.fill(); g.lineWidth = 6; g.strokeStyle = '#0F141C'; g.stroke();
+    g.fillStyle = '#48CAE4'; g.fillRect(x + 22, y + 4, W - 44, 5);
+    g.font = '800 30px "Plus Jakarta Sans", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.lineWidth = 6; g.strokeStyle = '#0F141C'; g.strokeText('SEM XEQUE', w / 2, h / 2 + 4);
+    g.fillStyle = '#F8FAFC'; g.fillText('SEM XEQUE', w / 2, h / 2 + 4);
   });
 
   Object.assign(YC.Board3D.prototype, {
@@ -78,15 +90,15 @@
 
     /** Etiqueta do estado mais importante por cima da peça (ou nenhuma). */
     syncStatus(g, p, h) {
-      const THREE = T(), st = TAG.find(([k]) => p[k]);
+      const THREE = T(), st = TAG.find(([k]) => p[k]) || (p.type === 'k' && this.guards && this.guards[p.color] ? GUARD : null);
       const tag = this.accessory(g, 'statusTag', !!st, () => new THREE.Sprite(new THREE.SpriteMaterial({ depthTest: false })));
       if (!tag || !st) return;
       if (g.userData.statusKey !== st[0]) {
         g.userData.statusKey = st[0];
-        tag.material.map = T3().textLabel ? T3().textLabel(st[1], st[2]) : T3().label(st[1], st[2]);
+        tag.material.map = st === GUARD ? guardTex() : T3().textLabel ? T3().textLabel(st[1], st[2]) : T3().label(st[1], st[2]);
         tag.material.needsUpdate = true;
       }
-      tag.scale.set(0.9, 0.225, 1);
+      if (st === GUARD) tag.scale.set(1.15, 0.32, 1); else tag.scale.set(0.9, 0.225, 1);
       tag.position.set(0, h + 0.48, 0);
     }
   });

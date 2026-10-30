@@ -95,7 +95,7 @@
       if (checked) return `Estás em xeque e este lance não o resolve: o teu Rei continuava atacado (${list(att)}). Tapa o xeque, captura quem o dá ou foge com o Rei.`;
       return `${The(t)} está ${adj(t, 'cravad')}: se sair daí, o teu Rei fica em xeque (${list(att)}).`;
     }
-    if (guardHit) return `O Rei inimigo está protegido pelo ${card('eq_escudo_choque')}: não lhe podes dar xeque com um lance.`;
+    if (guardHit) return `O Rei inimigo está protegido pelo ${card('eq_escudo_choque')}: enquanto a peça que o tem estiver com o Escudo de pé, não lhe podes dar xeque com um lance. Parte-lhe o Escudo primeiro.`;
     return 'Este lance não é permitido agora.';
   }
 

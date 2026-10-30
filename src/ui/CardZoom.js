@@ -27,9 +27,16 @@
         card.style.setProperty('--cw', `${width}px`);
         wrap.style.width = `${width}px`;
         wrap.appendChild(card);
+        // velocidade explicada: o que esta carta responde e quem lhe responde
+        const c = YC.Cards.get(id), sp = c && YC.HoloCard.speedInfo ? YC.HoloCard.speedInfo(c) : null, esc = YC.HoloCard.esc;
+        if (sp) wrap.insertAdjacentHTML('beforeend', `<div class="cz-speed s${c.ss}"><b>${YC.Icon ? YC.Icon({ 1: 'chevron', 2: 'wings', 3: 'bolt' }[c.ss], { size: 16 }) : ''}${esc(sp.title)}</b><span>${esc(sp.can)}</span><span>${esc(sp.by)}</span></div>`);
         if (caption) wrap.insertAdjacentHTML('beforeend', `<div class="cz-cap">${YC.Icon ? YC.Icon('pin', { size: 18 }) : ''}${YC.HoloCard.esc(caption)}</div>`);
         document.body.appendChild(wrap);
-        const r = target.getBoundingClientRect(), w = width, h = w * 1.4 + (caption ? 50 : 0), gap = 18;
+        // ecrã baixo: a carta encolhe para caber com a velocidade e a legenda por baixo
+        const extra = () => [...wrap.children].slice(1).reduce((t, e) => t + e.offsetHeight + 12, 0);
+        const fitW = Math.floor((innerHeight - 16 - extra()) / 1.4);
+        if (fitW < width) { width = Math.max(170, fitW); card.style.setProperty('--cw', `${width}px`); wrap.style.width = `${width}px`; }
+        const r = target.getBoundingClientRect(), w = width, gap = 18, h = w * 1.4 + extra();
         let x;
         if (side === 'left' || (side === 'auto' && r.right + gap + w > innerWidth)) x = r.left - gap - w;
         else x = r.right + gap;

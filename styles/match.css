@@ -92,6 +92,13 @@ body.in-match .toast { max-width: 300px; }
 .drag-ghost.bad .hc-face { box-shadow: 0 0 0 3px var(--color-danger), 0 26px 34px rgba(0, 0, 0, .5); }
 /* zoom de carta (estilo Hearthstone) */
 .card-zoom { position: fixed; z-index: 95; pointer-events: none; transform-origin: 50% 50%; filter: drop-shadow(0 18px 26px rgba(0, 0, 0, .6)); }
+.cz-speed { display: flex; flex-direction: column; gap: 3px; margin-top: 10px; padding: 8px 11px; font-size: 12.5px; line-height: 1.35; color: var(--text-main);
+  background: var(--surface-2); border: 2.5px solid var(--border-ink); border-radius: 10px; box-shadow: 0 4px 0 #090C10, inset 4px 0 0 #94A3B8; }
+.cz-speed.s2 { box-shadow: 0 4px 0 #090C10, inset 4px 0 0 #00B4D8; } .cz-speed.s3 { box-shadow: 0 4px 0 #090C10, inset 4px 0 0 #FFB703; }
+.cz-speed b { display: flex; align-items: center; gap: 5px; font-size: 13.5px; font-weight: 800; }
+.cz-speed span + span { color: var(--text-muted, #A7B0BE); }
+.hc-tip .tip-speed { font-size: 12px; line-height: 1.35; padding-left: 7px; border-left: 3px solid #94A3B8; }
+.hc-tip .tip-speed.s2 { border-left-color: #00B4D8; } .hc-tip .tip-speed.s3 { border-left-color: #FFB703; }
 .cz-cap { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 12px; padding: 7px 10px; text-align: center; font-weight: 800; font-size: 14px; color: var(--text-main);
   background: var(--surface-2); border: 2.5px solid var(--border-ink); border-radius: 10px; box-shadow: 0 4px 0 #090C10, inset 0 4px 0 var(--color-primary); }
 

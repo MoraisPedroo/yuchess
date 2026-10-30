@@ -111,6 +111,7 @@
         // Ultimate (Ultimates.js): a peça passa a ser a personagem
         const ult = YC.Ultimate && YC.Ultimate.forPiece(p, m);
         el.classList.toggle('ult-ward', p.type === 'k' && !!YC.Ultimate && YC.Ultimate.wardFor(m, p.color));
+        el.classList.toggle('k-guard', p.type === 'k' && YC.Chess.guarded(m.pos, p.color));   // Escudo Tático de pé
         if (ult && !el.querySelector('.ult-fig')) el.querySelector('.squash').innerHTML = `<img class="ult-fig" src="${YC.Ultimate.hero(ult)}" alt="" draggable="false">`;
         else if (!ult && el.querySelector('.ult-fig')) { el.dataset.type = ''; this.renderType(el, p); }
         el.classList.toggle('ult-form', !!ult);

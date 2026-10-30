@@ -70,6 +70,9 @@
       if (this.fx) this.fx._unit = this.unit();
       const turn = m.state.turnCount, seen = new Set();
       const checked = !m.state.winner && YC.Chess.inCheck(m.pos, m.state.active) ? YC.Chess.kingSquare(m.pos, m.state.active) : -1;
+      // Reis protegidos pelo Escudo Tático (só enquanto a peça tiver o Escudo de pé): etiqueta "SEM XEQUE"
+      const U = YC.Ultimate, held = (c) => !!(U && U.wardHold && U.wardHold.has(c));
+      this.guards = { w: YC.Chess.guarded(m.pos, 'w') && !held('w'), b: YC.Chess.guarded(m.pos, 'b') && !held('b') };
       m.pos.board.forEach((p, sq) => {
         if (!p) return;
         seen.add(p.id);

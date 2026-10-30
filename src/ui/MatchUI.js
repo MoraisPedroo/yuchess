@@ -292,8 +292,8 @@
       const how = { EQUIP: 'Arrasta para uma peça tua que brilhe.', GRID: 'Arrasta para uma casa vazia (filas 3 a 6). Fica escondida do adversário.',
         REACTIVE: 'Arrasta para a tua Zona: dispara quando acontece o que diz o texto.', COUNTER: 'Arrasta para a tua Zona: responde às cartas do adversário.',
         QUICK: 'Arrasta para o tabuleiro para ativar já, ou para a Zona para guardar.' }[c.kind];
-      const speed = { 1: 'não pode responder', 2: 'responde a VEL 1 e 2', 3: 'responde a qualquer carta' }[c.ss] || '';
-      return `<div class="hc-tip"><b>${esc(YC.Cards.KIND_LABEL[c.kind])}</b><span class="tip-meta"><em style="color:${R.color}">${R.label}</em> · VEL ${c.ss}: ${speed}</span><p>${how}</p><small>Ou clica na carta para ver as opções.</small></div>`;
+      const sp = YC.HoloCard.speedInfo(c);
+      return `<div class="hc-tip"><b>${esc(YC.Cards.KIND_LABEL[c.kind])}</b><span class="tip-meta"><em style="color:${R.color}">${R.label}</em> · ${sp.title}</span><p>${how}</p><p class="tip-speed s${c.ss}">${esc(sp.can)} ${esc(sp.by)}</p><small>Ou clica na carta para ver as opções.</small></div>`;
     }
 
     /** Passar o rato nas cartas da mesa 3D (Zona e Cemitério): zoom junto da carta. */

@@ -181,7 +181,7 @@
     ['eq_sirene_perseguicao', 'Sirene Emergência Giro', 'EQUIPMENT', 'EQUIP', 'EPIC', 1, { family: 'policia', shield: true, pieces: 'rq' },
       'Equipa uma Torre ou Dama. Recebe 1 Escudo e também se pode mover 1 casa na diagonal.', ['#2563EB', '#D90429', 'SIRENE_EMERGENCIA', 'magic_zap']],
     ['eq_escudo_choque', 'Escudo Tático Antitumulto', 'EQUIPMENT', 'EQUIP', 'LEGENDARY', 1, { family: 'policia', shield: true, pieces: 'pnbrq' },
-      'Equipa uma peça aliada. Recebe 1 Escudo. Enquanto o tiver, o adversário não pode dar xeque ao teu Rei com lances.', ['#2563EB', '#0F141C', 'ESCUDO_ANTITUMULTO', 'shield_clang']],
+      'Equipa uma peça aliada e dá-lhe 1 Escudo. Só enquanto esse Escudo estiver de pé é que o adversário não pode dar xeque ao teu Rei com lances. Se o Escudo partir, a proteção acaba.', ['#2563EB', '#0F141C', 'ESCUDO_ANTITUMULTO', 'shield_clang']],
     ['gt_barricada_picos', 'Tapete de Fita de Picos', 'GRID_TRAP', 'GRID', 'COMMON', 2, { family: 'policia' },
       'Escondida numa casa. A peça inimiga que a pise perde o Escudo e fica congelada 1 turno.', ['#2563EB', '#64748B', 'FITA_PICOS', 'glass']],
     ['gt_cone_sinalizacao', 'Cone de Trânsito Refletor', 'GRID_TRAP', 'GRID', 'RARE', 2, { family: 'policia' },

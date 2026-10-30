@@ -98,3 +98,5 @@ html.reduce-motion .piece.ult-ward .base-disc { animation: none; }
 .piece .ult-fig { height: 175%; width: auto; max-width: none; translate: 0 4%; filter: drop-shadow(0 4px 3px rgba(0, 0, 0, .5)); pointer-events: none; }
 .piece-insp.ult .pi-figure .ult-fig { height: 118%; translate: 0 -6%; }
 .pi-title b small { font-weight: 700; font-size: .7em; color: var(--text-muted); }
+/* Escudo Tático de pé (tabuleiro CSS de reserva): anel ciano no Rei — o 3D mostra a etiqueta "SEM XEQUE" */
+.piece.k-guard:not(.ult-ward) .base-disc { box-shadow: 0 0 0 3px #48CAE4; }

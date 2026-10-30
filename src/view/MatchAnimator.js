@@ -37,7 +37,7 @@
       on('piece:promote', ({ piece, sq }) => this.promote(piece, sq));
       on('capture:snapback', this.snapback);
       on('capture:miss', ({ to }) => this.at(to, 'FALHOU!', '#575B5F', 'spring_jump'));
-      on('shield:shatter', this.shieldShatter);
+      on('shield:shatter', async (p) => { await this.shieldShatter(p); await this.kingUnguarded(p); });
       on('shield:gain', (p) => (YC.Ultimate ? YC.Ultimate.onShieldGain(this, p) : this.shieldGain(p)), 8000);
       on('shield:divine', ({ sq }) => this.at(sq, 'ÉGIDE!', '#12B5CB', 'shield_clang', { ring: '#12B5CB', colors: ['#12B5CB', '#fff', '#FCC934'] }));
       on('shield:blocked', ({ sq }) => this.pop(sq, 'BLOQUEADO!', '#FA903E', 'error'));
@@ -200,6 +200,14 @@
       S('hop');
       if (a) await FX().to(a.querySelector('.squash'), { y: '-12%', scaleY: 1.1, duration: 0.18, ease: 'power2.out' });
       await FX().wait(160);
+    }
+
+    /** Partiu o Escudo de uma peça com o Escudo Tático: o Rei dela deixa de estar protegido do xeque (aviso no Rei). */
+    async kingUnguarded({ piece }) {
+      const m = this.ui.match;
+      if (!piece || !piece.equips.includes('eq_escudo_choque') || YC.Chess.guarded(m.pos, piece.color)) return;
+      const k = YC.Chess.kingSquare(m.pos, piece.color);
+      if (k >= 0) await this.pop(k, 'REI SEM ESCUDO!', '#FB8500', 'error');
     }
 
     shieldGain({ sq }) {

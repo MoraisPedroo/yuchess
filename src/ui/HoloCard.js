@@ -9,6 +9,21 @@
   const SS_LABEL = { 1: 'Velocidade 1', 2: 'Velocidade 2', 3: 'Velocidade 3' };
   const SPEED_ICON = { 1: 'chevron', 2: 'wings', 3: 'bolt' };
 
+  /** A velocidade explicada (Chain): o que esta carta pode responder e quem lhe pode responder. Uma carta só responde a
+      outra de velocidade igual ou menor, e nunca com Velocidade 1 (ChainResolver.linkOptions). */
+  const SPEED_HOW = {
+    EQUIP: 'Joga-se na tua vez e abre a Chain; não responde a cartas.',
+    GRID: 'Dispara sozinha quando uma peça inimiga pisa a casa; não responde a cartas.',
+    REACTIVE: 'Dispara sozinha quando acontece o que diz o texto (captura, destruição ou xeque); não responde a cartas.',
+    QUICK: 'Responde a cartas de Velocidade 1 e 2 (Equipamentos, Armadilhas e outras Magias Rápidas), mas não a Counter-Traps.',
+    COUNTER: 'A mais rápida: responde a qualquer carta (Velocidade 1, 2 ou 3).'
+  };
+  function speedInfo(card) {
+    const by = card.ss >= 3 ? 'Só outra carta de Velocidade 3 (Counter-Trap) lhe pode responder.'
+      : 'O adversário pode responder-lhe com Velocidade 2 (Magia Rápida) ou 3 (Counter-Trap).';
+    return { title: SS_LABEL[card.ss], can: SPEED_HOW[card.kind] || '', by };
+  }
+
   function esc(s) { return String(s).replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch])); }
 
   function faceHTML(card, opts = {}) {
@@ -25,7 +40,7 @@
     const gems = { COMMON: ic('gemCommon'), RARE: ic('gemRare'), EPIC: ic('gemEpic').repeat(3), LEGENDARY: ic('crown') }[card.rarity];
     return `<div class="hc-face">`
       + `<div class="hc-art" style="--c1:${card.theme.primary};--c2:${card.theme.secondary}"><div class="hc-rays"></div>${YC.ItemToken ? YC.ItemToken.cardArt(card) : YC.CardArt.svg(card)}${video}${alive}</div>`
-      + `<div class="hc-speed s${card.ss}" title="${SS_LABEL[card.ss]}">${ic(SPEED_ICON[card.ss])}<b>${card.ss}</b></div>`
+      + `<div class="hc-speed s${card.ss}" title="${esc(`${SS_LABEL[card.ss]}: ${speedInfo(card).can} ${speedInfo(card).by}`)}">${ic(SPEED_ICON[card.ss])}<b>${card.ss}</b></div>`
       + `<div class="hc-ribbon"><span class="hc-name${fit}">${esc(card.name)}</span><span class="hc-kind">${YC.Cards.KIND_LABEL[card.kind]}</span></div>`
       + `<div class="hc-text">${esc(card.text)}</div>`
       + `<div class="hc-rar" title="${R.label}">${gems}</div>`
@@ -109,5 +124,5 @@
     });
   }
 
-  YC.HoloCard = { create, back, faceHTML, esc, playVideo, stopVideo };
+  YC.HoloCard = { create, back, faceHTML, esc, playVideo, stopVideo, speedInfo };
 })(typeof window !== 'undefined' ? (window.YC = window.YC || {}) : (globalThis.YC = globalThis.YC || {}));
