@@ -28,6 +28,7 @@
 
 - **Vídeo das Ultimates por fazer: só o poder da Lola** (Canhão; limite do Gemini: 4 vídeos por janela de 5 h, a próxima abre às 17:09 de 2026-10-30). Feitos 15 de 16. Prompt: *points the golden cane forward and the small red circus cannon beside her fires with a big puff of white smoke and a burst of colorful confetti*. Imagem inicial em `_tmp_art/ult_<icone>_start.png`, prompts na tabela do `docs/ART-PROMPTS.md`; depois `python tools/ultimate-art.py pack video.mp4 ICONE summon|strike início duração` e acertar `ms` em `src/ui/UltimateDefs.js`.
 
+- **Visual ao estilo TFT (à espera do relatório)**: o Pedro acha as peças feias e as Ultimates "em 2D" (no tabuleiro são um sprite plano, `Board3DUltimate.syncUltimate`). Quer peças 3D com personagem e animações, a transformação das Ultimates em modelos 3D, um ecrã inicial com cena 3D viva e o fluxo da ranqueada "Partida encontrada!" + ecrã de carregamento/VS (hoje a ranqueada salta direto para a partida: `OnlineLobby.launch` → `App.startOnline`, sem `YC.VS.run`). Prompt para o Deep Research do Gemini em `docs/DEEP-RESEARCH-VISUAL-3D.md` (anexar as capturas de `_tmp_art/capturas/`). Quando o relatório chegar, implementar por fases.
 - O Pedro está a testar a versão publicada e vai enviar os erros que encontrar (sobretudo: velocidade das animações, arrastar cartas no telemóvel, legibilidade do zoom).
 - As regras do Firestore estão publicadas (2026-10-29). Falta o teste real do online com dois jogadores (desistência, abandono, ranqueada).
 - ~~Vídeos das Lendárias novas~~: feitos os 9 (2026-10-29); as 13 Lendárias têm vídeo em `assets/video/`. A animação CSS `.hc-alive` fica só como reserva para Lendárias futuras sem vídeo (passos em `docs/ART-PROMPTS.md`, secção "Vídeos das 9 Lendárias novas", com `tools/legend-video.py`).
@@ -53,6 +54,11 @@
 - Num separador escondido o navegador quase para as animações (requestAnimationFrame); o motor espera no máximo 4 s por animação, por isso o jogo nunca bloqueia, só fica lento.
 
 ## Registo de sessões
+
+### 2026-10-30 (tarde) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Pedido do Pedro**: descrever passo a passo como são feitas as peças 3D e as Ultimates (acha as peças feias e as Ultimates em 2D) e preparar o prompt para o Deep Research do Google gerar um guia para levar o visual ao estilo do Teamfight Tactics (peças, transformação das Ultimates em 3D, ecrã inicial e ecrã VS da ranqueada).
+- **Feito**: `docs/DEEP-RESEARCH-VISUAL-3D.md` com o estado atual exato (peças por código em `PieceMeshes.js`, materiais em `Toon3D.js`, câmara/luzes/bloom em `Board3D.js`, figura plana em `Board3DUltimate.js`, Arena em CSS com fotos das peças em `Hub.renderStage`, VS em CSS em `VersusScreen.js`, só contra o bot), as restrições do projeto e o formato do relatório (secções A–J). Capturas para anexar em `_tmp_art/capturas/` (fora do git). Nenhum código mudou.
+- **Antes disto**: mais 4 vídeos das Ultimates (golpes do Riku, Nova e Marina e poder da Yuki); falta o poder da Lola.
 
 ### 2026-10-30 (madrugada) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Ultimates para as 13 Lendárias** (antes só o Cetro e o Escudo). Personagens novas feitas no Gemini, todas com arte recortada em `assets/ultimate/<icone>/hero.png` (prompts em `docs/ART-PROMPTS.md`, "As outras 11 Lendárias"): Goro (Bigorna), Mira (Espelho), Rin (Apito), Luna (Truque), Aiko (Veto), Ren (Rescisão), Yuki (Trineu), Lola (Canhão), Riku (Exoesqueleto), Nova (Soro) e Marina (Bússola). Todas custam 1000 de ouro (`Economy.ULTIMATES`; teste novo: todas as Lendárias têm Ultimate e só elas).
