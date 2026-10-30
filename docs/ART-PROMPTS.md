@@ -332,3 +332,46 @@ numa camada branca por cima de tudo, em tamanho real (765×1024), e capturam-se 
 | **Riku, o Piloto Mecânico** | Exoesqueleto (`attack`) | orange hair, goggles, chunky orange and red robot exoskeleton with huge gauntlets | Invocação (4,0 s + 5,6 s) — *the robotic suit powers up, orange lights turn on, steam puffs, he clenches the fists*; Golpe (2,5 s + 5,0 s, impacto 0,5) — *punches forward, a burst of orange energy and a shockwave* |
 | **Nova, a Cientista Alfa** | Soro (`attack`) | teal hair, lab goggles, white lab coat with teal cuffs, glowing teal flask | Invocação (1,5 s + 6,0 s) — *raises the glowing teal flask, it bubbles, teal energy spirals around her*; Golpe (2,0 s + 5,5 s, impacto 0,55) — *throws the flask forward, it bursts into a splash of teal energy* |
 | **Marina, a Caçadora de Tesouros** | Bússola (`attack`) | golden-brown hair, navy captain hat, navy sailor coat with gold trim, glowing golden compass | Invocação (2,0 s + 6,5 s) — *opens the golden compass, the needle spins and glows, sparkles swirl in the sea breeze*; Golpe (2,5 s + 6,0 s, impacto 0,5) — *points the compass and a beam of golden light shoots out with gold coins* |
+
+## Peças 3D (modelos .glb, 2026-10-30)
+
+Plano em `docs/RELATORIO-VISUAL-3D.md` (Deep Research). Só se geram as 6 peças **brancas**; as pretas saem dos mesmos
+modelos com a textura recolorida (marfim → obsidiana `#1E2235`, ouro → prata `#8D99AE`, azul → carmesim `#851928`).
+
+1. **Imagem** (Gemini → "+" → Criar imagem → Proporção **1:1**). Na mesma conversa, para o estilo não mudar. A imagem sai
+   num `blob:` (desenha-se num canvas e manda-se ao recetor local) ou, se ficar no `lh3…`, com a camada branca + 2 zooms
+   + `scratchpad/stitch.py` (como nas Ultimates). Guardar em `_tmp_art/pieces/<tipo>_w.png`.
+2. **3D**: `python tools/trellis.py _tmp_art/pieces/pawn_w.png _tmp_art/pieces/pawn_w_raw.glb` (Space público
+   `microsoft/TRELLIS.2`, licença MIT). Precisa de sessão no Hugging Face (`hf auth login`, token "Read"): sem conta a
+   quota de GPU é 0 e com conta gratuita dá ~1 modelo por dia ("You have exceeded your ZeroGPU quota").
+3. **Limpar** (Blender 5.2, sem janela): `blender --background --factory-startup --python tools/blender-piece.py --
+   bruto.glb limpo.glb --height 0.72 --tris 2500 --rot 0 --preview vista.png` (alturas: Peão 0,72 · Torre 0,95 ·
+   Cavalo 0,98 · Bispo 1,10 · Dama 1,22 · Rei 1,28; `--rot` roda a peça para olhar para a câmara; ver a `vista.png`).
+4. **Comprimir**: `gltf-transform optimize limpo.glb assets/models/pieces/p_w.glb --compress meshopt
+   --texture-compress webp --texture-size 1024 --simplify false` (~100–300 KB).
+5. Acrescentar a linha em `src/view3d/PieceModelList.js` (`pw: 'assets/models/pieces/p_w.glb'`).
+
+Prompt do Peão (o primeiro): *3D game character render of a cute stylized chibi chess Pawn soldier for a colorful
+strategy autobattler game. Full body, three-quarter front view, centered, the entire figure visible from the top of the
+helmet to the boots, standing in a relaxed A-pose. Proportions 1:2.3 head-to-body ratio. The silhouette must still read
+as a classic chess pawn from above: a big rounded helmet topped by a polished ivory sphere, a round collar like the
+pawn's neck ring, a wide stable base. He holds a small round gold-rimmed shield (buckler) and a short wooden practice
+sword. Short tabard, wide sturdy boots, cute determined face with big glossy eyes and rosy cheeks. Materials and colors:
+ivory ceramic porcelain #F0F4FC as the main color, warm satin gold trims #F5BA38, royal blue cloth #2855AA. Hand-painted
+texture look, soft clean stylized shading with a gentle rim light, smooth simple shapes, premium mobile game quality
+like a collectible vinyl figure. Plain pure white background, no ground shadow, no text, no logo, no watermark.*
+
+As outras: *Create a new image: the chess <Peça> of the same set, as …* + o fim comum *Same art style, same three-quarter
+front view, same camera distance and framing, same soft lighting and same color palette as the Pawn and the Rook above:
+ivory ceramic porcelain #F0F4FC as the main color, warm satin gold trims #F5BA38, royal blue cloth #2855AA. Chibi
+proportions about 1:2.3 head-to-body, big glossy eyes. Hand-painted texture look, smooth simple shapes, premium mobile
+game quality like a collectible vinyl figure. Full body, centered, entire figure visible from top to feet, plain pure
+white background, no ground shadow, no text, no logo, no watermark. Square image.*
+
+| Peça | Descrição (o "as …") | Imagem |
+|---|---|---|
+| Torre | *a cute sturdy chibi castle-golem guard … helmet-head is a short wide cylindrical tower with four square crenellations, a little arched window visor showing his face, a broad cylindrical body like a tower made of smooth ivory stone blocks with gold bands, … a big rectangular tower shield* | feita |
+| Cavalo | *a cute chibi horse knight standing upright on two legs … a big stylized horse head (like the chess knight piece) with a flowing royal blue mane, alert ears … small gold-trimmed ivory breastplate and a short blue cape, holding a small jousting lance* | feita |
+| Bispo | *a cute chibi battle cleric … a tall rounded pointed mitre hat with the classic diagonal slit cut near the top and a small gold ball on the tip, a long flared robe … holding a short golden staff topped with a small sun orb* | feita |
+| Dama | *a cute chibi sorceress queen … a tall radiant gold crown with seven sharp points each tipped with a small round pearl … an elegant hourglass gown that flares wide at the bottom … a small glowing blue crystal orb floating above her open right hand* | por fazer (limite) |
+| Rei | *a cute chibi monarch … a tall imperial gold crown topped with a prominent cross, a big ermine-trimmed royal blue mantle, a friendly mustache, holding a short scepter* | por fazer |

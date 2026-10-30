@@ -16,6 +16,11 @@
   const FW = Math.round(S * SPR.wide), FH = Math.round(S * SPR.tall);
   const sprites = new Map(), waiting = new Map(), queue = [];
   let renderer = null, scene = null, cam = null, rt = null, rtS = null, failed = false, sprFailed = false, working = false;
+  // um modelo .glb de peça carregou (PieceModels): as fotos e sprites dessa peça refazem-se com ele
+  if (typeof window !== 'undefined') window.addEventListener('yc-piece-models', (e) => {
+    const k = e.detail;
+    for (const c of [cache, sprites]) for (const key of [...c.keys()]) if (key.startsWith(k)) c.delete(key);
+  });
 
   function setup() {
     const THREE = T();
@@ -84,7 +89,7 @@
 
   function render(type, color, bust) {
     if (!scene) setup();
-    const g = YC.PieceMeshes.make(type, color);
+    const g = (YC.PieceModels || YC.PieceMeshes).make(type, color);
     g.rotation.y = -0.4;
     scene.add(g);
     aim(g, bust);
@@ -115,7 +120,7 @@
   function spriteFrame(job) {
     const THREE = T();
     if (!scene) setup();
-    const g = YC.PieceMeshes.make(job.type, job.color);
+    const g = (YC.PieceModels || YC.PieceMeshes).make(job.type, job.color);
     g.rotation.y = -0.4;
     scene.add(g);
     if (!job.view) {

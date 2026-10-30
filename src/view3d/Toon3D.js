@@ -58,6 +58,7 @@
     setEnv(tex) {
       T3.env = tex;
       for (const m of glossy) { m.envMap = tex; m.needsUpdate = true; }
+      if (YC.ModelLib) YC.ModelLib.setEnv(tex);
     },
 
     basic(hex, k = 1, extra = {}) {

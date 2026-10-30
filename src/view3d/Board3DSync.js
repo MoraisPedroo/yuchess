@@ -38,10 +38,12 @@
       const hold = g.getObjectByName('hold');
       const old = hold.getObjectByName('body');
       if (old) hold.remove(old);
-      const body = PM().make(p.type, p.color);
+      // modelo .glb se já carregou (PieceModels), senão a peça feita por código
+      const body = YC.PieceModels ? YC.PieceModels.make(p.type, p.color) : PM().make(p.type, p.color);
       hold.add(body);
       g.userData.type = p.type;
       g.userData.color = p.color;
+      g.userData.bodyKey = YC.PieceModels ? YC.PieceModels.bodyKey(p.type, p.color) : p.type + p.color;
       g.userData.eyes = body.getObjectByName('eyes');
       g.userData.flag = body.getObjectByName('flag');
     },
@@ -80,10 +82,10 @@
         if (!g) g = this.makePieceGroup(p);
         g.userData.pick = { kind: 'piece', sq };
         if (this.busy.has(p.id)) return;
-        if (g.userData.type !== p.type) this.setBody(g, p);
+        if (g.userData.bodyKey !== (YC.PieceModels ? YC.PieceModels.bodyKey(p.type, p.color) : p.type + p.color)) this.setBody(g, p);
         if (g.userData.sq !== sq || !g.userData.placed) { this.place(g, sq); g.userData.placed = true; }
         this.setPedestal(g, p.color === viewer);
-        const h = H[p.type] || 1, frozen = p.frozenUntil > turn;
+        const h = YC.PieceModels ? YC.PieceModels.height(p.type, p.color, H[p.type] || 1) : (H[p.type] || 1), frozen = p.frozenUntil > turn;
         const states = [];
         if (p.equips.length) states.push('equipped');
         if (p.shield) states.push('shielded');

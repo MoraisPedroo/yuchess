@@ -8,7 +8,10 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 
 window.THREE = THREE;
-window.THREE_ADDONS = { EffectComposer, RenderPass, UnrealBloomPass, OutputPass, GLTFLoader, RoomEnvironment };
+// MeshoptDecoder e SkeletonUtils: modelos .glb comprimidos e com esqueleto (ModelLib.js)
+window.THREE_ADDONS = { EffectComposer, RenderPass, UnrealBloomPass, OutputPass, GLTFLoader, RoomEnvironment, MeshoptDecoder, SkeletonUtils };
 window.dispatchEvent(new Event('yc-three-ready'));

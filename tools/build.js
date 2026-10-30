@@ -26,7 +26,7 @@ const js = scripts.map((f) => {
 }).join('\n');
 // imagens de assets/ (objetos, efeitos, estádio — arte gerada) vão embutidas no ficheiro único (YC.asset lê-as);
 // os vídeos ficam de fora (pesados): sem eles a carta mostra a imagem parada
-const MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
+const MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.glb': 'model/gltf-binary' };
 const assetFiles = [];
 const walk = (dir) => { if (!fs.existsSync(dir)) return; for (const f of fs.readdirSync(dir)) { const p = path.join(dir, f); if (fs.statSync(p).isDirectory()) walk(p); else if (MIME[path.extname(f).toLowerCase()]) assetFiles.push(p); } };
 walk(path.join(ROOT, 'assets'));
