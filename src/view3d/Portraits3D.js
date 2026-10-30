@@ -9,11 +9,12 @@
 
   const T = () => window.THREE;
   const cache = new Map();
-  const S = 192, R = S * 2;
+  // foto parada a 320 px (o cartão da peça mostra-a grande: a 192 ficava desfocada), desenhada a 2× e reduzida
+  const S = 320, R = S * 2;
   // cada quadro da sprite é 20 % mais largo e 35 % mais alto do que a foto, com a mesma base: trocar a foto
-  // parada pela sprite não mexe a peça, e o salto e a pirueta cabem no quadro
+  // parada pela sprite não mexe a peça, e o salto e a pirueta cabem no quadro (a sprite fica a 192: são 24 quadros)
   const SPR = { n: 24, wide: 1.2, tall: 1.35, sup: 1.5, jump: 0.2 };
-  const FW = Math.round(S * SPR.wide), FH = Math.round(S * SPR.tall);
+  const SP = 192, FW = Math.round(SP * SPR.wide), FH = Math.round(SP * SPR.tall);
   const sprites = new Map(), waiting = new Map(), queue = [];
   let renderer = null, scene = null, cam = null, rt = null, rtS = null, failed = false, sprFailed = false, working = false;
   // um modelo .glb de peça carregou (PieceModels): as fotos e sprites dessa peça refazem-se com ele
@@ -40,7 +41,7 @@
   const srgb = (c) => { c = c < 0 ? 0 : c > 1 ? 1 : c; return 255 * (c <= 0.0031308 ? c * 12.92 : 1.055 * Math.pow(c, 1 / 2.4) - 0.055); };
 
   /** Desenha a cena no alvo e devolve um canvas sRGB do tamanho do alvo. */
-  function shoot(target) {
+  function shoot(target, model = false) {
     const THREE = T(), W = target.width, H = target.height;
     const prev = renderer.getRenderTarget(), clear = renderer.getClearColor(new THREE.Color()), alpha = renderer.getClearAlpha();
     renderer.setRenderTarget(target);
@@ -54,7 +55,8 @@
     const big = document.createElement('canvas');
     big.width = W; big.height = H;
     const ctx = big.getContext('2d'), img = ctx.createImageData(W, H), out = img.data;
-    const exp = renderer.toneMappingExposure / 0.6;
+    // as peças por código foram afinadas com esta exposição; os modelos (com luz própria) ficavam lavados
+    const exp = renderer.toneMappingExposure / (model ? 0.95 : 0.6);
     for (let y = 0; y < H; y++) {
       for (let x = 0; x < W; x++) {
         const i = ((H - 1 - y) * W + x) * 4, o = (y * W + x) * 4, a = buf[i + 3];
@@ -93,14 +95,31 @@
     g.rotation.y = -0.4;
     scene.add(g);
     aim(g, bust);
-    const big = shoot(rt);
+    const big = shoot(rt, !!g.userData.model);
     scene.remove(g);
     const small = document.createElement('canvas');
     small.width = small.height = S;
     const sc = small.getContext('2d');
     sc.imageSmoothingQuality = 'high';
     sc.drawImage(big, 0, 0, S, S);
+    if (g.userData.model) sharpen(sc, S);
     return small.toDataURL('image/png');
+  }
+
+  /** Realce leve (unsharp mask 3×3) depois de reduzir: a textura gerada é macia e a foto perdia o detalhe. */
+  function sharpen(ctx, n, k = 0.45) {
+    const img = ctx.getImageData(0, 0, n, n), d = img.data, src = new Uint8ClampedArray(d);
+    for (let y = 1; y < n - 1; y++) {
+      for (let x = 1; x < n - 1; x++) {
+        const i = (y * n + x) * 4;
+        if (src[i + 3] < 200) continue;   // as bordas transparentes ficam como estão
+        for (let c = 0; c < 3; c++) {
+          const blur = (src[i - 4 + c] + src[i + 4 + c] + src[i - n * 4 + c] + src[i + n * 4 + c]) / 4;
+          d[i + c] = src[i + c] + k * (src[i + c] - blur);
+        }
+      }
+    }
+    ctx.putImageData(img, 0, 0);
   }
 
   /** Pose do quadro t (0–1): agachar, saltar a rodar 360°, aterrar a achatar. */
@@ -142,7 +161,7 @@
     g.position.y += p.y * SPR.jump * job.h;
     g.rotation.y = -0.4 + p.rot;
     g.scale.set(s0.x * sx, s0.y * p.sy, s0.z * sx);
-    const big = shoot(rtS);
+    const big = shoot(rtS, !!g.userData.model);
     scene.remove(g);
     const ctx = job.strip.getContext('2d');
     ctx.imageSmoothingQuality = 'high';

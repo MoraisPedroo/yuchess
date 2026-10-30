@@ -345,10 +345,10 @@ modelos com a textura recolorida (marfim → obsidiana `#1E2235`, ouro → prata
    `microsoft/TRELLIS.2`, licença MIT). Precisa de sessão no Hugging Face (`hf auth login`): sem conta a
    quota de GPU é 0 e com conta gratuita dá 2 modelos por dia ("You have exceeded your ZeroGPU quota").
 3. **Limpar** (Blender 5.2, sem janela): `blender --background --factory-startup --python tools/blender-piece.py --
-   bruto.glb limpo.glb --height 0.72 --tris 5000 --rot 0 --preview vista.png` (Peão 5000 triângulos, as outras 6000; alturas: Peão 0,72 · Torre 0,95 ·
+   bruto.glb limpo.glb --height 0.72 --tris 8000 --rot 0 --preview vista.png` (Peão 8000 triângulos, as outras 9000; alturas: Peão 0,72 · Torre 0,95 ·
    Cavalo 0,98 · Bispo 1,10 · Dama 1,22 · Rei 1,28; `--rot` roda a peça para olhar para a câmara; ver a `vista.png`).
 4. **Comprimir**: `gltf-transform optimize limpo.glb assets/models/pieces/p_w.glb --compress meshopt
-   --texture-compress webp --texture-size 1024 --simplify false` (~100–300 KB).
+   --texture-compress webp --texture-size 2048 --simplify false` (~1 MB; com 1024 a foto do cartão perdia detalhe).
 5. Acrescentar a linha em `src/view3d/PieceModelList.js` (`pw: 'assets/models/pieces/p_w.glb'`).
 
 Prompt do Peão (o primeiro): *3D game character render of a cute stylized chibi chess Pawn soldier for a colorful
