@@ -89,7 +89,7 @@
 
   function render(type, color, bust) {
     if (!scene) setup();
-    const g = (YC.PieceModels || YC.PieceMeshes).make(type, color);
+    const g = (YC.PieceModels || YC.PieceMeshes).make(type, color, { upright: true });
     g.rotation.y = -0.4;
     scene.add(g);
     aim(g, bust);
@@ -120,7 +120,7 @@
   function spriteFrame(job) {
     const THREE = T();
     if (!scene) setup();
-    const g = (YC.PieceModels || YC.PieceMeshes).make(job.type, job.color);
+    const g = (YC.PieceModels || YC.PieceMeshes).make(job.type, job.color, { upright: true });
     g.rotation.y = -0.4;
     scene.add(g);
     if (!job.view) {

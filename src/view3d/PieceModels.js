@@ -11,7 +11,8 @@
   const H = { p: 0.72, r: 0.95, n: 0.98, b: 1.1, q: 1.22, k: 1.28 };
   // de longe (câmara alta do jogo) as figuras perdiam-se: maiores do que o relatório pedia e inclinadas para trás,
   // para a cara e a frente ficarem viradas para a câmara (como as unidades do TFT)
-  const SCALE = 1.28, TILT = -0.32;
+  // (18° parecia "torto": 12° chega para a cara se ver de longe)
+  const SCALE = 1.28, TILT = -0.21;
   const key = (type, color) => `piece:${type}${color}`;
   let started = false;
 
@@ -34,8 +35,9 @@
     /** Há modelo para esta peça? As Pretas sem modelo próprio usam o das Brancas com outras cores. */
     avail(type, color) { return PMod.has(type, color) || (color === 'b' && PMod.has(type, 'w')); },
 
-    /** Corpo da peça (grupo "body"): o modelo, se já carregou, senão a peça feita por código. */
-    make(type, color) {
+    /** Corpo da peça (grupo "body"): o modelo, se já carregou, senão a peça feita por código.
+        upright: sem a inclinação do tabuleiro (fotos da interface, que já têm câmara própria). */
+    make(type, color, { upright = false } = {}) {
       const own = PMod.has(type, color);
       const root = own ? YC.ModelLib.clone(key(type, color)) : PMod.avail(type, color) && YC.ModelLib.clone(key(type, 'w'), true);
       if (!root) return YC.PieceMeshes.make(type, color);
@@ -43,7 +45,7 @@
       g.name = 'body';
       g.userData.model = true;
       root.scale.setScalar(SCALE);
-      root.rotation.x = TILT;
+      root.rotation.x = upright ? 0 : TILT;
       g.add(root);
       return g;
     },
