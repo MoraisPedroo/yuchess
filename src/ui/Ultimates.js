@@ -1,5 +1,6 @@
-/* Ultimates.js — animações Ultimate de Lendárias: personagens de anime originais (arte e vídeos feitos no Gemini, em
-   assets/ultimate/<icone>/: hero.png recortada, summon.mp4 e strike.mp4). Só visual: o motor não sabe que existem.
+/* Ultimates.js — animações Ultimate das Lendárias: personagens de anime originais (UltimateDefs.js; arte e vídeos
+   feitos no Gemini, em assets/ultimate/<icone>/: hero.png recortada, summon.mp4 e strike.mp4). Só visual: o motor não
+   sabe que existem. As Armadilhas/Counter-Traps e os poderes dos Equipamentos estão em UltimateCards.js.
    Desbloqueio com ouro nos Baralhos (Economy.unlockUltimate). Numa partida, match.ults = { w: [...], b: [...] } diz o
    que cada jogador desbloqueou (no online as do adversário chegam nas mensagens dele — LockstepSession): se um dos
    dois a desbloqueou, a Ultimate vale para QUALQUER peça com essa carta (a de quem a roubar com o Íman também) e
@@ -18,24 +19,7 @@
   const calm = () => YC.reducedMotion && YC.reducedMotion();
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
-  const DEFS = {
-    eq_cetro_usurpador: {
-      id: 'eq_cetro_usurpador', icon: 'royal_scepter', name: 'Akane', title: 'A Rainha Rubi', role: 'attack', c1: '#D90429', c2: '#FFB703',
-      say: { summon: 'Esta coroa agora é minha!', strike: 'Ajoelha-te perante a rainha!' }, ms: { summon: 4800, strike: 4000 }, hit: 0.68,
-      tabs: { summon: 'Invocação', strike: 'Golpe' },
-      about: [['Invocar', 'ao equipares o Cetro, entra um vídeo especial e o Peão transforma-se na Akane.'],
-        ['No tabuleiro', 'a peça passa a ser a própria Akane.'],
-        ['Golpe', 'sempre que ela captura, entra o vídeo do golpe e uma bola de energia sai dela e explode na peça inimiga.']]
-    },
-    eq_escudo_choque: {
-      id: 'eq_escudo_choque', icon: 'escudo_antitumulto', name: 'Kaito', title: 'O Guardião Azul', role: 'guard', c1: '#0077B6', c2: '#48CAE4',
-      say: { summon: 'Ninguém toca no meu Rei!', guard: 'Barreira total!' }, ms: { summon: 4600, guard: 3600 }, hit: 0.5,
-      files: { guard: 'strike' }, tabs: { summon: 'Invocação', guard: 'Defesa' },
-      about: [['Invocar', 'ao equipares o Escudo, entra um vídeo especial, a peça transforma-se no Kaito e lança uma barreira de hexágonos sobre o teu Rei.'],
-        ['No tabuleiro', 'enquanto o Escudo dele aguentar, o Rei fica dentro da barreira (não pode levar xeque com lances).'],
-        ['Defesa', 'quando o atacam, entra o vídeo dele a defender; se o Escudo partir, a barreira do Rei estilhaça.']]
-    }
-  };
+  const DEFS = YC.ULT_DEFS || {};   // as personagens (UltimateDefs.js)
 
   const U = {
     DEFS,
@@ -120,8 +104,10 @@
           v.playbackRate = rate;
           v.addEventListener('playing', () => el.classList.add('vplay'), { once: true });
           v.addEventListener('ended', finish, { once: true });
-          v.addEventListener('error', () => el.classList.add('novideo'), { once: true });
-          const p = v.play(); if (p && p.catch) p.catch(() => el.classList.add('novideo'));
+          // ainda sem vídeo (por gerar): fica a arte parada com os efeitos, mas mais curto
+          const still = () => { el.classList.add('novideo'); clearTimeout(timer); timer = setTimeout(finish, Math.min(ms, 2400)); };
+          v.addEventListener('error', still, { once: true });
+          const p = v.play(); if (p && p.catch) p.catch(still);
         }
         timer = setTimeout(finish, ms + 900);
         S(kind === 'summon' ? 'reveal_legend' : kind === 'guard' ? 'shield_clang' : 'sword_draw');
@@ -173,7 +159,8 @@
         if (impact) {
           b.sparks(B.x, 0.6, B.z, h1, { n: 34, speed: 3.4 });
           b.sparks(B.x, 0.6, B.z, h2, { n: 20, speed: 2.6 });
-          b.burst(B.x, 0.8, B.z, twin ? 'LIGHTNING' : 'IMPACT', { size: twin ? 2 : 1.6 });
+          b.burst(B.x, 0.8, B.z, d.fx || (twin ? 'LIGHTNING' : 'IMPACT'), { size: twin ? 2 : 1.6 });
+          if (d.fx && b.scatter) b.scatter(B.x, 0.8, B.z, d.fx, { n: 7, size: 0.3 });
           if (twin) { b.shards3D(B.x, 0.8, B.z, h2, { n: 18, size: 0.08, sp: 3.2, glow: true }); b.shards3D(B.x, 0.8, B.z, h1, { n: 12, size: 0.07, sp: 2.6, glow: true }); }
           if (text) b.text3D(B.x, 1.5, B.z, text, d.c2, 1);
           b.lightFlash(B.x, 1, B.z, h1, 7, 0.6);
@@ -284,7 +271,7 @@
           : owned ? `<button class="btn" data-a="unlock" ${p.gold >= cost ? '' : 'disabled'}>Desbloquear <span class="coin-pill gold">${YC.Icon('coin')}${cost}</span></button>`
             : `<span class="muted">Primeiro tens de ter <b>${esc(card.name)}</b> (pacotes ou criar com Poeira).</span>`;
         return `<div class="ult-prev" style="--c1:${d.c1};--c2:${d.c2}">
-          <div class="ult-prev-stage"><img src="${U.hero(d)}" alt=""><video muted loop playsinline autoplay src="${U.video(d, 'summon')}"></video></div>
+          <div class="ult-prev-stage"><img src="${U.hero(d)}" alt=""><video muted loop playsinline autoplay src="${U.video(d, 'summon')}" onerror="this.hidden=true" onloadeddata="this.hidden=false"></video></div>
           <div class="ult-prev-body"><small class="ult-tag">${YC.Icon('star', { size: 14 })}ULTIMATE · ${esc(card.name)}</small>
             <h2>${esc(d.name)} · ${esc(d.title)}</h2>
             <ul>${d.about.map(([k, t]) => `<li><b>${esc(k)}:</b> ${esc(t)}</li>`).join('')}

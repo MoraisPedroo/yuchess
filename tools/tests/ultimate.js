@@ -13,6 +13,12 @@ module.exports = ({ test, eq, YC, setup, at, uid, sq, C }) => {
     eq(C.guarded(m.pos, 'w') && !C.guarded(m.pos, 'b'), true, 'agora protege o Rei branco e não o preto');
   });
 
+  test('Ultimate: todas as Lendárias têm Ultimate à venda (1000 de ouro) e nenhuma outra carta tem', async () => {
+    const leg = YC.Cards.LIST.filter((c) => c.rarity === 'LEGENDARY').map((c) => c.id).sort();
+    eq(Object.keys(YC.Economy.ULTIMATES).sort().join(), leg.join(), 'Lendárias = Ultimates');
+    eq(leg.every((id) => YC.Economy.ultimateCost(id) === 1000), true, 'preço 1000');
+  });
+
   test('Ultimate: precisa da carta e de 1000 de ouro, desconta e não se compra duas vezes', async () => {
     const E = YC.Economy, p = E.normalize(E.newProfile('Teste')), id = 'eq_cetro_usurpador';
     let err = '';

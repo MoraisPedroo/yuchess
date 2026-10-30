@@ -13,6 +13,20 @@
   const textures = {};
 
   Object.assign(YC.Board3D.prototype, {
+    /** Textura da arte da personagem (uma por personagem, partilhada pela figura e pelo ultPop de UltimateCards). */
+    ultTex(d) {
+      const THREE = T();
+      if (textures[d.icon]) return textures[d.icon];
+      const tex = textures[d.icon] = new THREE.TextureLoader().load(YC.Ultimate.hero(d), (t) => {
+        for (const gg of this.pieceEls.values()) {
+          const f = gg.getObjectByName('ultFigure');
+          if (f && f.userData.icon === d.icon) f.scale.set(FIG_H * (t.image.width / t.image.height), FIG_H, 1);
+        }
+      });
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    },
+
     syncUltimate(g, p, m) {
       const U = YC.Ultimate, d = U && U.forPiece(p, m);
       const hold = g.getObjectByName('hold');
@@ -21,14 +35,7 @@
       let fig = hold.getObjectByName('ultFigure');
       if (d && (!fig || fig.userData.icon !== d.icon)) {
         if (fig) hold.remove(fig);
-        const THREE = T();
-        const tex = textures[d.icon] || (textures[d.icon] = new THREE.TextureLoader().load(U.hero(d), (t) => {
-          for (const gg of this.pieceEls.values()) {
-            const f = gg.getObjectByName('ultFigure');
-            if (f && f.userData.icon === d.icon) f.scale.set(FIG_H * (t.image.width / t.image.height), FIG_H, 1);
-          }
-        }));
-        tex.colorSpace = THREE.SRGBColorSpace;
+        const THREE = T(), tex = this.ultTex(d);
         // a exposição alta do palco (ACES, no fim do composer) desbota a arte: a cor escurecida compensa
         fig = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, color: 0xB8B8B8, transparent: true, alphaTest: 0.35, fog: false }));
         fig.name = 'ultFigure';

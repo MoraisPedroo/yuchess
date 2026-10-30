@@ -172,6 +172,7 @@
       if (!pick) return;
       piece.cannonUsed = true;
       m.say(`Canhão de Circo! O Peão voou para ${sqName(pick.to)}.`, piece.color, { card: 'eq_canhao_homem_bala', sq: pick.to });
+      await m.bus.emitAsync('equip:proc', { piece, sq: m.sqOf(piece), id: 'eq_canhao_homem_bala', to: pick.to });
       await m.relocate(pick.p, pick.to, 'fly');
       if (pick.to >> 3 === last) await m.promoteNow(pick.p, 'eq_canhao_homem_bala');
     },

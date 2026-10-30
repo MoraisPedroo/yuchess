@@ -127,7 +127,9 @@
 
     // ── Ultimates: animação especial de uma Lendária (só visual), desbloqueada com ouro por quem tem a carta.
     //    Ficam em p.stats.ultimates (o "stats" já é gravado na nuvem e as regras não validam o conteúdo). ──
-    ULTIMATES: { eq_cetro_usurpador: 1000, eq_escudo_choque: 1000 },
+    ULTIMATES: { eq_cetro_usurpador: 1000, eq_escudo_choque: 1000, eq_exoesqueleto_tita: 1000, eq_elixir_mutacao_total: 1000,
+      eq_bussola_tesouro: 1000, eq_trono_glaciar: 1000, eq_canhao_homem_bala: 1000, gt_guilhotina_bigorna: 1000, rt_espelho_magico: 1000,
+      rt_truque_desaparecer: 1000, rt_injuncao_suprema: 1000, ct_apito_juiz: 1000, ct_clausula_rescisao: 1000 },
     ultimateCost(id) { return Economy.ULTIMATES[id] || 0; },
     hasUltimate(p, id) { return !!(p.stats && p.stats.ultimates && p.stats.ultimates.includes(id)); },
     unlockUltimate(p, id) {

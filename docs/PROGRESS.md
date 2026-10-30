@@ -26,6 +26,8 @@
 
 ## Em curso / a meio
 
+- **Vídeos das Ultimates por fazer** (limite do Gemini: ~3 vídeos por janela de 5 h): ativação da Mira, Rin, Luna, Aiko e Ren; invocação da Lola, Nova e Marina; golpe do Riku, Nova e Marina; poder da Yuki e da Lola. Imagem inicial em `_tmp_art/ult_<icone>_start.png`, prompts na tabela do `docs/ART-PROMPTS.md`; depois `python tools/ultimate-art.py pack video.mp4 ICONE summon|strike início duração` e acertar `ms` em `src/ui/UltimateDefs.js`.
+
 - O Pedro está a testar a versão publicada e vai enviar os erros que encontrar (sobretudo: velocidade das animações, arrastar cartas no telemóvel, legibilidade do zoom).
 - As regras do Firestore estão publicadas (2026-10-29). Falta o teste real do online com dois jogadores (desistência, abandono, ranqueada).
 - ~~Vídeos das Lendárias novas~~: feitos os 9 (2026-10-29); as 13 Lendárias têm vídeo em `assets/video/`. A animação CSS `.hc-alive` fica só como reserva para Lendárias futuras sem vídeo (passos em `docs/ART-PROMPTS.md`, secção "Vídeos das 9 Lendárias novas", com `tools/legend-video.py`).
@@ -51,6 +53,11 @@
 - Num separador escondido o navegador quase para as animações (requestAnimationFrame); o motor espera no máximo 4 s por animação, por isso o jogo nunca bloqueia, só fica lento.
 
 ## Registo de sessões
+
+### 2026-10-30 (madrugada) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Ultimates para as 13 Lendárias** (antes só o Cetro e o Escudo). Personagens novas feitas no Gemini, todas com arte recortada em `assets/ultimate/<icone>/hero.png` (prompts em `docs/ART-PROMPTS.md`, "As outras 11 Lendárias"): Goro (Bigorna), Mira (Espelho), Rin (Apito), Luna (Truque), Aiko (Veto), Ren (Rescisão), Yuki (Trineu), Lola (Canhão), Riku (Exoesqueleto), Nova (Soro) e Marina (Bússola). Todas custam 1000 de ouro (`Economy.ULTIMATES`; teste novo: todas as Lendárias têm Ultimate e só elas).
+- **Código**: as personagens passaram para `src/ui/UltimateDefs.js` (com o papel de cada uma); `src/ui/UltimateCards.js` (novo) trata dos papéis novos — `card` (Armadilhas e Counter-Traps: a personagem entra em ecrã inteiro quando a carta entra na Chain, em vez da faixa "LENDÁRIA!", e aparece no tabuleiro quando resolve: na casa da Bigorna, ou na peça atacada e a energia voa até quem atacou no Espelho e no Veto) e `power` (Trineu e Canhão: o vídeo do poder entra quando o poder dispara, no `equip:proc`; o Canhão passou a emitir `equip:proc` com o destino do Peão). `attack` (Riku, Nova, Marina) faz como a Akane. No 3D a personagem aparece por instantes numa casa com `Board3D.ultPop` (mesmos materiais das figuras). O aviso do `equip:proc` sem Ultimate tem texto por carta (antes dizia "CACTO!" para tudo).
+- **Sem vídeo ainda**: o cut-in mostra a arte parada com os efeitos e dura só ~2,4 s; a pré-visualização mostra a arte. Vídeos já feitos: Yuki (invocação, 2,0 s + 5,4 s), Riku (invocação, 4,0 s + 5,6 s), Goro (ativação, 2,5 s + 5,0 s).
 
 ### 2026-10-29 (noite, 4) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Escudo Tático mais claro** (parecia que bastava a carta estar equipada): texto novo da carta (`CardsNew.js`: "Só enquanto esse Escudo estiver de pé…"); no 3D o Rei protegido tem a placa **"SEM XEQUE"** por cima (`Board3DStatus.syncStatus`, com `board.guards` calculado no `sync` a partir de `ChessRules.guarded`; no tabuleiro CSS é um anel ciano, classe `k-guard`) — aparece e desaparece com o Escudo, com ou sem Ultimate; quando o Escudo dessa peça parte, aparece **"REI SEM ESCUDO!"** no próprio Rei (`MatchAnimator.kingUnguarded`, ligado ao `shield:shatter` dos dois tabuleiros); notas novas nos efeitos ativos (`MatchBuffs`) e na explicação dos lances (`MoveExplain`: "Parte-lhe o Escudo primeiro").

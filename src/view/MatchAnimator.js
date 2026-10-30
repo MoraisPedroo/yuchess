@@ -7,6 +7,15 @@
   const FX = () => YC.FX;
   const S = (n) => YC.Sound && YC.Sound.play(n);
   const SAFE_MS = 4000;
+  // texto, cor e som do aviso quando o poder de um Equipamento dispara
+  const PROC = {
+    eq_espada_ganancia: ['+1 CARTA!', '#FCC934', 'sword_draw'], eq_armadura_espinhos: ['CACTO!', '#81C995', 'explosion_bam'],
+    eq_trono_glaciar: ['GELO!', '#8FD3FF', 'ice_freeze'], eq_bussola_tesouro: ['SAQUE!', '#FFB703', 'card_draw'],
+    eq_tubo_ensaio_toxico: ['ÁCIDO!', '#2EC4B6', 'explosion_bam'], eq_canhao_homem_bala: ['BUM!', '#FB8500', 'explosion_bam'],
+    eq_gancho_pirata: ['GANCHO!', '#FFB703', 'spring_jump'], eq_monociclo_acrobata: ['ESQUIVA!', '#81C995', 'spring_jump'],
+    eq_megafone_ordem: ['SAI DAÍ!', '#FB8500', 'negate_stamp'], eq_distintivo_fiscal: ['MULTA!', '#94A3B8', 'negate_stamp'],
+    eq_chave_inglesa_turbo: ['DESMONTA!', '#FB8500', 'glass'], eq_saco_pilhagem: ['PILHAGEM!', '#FFB703', 'card_draw']
+  };
 
   class MatchAnimator {
     constructor({ bus, board, ui }) {
@@ -22,8 +31,8 @@
       on('card:set', this.cardSet);
       on('trap:set', this.trapSet);
       on('trap:clang', ({ sq }) => this.at(sq, 'CLANG!', '#8E9BAE', 'shield_clang', { sparks: true }));
-      on('chain:link', this.chainLink);
-      on('chain:resolve', this.chainResolve);
+      on('chain:link', this.chainLink, 16000);        // Lendária com Ultimate: vídeo da personagem (UltimateCards)
+      on('chain:resolve', this.chainResolve, 12000);
       on('chain:negate', this.chainNegate);
       on('chain:fizzle', ({ link }) => { this.ui.chainState(link, 'fizzle'); return FX().wait(200); });
       on('chain:end', () => { this.ui.chainClear(); return FX().wait(120); });
@@ -31,7 +40,7 @@
       on('equip:attach', (p) => (YC.Ultimate ? YC.Ultimate.onEquip(this, p) : this.equipAttach(p)), 16000);
       on('equip:strip', ({ sq }) => this.at(sq, 'SPLOSH!', '#F538A0', 'explosion_bam', { colors: ['#F538A0', '#FFB4C8', '#fff'] }));
       on('equip:steal', (p) => (YC.Ultimate ? YC.Ultimate.onSteal(this, p) : this.equipSteal(p.from, p.to)), 16000);
-      on('equip:proc', ({ sq, id }) => this.pop(sq, id === 'eq_espada_ganancia' ? '+1 CARTA!' : 'CACTO!', id === 'eq_espada_ganancia' ? '#FCC934' : '#81C995', id === 'eq_espada_ganancia' ? 'sword_draw' : 'explosion_bam'));
+      on('equip:proc', (p) => (YC.Ultimate && YC.Ultimate.onProc ? YC.Ultimate.onProc(this, p) : this.procPop(p)), 16000);
       on('capture:declare', (p) => (YC.Ultimate ? YC.Ultimate.onCapture(this, p) : this.captureDeclare(p)), 12000);
       on('piece:move', this.pieceMove);
       on('piece:promote', ({ piece, sq }) => this.promote(piece, sq));
@@ -152,7 +161,7 @@
       const fromRect = this.ui.cardOriginRect(link);
       this.ui.hideHand.delete(link.inst.uid);
       this.ui.renderSoft();
-      if (link.def.rarity === 'LEGENDARY') await this.ui.cutIn(link);
+      if (link.def.rarity === 'LEGENDARY') await (YC.Ultimate && YC.Ultimate.onLink ? YC.Ultimate.onLink(this, link) : this.ui.cutIn(link));
       await this.ui.showLink(link, chain, fromRect);
       S(link.kind === 'COUNTER' ? 'negate_stamp' : 'magic_zap');
     }
@@ -161,6 +170,13 @@
       this.ui.chainState(link, 'resolving');
       S(link.def.theme.sfx);
       await FX().wait(380);
+      if (link.def.rarity === 'LEGENDARY' && YC.Ultimate && YC.Ultimate.onResolve) await YC.Ultimate.onResolve(this, link);
+    }
+
+    /** Poder de um Equipamento (equip:proc) sem Ultimate: aviso curto na peça. */
+    procPop({ sq, id }) {
+      const [text, color, sound] = PROC[id] || ['UAU!', '#81C995', 'magic_zap'];
+      return this.pop(sq, text, color, sound);
     }
 
     async chainNegate({ link, by }) {
