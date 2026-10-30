@@ -18,7 +18,7 @@
     id: 'fusao_real', ids: ['eq_cetro_usurpador', 'eq_escudo_choque'], icon: 'fusao_real', name: 'Akaito', title: 'A Fusão Real',
     role: 'fusion', c1: '#D90429', c2: '#48CAE4',
     say: { summon: 'Coroa e escudo: somos um só!', strike: 'Raio Real Duplo!', guard: 'Muralha Rubi-Safira!' },
-    ms: { summon: 5400, strike: 4600, guard: 3600 }, hits: { strike: 0.45, guard: 0.45 },
+    ms: { summon: 5400, strike: 4600, guard: 4200 }, hits: { strike: 0.45, guard: 0.47 },
     tabs: { summon: 'Fusão', strike: 'Golpe', guard: 'Defesa' }
   }];
 

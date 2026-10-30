@@ -303,7 +303,7 @@ foi sempre "Animate this 2D cartoon game illustration. The character …" com um
   background*. Entrada (2,5 s + 5,4 s) — *A swirling spiral of red-gold and cyan light wraps around the character from the
   ground up, the character spins the ruby scepter and raises the hexagon shield, and a bright burst of red and blue light
   explodes outward …* Golpe (4,0 s + 4,6 s) — *… a swirling ball of red and cyan energy charges at the ruby, then fires as a
-  twisting double beam of red and blue light …* **Defesa (por fazer, limite do Gemini)** — *The character braces behind the
+  twisting double beam of red and blue light …* Defesa (1,0 s + 4,2 s; a barreira dupla aparece aos 2,0 s do corte) — *The character braces behind the
   hexagon shield as bright orange cartoon sparks fly at it from the front; a double barrier of glowing red and cyan hexagons
   flashes around the character and the sparks bounce away harmlessly, then the character twirls the ruby scepter and smiles
-  confidently.* → `python tools/ultimate-art.py pack video.mp4 FUSAO_REAL guard 1.0 3.6`.
+  confidently.* → `python tools/ultimate-art.py pack video.mp4 FUSAO_REAL guard 1.0 4.2`.
