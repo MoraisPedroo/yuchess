@@ -58,6 +58,11 @@
 
 ## Registo de sessões
 
+### 2026-11-02 (tarde) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Cartão da peça com a personagem 3D animada** — o Pedro achou a personagem do cartão (passar o rato numa peça com Ultimate) descentrada e feia: era a imagem 2D (`hero.png`) sem regra de centrar. Agora, se a personagem tem modelo (`UltModels`), o cartão mostra-a em 3D ao vivo com `src/view3d/Showcase3D.js`: um segundo renderer pequeno (outro contexto WebGL, criado uma vez e reaproveitado) com as luzes das fotos das peças; cai e achata ao abrir, respira, olha para os lados e de 5 em 5 s salta com pirueta; com "Reduzir movimento" fica parada. Os pés ficam no centro do disco e a cúpula do Escudo fica por cima. Os materiais ganham uma cópia com o mapa de reflexos da vitrine (o do palco é do outro contexto); o shader e a textura preparam-se em tempo morto quando o modelo chega (`warm`, evento `yc-ult-models`). Personagens sem modelo: a arte 2D, agora centrada (`styles/ultimate.css`). Palco do cartão com Ultimate: 230 px.
+- **Como testar**: partida contra o bot com a Ultimate do Escudo ou do Cetro desbloqueada → equipar a carta → passar o rato na peça.
+- Testado no navegador (Kaito, Akane e o Riku sem modelo) sem erros; os 4 testes passam.
+
 ### 2026-11-02 · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Ultimates em 3D: primeiros modelos** — Akane e Kaito gerados no TRELLIS.2 a partir das imagens "figura 3D" (`_tmp_art/ult3d/<icone>_3d.png`), limpos com `tools/blender-piece.py --height 1.2 --tris 12000` e comprimidos (meshopt + WebP 2048). Linhas em `src/view3d/UltModelList.js`. No tabuleiro a personagem passa a ser o modelo; a transformação tem vídeo curto e aterragem 3D.
 - **Como testar**: Baralhos → desbloquear a Ultimate do Cetro ou do Escudo (1000 de ouro) → partida contra o bot → equipar a carta numa peça.

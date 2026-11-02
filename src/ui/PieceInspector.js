@@ -59,9 +59,12 @@
       const states = ['equipped', 'shielded', 'frozen', 'checked'].filter((k) => anchor.classList.contains(k)).join(' ');
       // peça transformada pela Ultimate (Ultimates.js): mostra a personagem
       const ult = YC.Ultimate && YC.Ultimate.forPiece(p, m);
-      const fig = ult ? `<img class="ult-fig" src="${YC.Ultimate.hero(ult)}" alt="">` : YC.pieceHTML(p.type, p.color);
+      // com modelo 3D, a personagem é desenhada ao vivo e animada (Showcase3D); sem modelo, a arte recortada
+      const live = !!(ult && ui.use3D && YC.Showcase3D && YC.Showcase3D.can(ult.icon));
+      const heroImg = ult ? `<img class="ult-fig" src="${YC.Ultimate.hero(ult)}" alt="">` : '';
+      const fig = ult ? (live ? '' : heroImg) : YC.pieceHTML(p.type, p.color);
       const el = document.createElement('div');
-      el.className = `piece-insp ${p.color}${ult ? ' ult' : ''}`;
+      el.className = `piece-insp ${p.color}${ult ? ' ult' : ''}${live ? ' live' : ''}`;
       el.innerHTML = `<div class="pi-stage"><div class="pi-disc"></div><div class="pi-figure piece ${p.color} ${states}"><div class="squash">${fig}</div><div class="shield-dome"></div></div></div>
         <div class="pi-body"><div class="pi-title"><b>${ult ? `${esc(ult.name)} <small>(${YC.PIECE_NAME[real]})</small>` : YC.PIECE_NAME[real]}</b><span>${TEAM[p.color]}${p.color === ui.viewer ? ' · tua' : ''} · ${YC.Chess.sqName(sq).toUpperCase()}</span></div>
         ${chips.length ? `<div class="pi-chips">${chips.map(([k, ic, t]) => `<span class="chip-${k}">${YC.Icon(ic, { size: 15 })}${esc(t)}</span>`).join('')}</div>` : ''}
@@ -71,6 +74,11 @@
       Insp.el = el;
       // a peça dá um salto com pirueta (sprite sheet feita da peça 3D) enquanto o rato está em cima
       if (YC.Portraits3D && ui.use3D && !ult) YC.Portraits3D.play(el.querySelector('.pi-figure .squash'), p.type, p.color, 'loop');
+      // a personagem 3D fica entre o disco e a cúpula do Escudo
+      if (live && !YC.Showcase3D.show(el.querySelector('.pi-stage'), ult.icon, el.querySelector('.pi-figure'))) {
+        el.classList.remove('live');
+        el.querySelector('.pi-figure .squash').innerHTML = heroImg;
+      }
       const r = anchor.getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight, gap = 16;
       // fora do tabuleiro (na margem do lado da peça) para nunca tapar as casas onde se quer jogar
       const br = ui.board.boardRect ? ui.board.boardRect() : null;

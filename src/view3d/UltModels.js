@@ -28,6 +28,9 @@
         .catch(() => { /* fica a figura de cartão */ });
     },
 
+    /** Cópia do modelo tal como vem (sem escala nem inclinação), para a vitrine do cartão (Showcase3D). */
+    raw(icon) { return UM.has(icon) ? YC.ModelLib.clone(key(icon)) : null; },
+
     /** Figura 3D da personagem (grupo com o modelo), ou null se ainda não carregou. */
     make(icon) {
       const THREE = window.THREE, root = UM.has(icon) && YC.ModelLib.clone(key(icon));
