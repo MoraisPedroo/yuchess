@@ -3,5 +3,7 @@
 (function (YC) {
   'use strict';
   YC.ULT_MODEL_FILES = {
+    royal_scepter: 'assets/models/ultimate/royal_scepter.glb',
+    escudo_antitumulto: 'assets/models/ultimate/escudo_antitumulto.glb'
   };
 })(typeof window !== 'undefined' ? (window.YC = window.YC || {}) : (globalThis.YC = globalThis.YC || {}));
