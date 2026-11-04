@@ -32,10 +32,10 @@
     /** A fusão de que esta carta faz parte (para a pré-visualização), ou null. */
     fusionWith(id) { return FUSIONS.find((f) => f.ids.includes(id)) || null; },
 
-    /** Entrada épica da fusão; resolve no fim do vídeo da fusão. */
-    async fusionIntro(f) {
+    /** Entrada épica da fusão; resolve no fim do vídeo da fusão (opts vai para o cutIn: maxMs encurta o vídeo). */
+    async fusionIntro(f, opts = {}) {
       const g = window.gsap;
-      if (!g || (YC.reducedMotion && YC.reducedMotion())) return U.cutIn(f, 'summon');
+      if (!g || (YC.reducedMotion && YC.reducedMotion())) return U.cutIn(f, 'summon', opts);
       const [A, K] = f.ids.map((id) => U.DEFS[id]);
       const el = document.createElement('div');
       el.className = 'ult-fuse';
@@ -65,7 +65,7 @@
       if (!skip) await wait(950);
       await new Promise((r) => g.to(el, { opacity: 0, duration: 0.2, onComplete: r }));
       el.remove();
-      return U.cutIn(f, 'summon');
+      return U.cutIn(f, 'summon', opts);
     }
   });
 })(typeof window !== 'undefined' ? (window.YC = window.YC || {}) : (globalThis.YC = globalThis.YC || {}));

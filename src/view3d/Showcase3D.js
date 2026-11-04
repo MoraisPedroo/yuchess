@@ -25,7 +25,7 @@
       r = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
       r.toneMapping = THREE.ACESFilmicToneMapping;
-      r.toneMappingExposure = 1.42;   // a mesma das fotos dos modelos (Portraits3D)
+      r.toneMappingExposure = 1.2;   // abaixo das fotos (1,42): com o fundo escuro do cartão, as cores ficavam desbotadas
       r.setClearColor(0x000000, 0);
       r.domElement.className = 'show3d';
       r.domElement.addEventListener('webglcontextlost', (e) => { e.preventDefault(); failed = true; stop(); });
@@ -47,8 +47,13 @@
     if (!m.isMeshStandardMaterial) return m;   // o contorno não usa reflexos: serve como está
     if (!mats.has(m)) {
       const c = m.clone();
-      c.onBeforeCompile = m.onBeforeCompile;
-      c.customProgramCacheKey = m.customProgramCacheKey;
+      // a luz de contorno ciano ajuda no tabuleiro, mas aqui deixava franjas esbranquiçadas: fica mais fraca
+      // (shader próprio, só neste contexto: o palco não recompila nada)
+      c.onBeforeCompile = (sh) => {
+        if (m.onBeforeCompile) m.onBeforeCompile(sh);
+        sh.fragmentShader = sh.fragmentShader.replace(/ycRim \* [0-9.]+;/, 'ycRim * 0.15;');
+      };
+      c.customProgramCacheKey = () => 'ycShow';
       c.envMap = env;
       mats.set(m, c);
     }

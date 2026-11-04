@@ -217,7 +217,8 @@
         d = (U.fusionOf && U.fusionOf(piece, an.ui.match)) || DEFS[id];
         // com a personagem em 3D o vídeo fica curto (a transformação acontece no tabuleiro)
         const in3D = YC.UltModels && YC.UltModels.has(d.icon);
-        await (d.role === 'fusion' && U.fusionIntro ? U.fusionIntro(d) : U.cutIn(d, 'summon', in3D ? { maxMs: 2800 } : {}));
+        const opts = in3D ? { maxMs: 2800 } : {};
+        await (d.role === 'fusion' && U.fusionIntro ? U.fusionIntro(d, opts) : U.cutIn(d, 'summon', opts));
       } finally { U.hold.delete(piece.id); }
       if (d) await U.revealAt(an, piece, d);
     },

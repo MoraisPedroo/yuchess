@@ -394,8 +394,12 @@ dele, faz a aterragem 3D depois do vídeo de invocação (que fica curto, 2,8 s)
    alto). Sem "NOT a 2D drawing…" o Gemini devolvia outra vez um desenho com contorno a tinta. Guardar em
    `_tmp_art/ult3d/<icone>_3d.png` (camada branca + 2 zooms + `stitch.py`).
 2. **3D**: `python tools/trellis.py _tmp_art/ult3d/<icone>_3d.png bruto.glb` (2 por dia na conta gratuita).
-3. **Limpar**: `blender … tools/blender-piece.py -- bruto.glb limpo.glb --height 1.2 --tris 12000 --preview vista.png`.
+3. **Limpar**: `blender … tools/blender-piece.py -- bruto.glb limpo.glb --height 1.2 --tris 12000 --preview vista.png`
+   (caminhos absolutos: com um relativo o Blender não grava a vista). Ver a vista antes de comprimir: a 1.ª imagem é a
+   frente; se mostrar o lado ou as costas, repetir com `--rot -90`, `90` ou `180` (o Riku precisou de `-90`).
 4. **Comprimir**: `gltf-transform optimize limpo.glb assets/models/ultimate/<icone>.glb --compress meshopt
    --texture-compress webp --texture-size 2048 --simplify false` e a linha no `UltModelList.js`.
+
+Modelos feitos: Akane e Kaito (2026-11-02), Akaito e Riku (2026-11-04). Faltam Nova, Marina, Yuki, Lola, Goro, Mira, Rin, Luna, Aiko e Ren.
 
 Imagens 3D feitas (as 14, 2026-10-30): Akane, Kaito (refeito com "IMPORTANT: chibi proportions exactly like Akane and Akaito"), Akaito, Riku, Nova, Marina, Yuki (sem o trenó), Lola (sem o canhão), Goro (sem a bigorna), Mira, Rin, Luna, Aiko e Ren, em `_tmp_art/ult3d/<icone>_3d.png`.

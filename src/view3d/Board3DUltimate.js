@@ -88,6 +88,13 @@
     syncWards(m) {
       const U = YC.Ultimate;
       if (!U) return;
+      // uma vez por partida: carrega já os modelos 3D das Ultimates em jogo (e da fusão, se as duas estiverem), para
+      // a primeira transformação ter o vídeo curto e a aterragem em 3D
+      if (YC.UltModels && m.ults && this.ultPre !== m) {
+        this.ultPre = m;
+        for (const id of [...(m.ults.w || []), ...(m.ults.b || [])]) if (U.DEFS[id]) YC.UltModels.want(U.DEFS[id].icon);
+        for (const f of U.FUSIONS || []) if (f.ids.every((id) => U.active(m, id))) YC.UltModels.want(f.icon);
+      }
       m.pos.board.forEach((p, sq) => {
         if (!p || p.type !== 'k') return;
         const g = this.el(p.id);
