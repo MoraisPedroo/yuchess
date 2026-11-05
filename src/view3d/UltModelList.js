@@ -6,6 +6,8 @@
     royal_scepter: 'assets/models/ultimate/royal_scepter.glb',
     escudo_antitumulto: 'assets/models/ultimate/escudo_antitumulto.glb',
     fusao_real: 'assets/models/ultimate/fusao_real.glb',
-    exoesqueleto_robo: 'assets/models/ultimate/exoesqueleto_robo.glb'
+    exoesqueleto_robo: 'assets/models/ultimate/exoesqueleto_robo.glb',
+    soro_alfa: 'assets/models/ultimate/soro_alfa.glb',
+    bussola_dourada: 'assets/models/ultimate/bussola_dourada.glb'
   };
 })(typeof window !== 'undefined' ? (window.YC = window.YC || {}) : (globalThis.YC = globalThis.YC || {}));

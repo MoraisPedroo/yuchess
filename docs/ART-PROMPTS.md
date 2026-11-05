@@ -397,9 +397,11 @@ dele, faz a aterragem 3D depois do vídeo de invocação (que fica curto, 2,8 s)
 3. **Limpar**: `blender … tools/blender-piece.py -- bruto.glb limpo.glb --height 1.2 --tris 12000 --preview vista.png`
    (caminhos absolutos: com um relativo o Blender não grava a vista). Ver a vista antes de comprimir: a 1.ª imagem é a
    frente; se mostrar o lado ou as costas, repetir com `--rot -90`, `90` ou `180` (o Riku precisou de `-90`).
+   Se a vista sair em estilhaços, a decimação partiu a malha: ver o bruto com `--tris 500000` e subir os triângulos até
+   ficar fiel (a Nova precisou de 40 000).
 4. **Comprimir**: `gltf-transform optimize limpo.glb assets/models/ultimate/<icone>.glb --compress meshopt
    --texture-compress webp --texture-size 2048 --simplify false` e a linha no `UltModelList.js`.
 
-Modelos feitos: Akane e Kaito (2026-11-02), Akaito e Riku (2026-11-04). Faltam Nova, Marina, Yuki, Lola, Goro, Mira, Rin, Luna, Aiko e Ren.
+Modelos feitos: Akane e Kaito (2026-11-02), Akaito e Riku (2026-11-04), Nova e Marina (2026-11-05). Faltam Yuki, Lola, Goro, Mira, Rin, Luna, Aiko e Ren.
 
 Imagens 3D feitas (as 14, 2026-10-30): Akane, Kaito (refeito com "IMPORTANT: chibi proportions exactly like Akane and Akaito"), Akaito, Riku, Nova, Marina, Yuki (sem o trenó), Lola (sem o canhão), Goro (sem a bigorna), Mira, Rin, Luna, Aiko e Ren, em `_tmp_art/ult3d/<icone>_3d.png`.
