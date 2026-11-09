@@ -8,6 +8,8 @@
     fusao_real: 'assets/models/ultimate/fusao_real.glb',
     exoesqueleto_robo: 'assets/models/ultimate/exoesqueleto_robo.glb',
     soro_alfa: 'assets/models/ultimate/soro_alfa.glb',
-    bussola_dourada: 'assets/models/ultimate/bussola_dourada.glb'
+    bussola_dourada: 'assets/models/ultimate/bussola_dourada.glb',
+    trineu_glaciar: 'assets/models/ultimate/trineu_glaciar.glb',
+    canhao_circo: 'assets/models/ultimate/canhao_circo.glb'
   };
 })(typeof window !== 'undefined' ? (window.YC = window.YC || {}) : (globalThis.YC = globalThis.YC || {}));
