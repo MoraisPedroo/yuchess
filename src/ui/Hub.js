@@ -37,8 +37,10 @@
       gear.innerHTML = I('gear', { size: 24 });
       gear.addEventListener('click', () => Hub.settings());
       YC.ProfileStore.onChange(() => { Hub.renderNav(); if (Hub.tab === 'arena') Hub.renderArena(); });
-      // o Three.js chega depois (módulo): quando chegar, o palco da Arena passa a ter as peças 3D
-      window.addEventListener('yc-three-ready', () => { if (Hub.tab === 'arena') Hub.renderStage(); });
+      // o Three.js chega depois (módulo): quando chegar, as fotos das peças passam a ser 3D
+      window.addEventListener('yc-three-ready', () => Hub.warmPortraits());
+      if (window.THREE) Hub.warmPortraits();
+      if (YC.MenuBackdrop) YC.MenuBackdrop.init();
       Hub.renderNav();
     },
 
@@ -65,6 +67,7 @@
         document.querySelectorAll('#dock .tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
         document.body.classList.toggle('in-match', tab === 'match');
         document.body.classList.toggle('has-match', !!(Hub.app && Hub.app.inMatch()) && tab !== 'match');
+        if (YC.MenuBackdrop) YC.MenuBackdrop.screen(tab);
         if (tab === 'arena') Hub.renderArena();
         if (tab === 'shop') YC.GachaView.render(next);
         if (tab === 'decks') YC.DeckBuilderView.render(next);
@@ -92,28 +95,18 @@
       acc.onclick = () => YC.PlayMenu.open('online');
     },
 
-    /** As 3 melhores cartas do baralho ativo (para o expositor do palco). */
-    featured(deck) {
-      const ids = [...new Set(deck.cards)];
-      return ids.sort((a, b) => RANK[YC.Cards.get(b).rarity] - RANK[YC.Cards.get(a).rarity]).slice(0, 3);
-    },
-
     renderArena() {
       const root = document.getElementById('screen-arena');
       const p = YC.ProfileStore.profile, deck = YC.Economy.activeDeck(p), E = YC.Economy;
       const v = E.validateDeck(p, deck.cards);
       const st = p.stats || {}, games = (st.wins || 0) + (st.losses || 0) + (st.draws || 0);
+      const AH = YC.ArenaHero;
+      // cliente ao estilo do LoL (docs/RELATORIO-TELAS.md): vídeo atrás (MenuBackdrop), personagem em destaque ao
+      // centro, cartaz e pódio à esquerda, baralho e JOGAR à direita
       root.innerHTML = `
         <div class="home">
-          <aside class="arena-side panel arena-rank"></aside>
-          <section class="arena-stage">
-            <div class="stage-cards"></div>
-            <div class="pedestal"><div class="pedestal-board"></div>
-              <button class="stage-piece sp-k" title="Clica para saltar"></button>
-              <button class="stage-piece sp-n" title="Clica para saltar"></button>
-            </div>
-            <div class="league-plate">${I('trophy', { size: 30 })}<div><b>Arena dos Brinquedos</b><small>${st.wins || 0} vitórias · ${games} partidas</small></div></div>
-          </section>
+          <aside class="arena-left">${AH ? AH.banner() : ''}<div class="arena-side panel arena-rank"></div></aside>
+          <section class="arena-hero">${AH ? AH.html() : ''}</section>
           <aside class="arena-play">
             <div class="panel deck-dock">
               <div class="panel-head">${I('cards')}<h3>${esc(deck.name)}</h3><span class="deck-n ${v.ok ? 'ok' : ''}">${deck.cards.length}/${YC.Cards.RULES.DECK_SIZE}</span></div>
@@ -121,46 +114,28 @@
               ${v.ok ? '' : `<p class="warn">${I('warn', { size: 16 })} ${esc(v.errors[0])}</p>`}
               <div class="row-btns tight"><button class="btn small secondary" data-a="decks">Editar baralho</button><button class="btn small secondary" data-a="rules">${I('info', { size: 18 })}Como se joga</button></div>
             </div>
-            <button class="btn big play-btn" data-a="play">${I('play', { size: 26 })}JOGAR</button>
+            <div class="play-wrap"><button class="play-btn" data-a="play"><i class="play-sheen"></i>${I('play', { size: 28, fill: '#0F141C' })}<span>JOGAR</span></button></div>
+            <p class="arena-tally">${I('trophy', { size: 18 })}<b>${st.wins || 0}</b> vitórias · <b>${games}</b> partidas</p>
           </aside>
         </div>`;
       const dc = root.querySelector('.dock-cards');
       [...deck.cards].sort((a, b) => RANK[YC.Cards.get(b).rarity] - RANK[YC.Cards.get(a).rarity]).slice(0, 4)
         .forEach((id) => { const c = YC.HoloCard.create(id, { size: 'xs', static: true }); YC.CardZoom.attach(c, id); dc.appendChild(c); });
-      const sc = root.querySelector('.stage-cards');
-      // expositor: a melhor carta ao meio, as outras inclinadas dos lados
-      const best = Hub.featured(deck), order = best.length === 3 ? [best[1], best[0], best[2]] : best;
-      order.forEach((id, i) => {
-        const slot = document.createElement('div');
-        slot.className = `stage-slot s${best.length === 1 ? 1 : i}`;
-        slot.appendChild(YC.HoloCard.create(id, { size: 'md', autoplay: YC.Cards.get(id).rarity === 'LEGENDARY' }));
-        sc.appendChild(slot);
-      });
-      Hub.renderStage();
+      if (AH) { AH.mount(root.querySelector('.arena-hero')); AH.bindBanner(root, Hub.go); }
       YC.ArenaRanking.render(root.querySelector('.arena-rank'));
       root.querySelector('[data-a="play"]').onclick = () => YC.PlayMenu.open();
       root.querySelector('[data-a="decks"]').onclick = () => Hub.go('decks');
       root.querySelector('[data-a="rules"]').onclick = () => Hub.rules();
       const g = G();
-      if (g) g.fromTo(root.querySelectorAll('.stage-cards .hcard'), { y: 40, opacity: 0, rotation: 0 }, { y: 0, opacity: 1, duration: 0.42, stagger: 0.06, ease: 'expo.out', delay: 0.1, clearProps: 'transform,opacity' });
+      if (g && !YC.reducedMotion()) {
+        g.fromTo(root.querySelectorAll('.arena-left > *'), { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.42, stagger: 0.06, ease: 'expo.out', delay: 0.08, clearProps: 'transform,opacity' });
+        g.fromTo(root.querySelectorAll('.arena-play > *'), { x: 40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.42, stagger: 0.06, ease: 'expo.out', delay: 0.1, clearProps: 'transform,opacity' });
+      }
     },
 
-    /** Pedestal com o Rei branco e o Cavalo preto em 3D (fotos + sprite sheet do salto ao clicar). */
-    renderStage() {
-      const P = YC.Portraits3D, root = document.getElementById('screen-arena');
-      // Rei branco e Dama preta (o Cavalo, visto de frente na foto, parecia uma Torre)
-      const slots = [['.sp-k', 'k', 'w'], ['.sp-n', 'q', 'b']];
-      const has3D = P && P.useOwn();
-      for (const [sel, t, c] of slots) {
-        const el = root.querySelector(sel);
-        if (!el) continue;
-        el.innerHTML = `<div class="squash">${has3D ? YC.pieceHTML(t, c) : YC.PieceArt.svg(t, c)}</div>`;
-        if (!has3D) continue;
-        const box = el.firstChild;
-        P.sprite(t, c, null, true);
-        el.onclick = () => { if (YC.Sound) YC.Sound.play('hop'); P.play(box, t, c, 'once'); };
-        el.onpointerenter = () => P.play(box, t, c, 'once');
-      }
+    /** Liga o renderer das fotos 3D das peças nos menus (o ecrã VS e o perfil usam-nas). */
+    warmPortraits() {
+      if (YC.Portraits3D) YC.Portraits3D.useOwn();
     },
 
     rules() {

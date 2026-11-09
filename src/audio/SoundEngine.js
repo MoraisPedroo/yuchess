@@ -64,6 +64,13 @@
     },
 
     presets: {
+      // cliente (docs/RELATORIO-TELAS.md, secção F): impacto do VS, subida para o estádio, partida encontrada, fanfarra
+      whoosh() { Sound.noise({ dur: 0.18, vol: 0.22, type: 'bandpass', f: 400, f2: 1200, q: 1.2 }); },
+      vs_slam() { Sound.noise({ dur: 0.35, vol: 0.55, type: 'bandpass', f: 180, q: 1.4 }); Sound.tone({ type: 'sine', f: 60, f2: 38, dur: 0.45, vol: 0.6 }); Sound.tone({ type: 'triangle', f: 880, f2: 660, dur: 0.18, vol: 0.12 }); },
+      vs_riser() { Sound.tone({ type: 'sawtooth', f: 200, f2: 1600, dur: 0.6, vol: 0.07 }); Sound.noise({ dur: 0.6, vol: 0.12, type: 'highpass', f: 800, f2: 5000 }); },
+      match_found() { Sound.tone({ type: 'sine', f: 110, f2: 45, dur: 0.45, vol: 0.5 }); [293.7, 440, 740].forEach((f, i) => Sound.tone({ type: 'sawtooth', f, t: 0.04 + i * 0.03, dur: 0.8, vol: 0.06 })); },
+      fanfare() { [261.6, 329.6, 392, 523.3].forEach((f, i) => { Sound.tone({ type: 'triangle', f, t: i * 0.12, dur: 0.5, vol: 0.22 }); Sound.tone({ type: 'sine', f: f * 2, t: i * 0.12, dur: 0.35, vol: 0.06 }); }); },
+      tick() { Sound.tone({ type: 'sine', f: 2400, dur: 0.018, vol: 0.08 }); },
       chess_move() { Sound.noise({ dur: 0.05, vol: 0.35, type: 'bandpass', f: 1800, q: 2 }); Sound.tone({ type: 'triangle', f: 520, f2: 760, dur: 0.09, vol: 0.25 }); },
       hop() { Sound.tone({ type: 'sine', f: 380, f2: 720, dur: 0.12, vol: 0.18 }); },
       capture() { Sound.noise({ dur: 0.18, vol: 0.5, f: 900, f2: 200 }); Sound.tone({ type: 'square', f: 220, f2: 70, dur: 0.22, vol: 0.22 }); },

@@ -16,6 +16,8 @@
       YC.Hub.init(App);
       const code = new URLSearchParams(location.search).get('sala');
       YC.Hub.show('arena');
+      // ecrã de entrada (uma vez por sessão): ao entrar, a Arena volta a fazer a entrada
+      if (YC.Splash) YC.Splash.show().then(() => { if (YC.Hub.tab === 'arena') YC.Hub.renderArena(); });
       if (code) { YC.OnlineLobby.pendingCode = code.toUpperCase(); YC.PlayMenu.open('online'); }
       YC.OnlineLobby.autoConnect();
     },
@@ -59,7 +61,11 @@
       const team = (t) => (t === 'w' ? 'Brancas' : 'Pretas');
       App.starting = true;
       // ecrã "VS": a partida monta-se por trás das placas fechadas
-      await YC.VS.run({ left: { name: names[me], sub: `${labels[me]} · ${team(me)}`, color: me }, right: { name: names[bot], sub: `${labels[bot]} · ${team(bot)}`, color: bot } }, () => {
+      // ecrã de carregamento/VS: a tua personagem em destaque contra a personagem do nível do bot
+      const fav = YC.ArenaHero && YC.ArenaHero.current(), st = p.stats || {};
+      const left = { name: names[me], sub: `${labels[me]} · ${team(me)}`, color: me, art: fav && fav.d.icon, chip: `${st.wins || 0} ${st.wins === 1 ? 'vitória' : 'vitórias'}` };
+      const right = { name: names[bot], sub: `${labels[bot]} · ${team(bot)}`, color: bot, art: YC.VS.botArt && YC.VS.botArt[level], chip: `Nível ${YC.BotAI.LEVELS[level].label}` };
+      await YC.VS.run({ left, right, minMs: 2000 }, () => {
         const ui = App.newUI();
         App.match = match;
         ui.mount({ match, viewer: me, clockMs: clockMin * 60000, labels });
@@ -90,17 +96,27 @@
       const game = await og.start();
       App.match = game;
       const opp = og.opp;
-      ui.mount({ match: game, viewer: og.team, online: og, labels: { [og.team]: `${profile.rating} pts`, [og.oppTeam]: `${opp.rating} pts` } });
-      ui.onGameOver = async ({ winner }) => {
-        const base = App.reward(winner, og.team, game) || {};
-        const rr = await og.finish(winner);
-        let rating = '';
-        if (rr && rr.delta != null) rating = `Rating ${rr.before} → ${rr.before + rr.delta} (${rr.delta >= 0 ? '+' : ''}${rr.delta})`;
-        else if (rr && rr.pending) rating = 'Rating: à espera da confirmação do adversário…';
-        else if (rr && rr.conflict) rating = 'Rating: os resultados não coincidem (não contou).';
-        return { ...base, rating };
-      };
-      YC.Hub.show('match');
+      const team = (t) => (t === 'w' ? 'Brancas' : 'Pretas'), fav = YC.ArenaHero && YC.ArenaHero.current();
+      // "Partida encontrada!" e o ecrã de carregamento/VS com os dois jogadores (o adversário mostra o Rei: a
+      // personagem favorita dele ainda não vai na sala do Firestore)
+      await YC.VS.found(og.ranked);
+      await YC.VS.run({
+        left: { name: profile.name, sub: `Tu · ${team(og.team)}`, color: og.team, art: fav && fav.d.icon, chip: `${profile.rating} pts` },
+        right: { name: opp.name, sub: `Adversário · ${team(og.oppTeam)}`, color: og.oppTeam, chip: `${opp.rating} pts` },
+        minMs: 2500
+      }, () => {
+        ui.mount({ match: game, viewer: og.team, online: og, labels: { [og.team]: `${profile.rating} pts`, [og.oppTeam]: `${opp.rating} pts` } });
+        ui.onGameOver = async ({ winner }) => {
+          const base = App.reward(winner, og.team, game) || {};
+          const rr = await og.finish(winner);
+          let rating = '';
+          if (rr && rr.delta != null) rating = `Rating ${rr.before} → ${rr.before + rr.delta} (${rr.delta >= 0 ? '+' : ''}${rr.delta})`;
+          else if (rr && rr.pending) rating = 'Rating: à espera da confirmação do adversário…';
+          else if (rr && rr.conflict) rating = 'Rating: os resultados não coincidem (não contou).';
+          return { ...base, rating };
+        };
+        YC.Hub.show('match');
+      });
       YC.UI.toast(og.team === 'w' ? 'Jogas com as Brancas: começas tu!' : 'Jogas com as Pretas.');
       game.start().catch((err) => console.error('[online]', err));
     }

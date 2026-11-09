@@ -76,6 +76,11 @@
       const won = winner === this.viewer, draw = winner === 'DRAW';
       const res = this.onGameOver ? this.onGameOver({ winner, reason }) : null;
       const mascot = this.q('.mascot');
+      // ecrã de fim cinematográfico (PostGame); o modal antigo fica como reserva
+      if (YC.PostGame) {
+        if (winner === this.viewer && mascot) mascot.classList.add('win');
+        return YC.PostGame.show(this, { winner, reason, res });
+      }
       if (won) {
         YC.Sound && YC.Sound.play('victory_fanfare');
         YC.FX.confetti(); setTimeout(() => YC.FX.confetti({ origin: { x: 0.2, y: 0.6 } }), 300); setTimeout(() => YC.FX.confetti({ origin: { x: 0.8, y: 0.6 } }), 500);

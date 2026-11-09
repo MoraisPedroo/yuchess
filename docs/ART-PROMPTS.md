@@ -405,3 +405,25 @@ dele, faz a aterragem 3D depois do vídeo de invocação (que fica curto, 2,8 s)
 Modelos feitos: Akane e Kaito (2026-11-02), Akaito e Riku (2026-11-04), Nova e Marina (2026-11-05), Yuki e Lola (2026-11-09; a Yuki com 40 000). Faltam Goro, Mira, Rin, Luna, Aiko e Ren.
 
 Imagens 3D feitas (as 14, 2026-10-30): Akane, Kaito (refeito com "IMPORTANT: chibi proportions exactly like Akane and Akaito"), Akaito, Riku, Nova, Marina, Yuki (sem o trenó), Lola (sem o canhão), Goro (sem a bigorna), Mira, Rin, Luna, Aiko e Ren, em `_tmp_art/ult3d/<icone>_3d.png`.
+
+## Menus ao estilo do LoL — fundos (2026-11-09)
+
+Relatório em `docs/RELATORIO-TELAS.md`. Fluxo: imagem 16:9 no Gemini ("Criar imagem", Proporção 16:9) → vídeo no Gemini
+("Criar vídeo", Paisagem, com a imagem anexada) → `python tools/menu-video.py bruto.mp4 <nome>` (ciclo sem costura com
+fusão de 1 s, WebM VP9 + MP4 H.264 720p, vertical 540×960 para telemóvel, imagem de espera WebP) → pôr o nome em
+`YC.MENU_CLIPS` (`src/ui/MenuBackdrop.js`). Os vídeos não entram no ficheiro único do build (só a imagem de espera).
+
+- **Arena** (`arena`, feito): imagem a partir de `assets/arena/stadium.jpg` anexado — *Using the attached esports stadium only
+  as the location reference, create a new 16:9 key art background for the main menu of a stylized anime chess-and-trading-cards
+  game… relight everything with cyan (#00B4D8), warm gold (#FFB703) and a little crimson (#D90429) — absolutely no purple and
+  no magenta… giant glossy chessboard with glowing cyan neon edges… vinyl-toy chess pieces… glowing trading cards with gold
+  borders floating… keep the center open… darken the left and right thirds…* Vídeo: *A calm looping background animation of
+  this game art: the floating golden cards slowly circle above the glowing chessboard, the cyan neon lines pulse, the stage
+  spotlights slowly sweep and golden sparks float upward. The camera stays almost still. Same image, same style, seamless loop.*
+  (o pedido mais longo e "exato" dava erro; este passou à 3.ª tentativa).
+- **VS** (`vs`, só a imagem): a mesma imagem anexada, sem peças nem cartas, energia ciano à esquerda e carmesim à direita a
+  chocar num remoinho dourado ao centro. O vídeo deu erro 4 vezes ("I encountered an error"); o ecrã usa a imagem com zoom
+  lento e um remoinho em CSS. Quando houver vídeo: `menu-video.py bruto.mp4 vs` e `YC.MENU_CLIPS.vs = true`.
+- Dicas: o Gemini dá erros genéricos nos vídeos com frequência — "Refazer → Tentar de novo" ou uma conversa nova com um
+  pedido mais curto. Os PNG saem a 1024×572 (chega: o Veo dá 720p). Por fazer: ciclo próprio para o ecrã de entrada
+  (Akane e Kaito frente a frente) e música de menu ("Criar música" no Gemini).

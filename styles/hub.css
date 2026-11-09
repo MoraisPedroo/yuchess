@@ -131,37 +131,6 @@
   -webkit-text-stroke: 3px var(--border-ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--border-ink); transform: skewX(-6deg); }
 @media (max-width: 1100px) { .gacha-cards .hcard.size-lg { --cw: 128px; } }
 
-/* ───────── Ecrã "VS" (entrada na partida) ───────── */
-.vs { position: fixed; inset: 0; z-index: 95; overflow: hidden; pointer-events: all; }
-.vs-door { position: absolute; top: -4%; bottom: -4%; width: 62%; display: flex; align-items: center; transform-origin: 50% 50%; }
-.vs-door.l { left: -8%; justify-content: center; background: linear-gradient(160deg, #1B2638, var(--surface-1)); border-right: 10px solid var(--border-ink);
-  box-shadow: inset -10px 0 0 var(--color-accent); clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%); }
-.vs-door.r { right: -8%; justify-content: center; background: linear-gradient(200deg, #2A3550, var(--surface-2)); border-left: 10px solid var(--border-ink);
-  box-shadow: inset 10px 0 0 var(--color-danger); clip-path: polygon(12% 0, 100% 0, 100% 100%, 0 100%); }
-/* junta diagonal onde as placas batem: tinta + friso dourado (o recorte das placas esconde o contorno delas) */
-.vs-seam { position: absolute; left: 50%; top: -6%; height: 112%; width: 20px; margin-left: -10px; transform: rotate(7.4deg); z-index: 2;
-  background: linear-gradient(90deg, var(--border-ink) 0 32%, var(--color-primary) 32% 68%, var(--border-ink) 68%); box-shadow: 0 0 0 1px var(--border-ink); }
-.vs-p { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
-.vs-door.l .vs-p { margin-right: 18%; } .vs-door.r .vs-p { margin-left: 18%; }
-.vs-ava { width: clamp(130px, 14vw, 200px); aspect-ratio: 1; border-radius: 22px; border: 4px solid var(--border-ink); overflow: hidden;
-  background: radial-gradient(circle at 50% 30%, #E2E8F0, #94A3B8 60%, #475569); box-shadow: 0 6px 0 #090C10, inset 0 4px 0 rgba(0, 0, 0, .25); }
-.vs-ava.b { background: radial-gradient(circle at 50% 30%, #64748B, #334158 55%, #1E293B); }
-.vs-ava .p3d, .vs-ava .piece-svg { width: 112%; height: 112%; margin: 2% -6% 0; }
-.vs-p b { font-family: var(--font-display); font-weight: 400; font-size: clamp(24px, 2.6vw, 40px); line-height: 1; color: var(--text-main);
-  -webkit-text-stroke: 3px var(--border-ink); paint-order: stroke fill; text-shadow: 0 4px 0 var(--border-ink); max-width: 30vw; overflow-wrap: anywhere; }
-.vs-p small { font-weight: 800; font-size: .9rem; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); }
-.vs-stamp { position: absolute; left: 50%; top: 50%; width: 170px; height: 170px; margin: -85px 0 0 -85px; display: grid; place-items: center; border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #FFE58A, var(--color-primary) 55%, var(--color-primary-lip)); border: 6px solid var(--border-ink);
-  box-shadow: 0 8px 0 #090C10, 0 0 0 8px rgba(255, 183, 3, .25); font-family: var(--font-display); font-size: 84px; color: #fff; -webkit-text-stroke: 5px var(--border-ink); paint-order: stroke fill;
-  text-shadow: 0 5px 0 var(--border-ink); }
-@media (max-aspect-ratio: 4/5) {
-  .vs-door { width: 100%; height: 56%; top: auto; bottom: auto; left: 0 !important; right: 0 !important; clip-path: none; border: 0; }
-  .vs-door.l { top: -4%; box-shadow: inset 0 -10px 0 var(--color-accent); border-bottom: 10px solid var(--border-ink); clip-path: polygon(0 0, 100% 0, 100% 86%, 0 100%); }
-  .vs-door.r { bottom: -4%; box-shadow: inset 0 10px 0 var(--color-danger); border-top: 10px solid var(--border-ink); clip-path: polygon(0 14%, 100% 0, 100% 100%, 0 100%); }
-  .vs-door.l .vs-p, .vs-door.r .vs-p { margin: 0; }
-  .vs-p b { max-width: 80vw; }
-}
-
 /* ───────── Baralhos ───────── */
 .builder { display: grid; grid-template-columns: 1fr 520px; gap: 18px; align-items: start; }
 .coll, .deck { padding: 16px; }
