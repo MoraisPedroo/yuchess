@@ -42,7 +42,8 @@
       </div></div>`;
   }
 
-  // fundo: o vídeo do VS se existir (YC.MENU_CLIPS.vs); senão a imagem com zoom lento e o remoinho a rodar (CSS)
+  // fundo: o vídeo do VS (toca uma vez: as fitas ciano e carmesim entram com os cartões e chocam num remoinho dourado
+  // quando o carimbo bate); sem vídeo, a imagem com zoom lento e um remoinho em CSS
   function backdrop() {
     const has = YC.MENU_CLIPS && YC.MENU_CLIPS.vs, calm = YC.reducedMotion();
     const poster = YC.asset(`${DIR}vs-poster.webp`);
@@ -50,7 +51,7 @@
     const v = document.createElement('video');
     const webm = v.canPlayType('video/webm; codecs="vp9"') !== '';
     const mobile = innerWidth <= 768 && innerHeight > innerWidth;
-    return `<video class="lv-bg" muted loop playsinline autoplay poster="${poster}" src="${DIR}vs-${mobile ? 'mobile' : '720p'}.${webm ? 'webm' : 'mp4'}"></video>`;
+    return `<video class="lv-bg" muted playsinline autoplay poster="${poster}" src="${DIR}vs-${mobile ? 'mobile' : '720p'}.${webm ? 'webm' : 'mp4'}"></video>`;
   }
 
   const VS = {

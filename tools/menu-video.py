@@ -8,8 +8,11 @@ fica 1 s mais curto). Grava em assets/video/menu/:
   <nome>-poster.webp                                  — imagem de espera (1.º quadro do ciclo)
 Sem áudio (o navegador só deixa tocar sozinho sem som).
 
-Uso:  python tools/menu-video.py bruto.mp4 arena [--crop-x 0.5]
+Uso:  python tools/menu-video.py bruto.mp4 arena [--crop-x 0.5] [--start 0] [--once]
   --crop-x  onde fica o corte vertical do telemóvel (0 = esquerda, 0,5 = centro, 1 = direita)
+  --start   segundos a cortar no início do clipe
+  --once    sem fusão no fim: o clipe é uma pequena história que toca uma vez (ex.: o VS, em que as fitas de energia
+            entram e chocam enquanto os cartões chegam)
 Depois: pôr o nome em YC.MENU_CLIPS (src/ui/MenuBackdrop.js).
 """
 import argparse
@@ -35,17 +38,24 @@ def main():
     ap.add_argument('raw')
     ap.add_argument('name')
     ap.add_argument('--crop-x', type=float, default=0.5)
+    ap.add_argument('--start', type=float, default=0.0)
+    ap.add_argument('--once', action='store_true')
     a = ap.parse_args()
     os.makedirs(OUT, exist_ok=True)
     d = duration(a.raw)
     base = os.path.join(OUT, a.name)
     master = os.path.join(tempfile.gettempdir(), f'{a.name}_master.mp4')
 
-    # 1. ciclo: [1 s → fim] funde-se no fim com [0 → 1 s]
-    fc = ('[0:v]fps=24,scale=1280:720:flags=lanczos,split[b][p];'
-          '[p]trim=duration=1,setpts=PTS-STARTPTS[head];'
-          '[b]trim=start=1,setpts=PTS-STARTPTS[main];'
-          f'[main][head]xfade=transition=fade:duration=1:offset={d - 2:.3f},format=yuv420p[v]')
+    d -= a.start
+    if a.once:
+        # 1. uma vez: só o corte do início
+        fc = f'[0:v]trim=start={a.start:.3f},setpts=PTS-STARTPTS,fps=24,scale=1280:720:flags=lanczos,format=yuv420p[v]'
+    else:
+        # 1. ciclo: [1 s → fim] funde-se no fim com [0 → 1 s]
+        fc = (f'[0:v]trim=start={a.start:.3f},setpts=PTS-STARTPTS,fps=24,scale=1280:720:flags=lanczos,split[b][p];'
+              '[p]trim=duration=1,setpts=PTS-STARTPTS[head];'
+              '[b]trim=start=1,setpts=PTS-STARTPTS[main];'
+              f'[main][head]xfade=transition=fade:duration=1:offset={d - 2:.3f},format=yuv420p[v]')
     run(['-i', a.raw, '-filter_complex', fc, '-map', '[v]', '-an', '-c:v', 'libx264', '-crf', '14', '-preset', 'slow', master])
 
     # 2. computador 720p
@@ -65,7 +75,7 @@ def main():
     for suf in ('-720p.webm', '-720p.mp4', '-mobile.webm', '-mobile.mp4', '-poster.webp'):
         p = base + suf
         print(f'{os.path.basename(p)}: {os.path.getsize(p) / 1024:.0f} KB')
-    print(f'ciclo de {d - 1:.1f} s')
+    print(f'{d:.1f} s, toca uma vez' if a.once else f'ciclo de {d - 1:.1f} s')
 
 
 if __name__ == '__main__':

@@ -26,7 +26,7 @@
 
 ## Em curso / a meio
 
-- **Menus ao estilo do cliente do League of Legends — fases 1, 2 e 4 feitas (2026-11-09)**: relatório em `docs/RELATORIO-TELAS.md` (prompt em `docs/DEEP-RESEARCH-TELAS.md`). Feito: fundo de vídeo dos menus (`MenuBackdrop`, ciclo `arena`), Arena nova com personagem em destaque (`ArenaHero`), "Escolhe o modo" (`PlayMenu`), ecrã de carregamento/VS (`VersusScreen`, bot e online), "Partida encontrada!" (`VS.found`, online, sem aceitar), fim de partida (`PostGame`), ecrã de entrada (`SplashScreen`), sons novos. **Falta**: (1) o vídeo do VS — o Gemini deu erro 4 vezes; está a imagem `vs-poster.webp` com movimento em CSS; (2) fase 3: barra de procura que fica visível ao navegar (`QueueBar`) e ready-check a sério + personagem favorita/progresso do adversário no ecrã de carregamento — precisam de campos novos na sala e de publicar as regras do Firestore (pedir autorização ao Pedro); (3) ligas/emblemas a partir do Elo; (4) música de menu ("Criar música" no Gemini); (5) ciclo próprio para o ecrã de entrada; (6) apagar o CSS morto do antigo palco da Arena em `styles/hub.css` (`.pedestal`, `.stage-*`, `.league-plate`).
+- **Menus ao estilo do cliente do League of Legends — fases 1, 2 e 4 feitas (2026-11-09)**: relatório em `docs/RELATORIO-TELAS.md` (prompt em `docs/DEEP-RESEARCH-TELAS.md`). Feito: fundo de vídeo dos menus (`MenuBackdrop`, ciclo `arena`), Arena nova com personagem em destaque (`ArenaHero`), "Escolhe o modo" (`PlayMenu`), ecrã de carregamento/VS (`VersusScreen`, bot e online), "Partida encontrada!" (`VS.found`, online, sem aceitar), fim de partida (`PostGame`), ecrã de entrada (`SplashScreen`), sons novos. Vídeo do VS feito (2026-11-09, noite). **Falta**: (2) fase 3: barra de procura que fica visível ao navegar (`QueueBar`) e ready-check a sério + personagem favorita/progresso do adversário no ecrã de carregamento — precisam de campos novos na sala e de publicar as regras do Firestore (pedir autorização ao Pedro); (3) ligas/emblemas a partir do Elo; (4) música de menu ("Criar música" no Gemini); (5) ciclo próprio para o ecrã de entrada; (6) apagar o CSS morto do antigo palco da Arena em `styles/hub.css` (`.pedestal`, `.stage-*`, `.league-plate`).
 
 - ~~Vídeos das Ultimates~~: feitos os 16 (o último, o poder da Lola, a 2026-10-30 às 17:14: corte 2,0 + 6,0 s, disparo `hit` 0,43). Todas as personagens têm entrada e, as que golpeiam, golpe/poder em `assets/ultimate/<icone>/`.
 
@@ -59,6 +59,11 @@
 - Num separador escondido o navegador quase para as animações (requestAnimationFrame); o motor espera no máximo 4 s por animação, por isso o jogo nunca bloqueia, só fica lento.
 
 ## Registo de sessões
+
+### 2026-11-09 (noite, 2) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
+- **Vídeo do ecrã VS**: com a nossa imagem o Veo recusava sempre (5 vezes, mesmo recortada); por texto, sem imagem, passou. O clipe mostra as fitas ciano e carmesim a entrar e a chocar num remoinho dourado, por isso toca uma vez (sem ciclo): `tools/menu-video.py` ganhou `--start` e `--once`; `assets/video/menu/vs-*` (WebM 0,8 MB, telemóvel 0,5 MB). `YC.MENU_CLIPS.vs = true`; o `<video>` do VS deixou de ter `loop`. As fitas chocam ~0,8 s depois de o ecrã abrir, quando o carimbo VS bate.
+- **Como testar**: JOGAR → Jogar contra o bot → ecrã VS.
+- Testado no Chrome (dois momentos fotografados: o choque e o carimbo no meio do remoinho); os 4 testes passam.
 
 ### 2026-11-09 (noite) · Pedro + Claude Code · branch `pedro/chess-gi-oh` → `main`
 - **Cliente ao estilo do LoL** (relatório do Deep Research guardado em `docs/RELATORIO-TELAS.md`). Arte gerada no Gemini nesta sessão: o fundo da Arena (estádio nas cores do jogo, tabuleiro néon, cartas a orbitar; imagem a partir do `stadium.jpg` + vídeo Veo de 10 s) e a imagem do VS (energia ciano contra carmesim). `tools/menu-video.py` faz o ciclo sem costura e as variantes (`assets/video/menu/`: WebM 1,4 MB, MP4 1,9 MB, telemóvel 0,8 MB, imagem de espera 96 KB).

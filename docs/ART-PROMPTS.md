@@ -421,9 +421,15 @@ fusão de 1 s, WebM VP9 + MP4 H.264 720p, vertical 540×960 para telemóvel, ima
   this game art: the floating golden cards slowly circle above the glowing chessboard, the cyan neon lines pulse, the stage
   spotlights slowly sweep and golden sparks float upward. The camera stays almost still. Same image, same style, seamless loop.*
   (o pedido mais longo e "exato" dava erro; este passou à 3.ª tentativa).
-- **VS** (`vs`, só a imagem): a mesma imagem anexada, sem peças nem cartas, energia ciano à esquerda e carmesim à direita a
-  chocar num remoinho dourado ao centro. O vídeo deu erro 4 vezes ("I encountered an error"); o ecrã usa a imagem com zoom
-  lento e um remoinho em CSS. Quando houver vídeo: `menu-video.py bruto.mp4 vs` e `YC.MENU_CLIPS.vs = true`.
+- **VS** (`vs`, feito): a imagem (energia ciano contra carmesim num remoinho dourado, com a plateia) foi recusada 5 vezes
+  no vídeo ("I'm having a hard time fulfilling your request"), mesmo recortada. Passou só por texto, sem imagem:
+  *Stylized cel-shaded 3D game background, seamless loop, static camera. A glossy black-and-white chessboard stage with
+  glowing cyan neon edges stands in the middle of a dark, empty futuristic esports arena with empty seats and hanging stage
+  lights. Above the board, a soft ribbon of cyan light drifts in from the left and a soft ribbon of red light drifts in from
+  the right; they meet in a slowly spinning swirl of warm golden light that releases tiny golden sparkles floating upward.
+  Spotlight beams slowly sweep through light haze. No people, no characters, no text.* O clipe conta uma história (as fitas
+  entram e chocam aos ~3 s), por isso não é ciclo: `menu-video.py bruto.mp4 vs --start 2.2 --once` (toca uma vez; as fitas
+  chocam quando o carimbo VS bate). Sem vídeo, o ecrã usa `vs-poster.webp` com zoom e um remoinho em CSS.
 - Dicas: o Gemini dá erros genéricos nos vídeos com frequência — "Refazer → Tentar de novo" ou uma conversa nova com um
   pedido mais curto. Os PNG saem a 1024×572 (chega: o Veo dá 720p). Por fazer: ciclo próprio para o ecrã de entrada
   (Akane e Kaito frente a frente) e música de menu ("Criar música" no Gemini).

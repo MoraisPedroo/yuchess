@@ -10,7 +10,7 @@
   'use strict';
 
   // ciclos que já existem (sem ficheiro fica o fundo de ardósia com as faíscas)
-  YC.MENU_CLIPS = YC.MENU_CLIPS || { arena: true };
+  YC.MENU_CLIPS = YC.MENU_CLIPS || { arena: true, vs: true };
   const DIR = 'assets/video/menu/';
   const MODE = { arena: 'arena', shop: 'dim', decks: 'dim', match: 'off' };
 
