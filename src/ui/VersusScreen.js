@@ -98,22 +98,16 @@
       el.remove();
     },
 
-    /** "PARTIDA ENCONTRADA!" (online): brasão com anel a encher, som de impacto e o título do separador a piscar
-        até voltares a ele. Aceitação automática (relatório, secção F): num 1v1 não se pede para aceitar. */
+    /** "PARTIDA ENCONTRADA!" da sala privada (sem aceitar: o amigo entrou pelo código): brasão com anel a encher, som
+        de impacto e o título do separador a piscar. A ranqueada tem o ecrã com aceitar (MatchFound). */
     async found(ranked) {
       const g = window.gsap;
       if (YC.Sound) YC.Sound.play('match_found');
-      if (document.hidden) {
-        const t = document.title;
-        let on = false;
-        const blink = setInterval(() => { on = !on; document.title = on ? 'PARTIDA ENCONTRADA!' : t; }, 600);
-        const stop = () => { clearInterval(blink); document.title = t; removeEventListener('focus', stop); };
-        addEventListener('focus', stop);
-      }
+      if (YC.MatchFound) YC.MatchFound.blinkTitle();
       if (!g || YC.reducedMotion()) return;
       const el = document.createElement('div');
       el.className = 'mf';
-      el.innerHTML = `<div class="mf-ring"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="54"/><circle class="fill" cx="60" cy="60" r="54"/></svg>${YC.Icon('swords', { size: 64 })}</div>
+      el.innerHTML = `<div class="mf-ring"><svg class="mf-svg" viewBox="0 0 120 120"><circle cx="60" cy="60" r="54"/><circle class="fill" cx="60" cy="60" r="54"/></svg>${YC.Icon('trophy', { size: 64 })}</div>
         <h2>PARTIDA ENCONTRADA!</h2><small>${ranked ? 'Ranqueada · o rating está em jogo' : 'Sala privada'}</small>`;
       document.body.appendChild(el);
       g.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.18 });

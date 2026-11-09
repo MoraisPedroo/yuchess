@@ -97,12 +97,11 @@
       App.match = game;
       const opp = og.opp;
       const team = (t) => (t === 'w' ? 'Brancas' : 'Pretas'), fav = YC.ArenaHero && YC.ArenaHero.current();
-      // "Partida encontrada!" e o ecrã de carregamento/VS com os dois jogadores (o adversário mostra o Rei: a
-      // personagem favorita dele ainda não vai na sala do Firestore)
-      await YC.VS.found(og.ranked);
+      // ecrã de carregamento/VS com os dois jogadores e as personagens em destaque (a do adversário vem em room.fav)
+      if (!og.ranked) await YC.VS.found(false);   // a ranqueada já teve o "Partida encontrada!" com aceitar
       await YC.VS.run({
         left: { name: profile.name, sub: `Tu · ${team(og.team)}`, color: og.team, art: fav && fav.d.icon, chip: `${profile.rating} pts` },
-        right: { name: opp.name, sub: `Adversário · ${team(og.oppTeam)}`, color: og.oppTeam, chip: `${opp.rating} pts` },
+        right: { name: opp.name, sub: `Adversário · ${team(og.oppTeam)}`, color: og.oppTeam, art: (room.fav || {})[opp.uid] || null, chip: `${opp.rating} pts` },
         minMs: 2500
       }, () => {
         ui.mount({ match: game, viewer: og.team, online: og, labels: { [og.team]: `${profile.rating} pts`, [og.oppTeam]: `${opp.rating} pts` } });

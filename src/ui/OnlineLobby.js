@@ -1,6 +1,8 @@
 /* OnlineLobby.js — a parte "Online" do menu JOGAR (PlayMenu): login com Google (obrigatório para jogar online),
    rating, fila ranqueada e salas privadas por código/link. A classificação está no pódio da Arena (ArenaRanking).
-   Ao entrar, o perfil da coleção passa a gravar no Firestore. */
+   Ao entrar, o perfil da coleção passa a gravar no Firestore. Na fila ranqueada o menu fecha e fica a barra de
+   procura (QueueBar) enquanto navegas; quando aparece adversário, "Partida encontrada!" com aceitar (found): se os
+   dois aceitam começa, se alguém recusa ou o tempo acaba, quem aceitou volta à fila. */
 (function (YC) {
   'use strict';
 
@@ -155,7 +157,10 @@
       code = String(code || '').toUpperCase().trim();
       if (code.length !== 5) { if (Lobby.showError) Lobby.showError('O código tem 5 letras.'); return; }
       const deck = Lobby.deck(); if (!deck) return;
-      try { await Lobby.launch(await YC.Online.joinRoom(code, Lobby.profile, deck)); }
+      try {
+        const id = await YC.Online.joinRoom(code, Lobby.profile, deck), m = await YC.Online.getMatch(id);
+        await (m && m.status === 'found' ? Lobby.found(id) : Lobby.launch(id));
+      }
       catch (err) { if (Lobby.showError) Lobby.showError(err.code ? FB().explain(err) : err.message); }
     },
 
@@ -165,7 +170,7 @@
       Lobby.view('loading', 'A procurar adversário…');
       try {
         const joined = await YC.Online.findRanked(Lobby.profile, deck);
-        if (joined) return Lobby.launch(joined);
+        if (joined) return Lobby.found(joined);
         Lobby.waitFor(await YC.Online.createRoom(Lobby.profile, true, deck), true);
       } catch (err) { Lobby.view('home'); Lobby.showError(FB().explain(err)); }
     },
@@ -174,10 +179,13 @@
       const w = { id, ranked, created: Date.now() };
       Lobby.waiting = w;
       Lobby.view('waiting', w);
+      if (YC.QueueBar) YC.QueueBar.show(w);
+      if (ranked && YC.PlayMenu) YC.PlayMenu.close();   // ranqueada: volta ao cliente, com a barra de procura
       w.hb = setInterval(() => YC.Online.heartbeat(id, Lobby.profile.uid), 10000);
       w.unsub = YC.Online.watch(id, (m) => {
         if (Lobby.waiting !== w || !m) return;
         if (m.status === 'playing') { Lobby.clearWaiting(w); Lobby.launch(id); }
+        if (m.status === 'found') { Lobby.clearWaiting(w); Lobby.found(id); }
       });
       if (ranked) {
         w.scan = setInterval(async () => {
@@ -185,7 +193,7 @@
           w.scanning = true;
           try {
             const other = await YC.Online.findRanked(Lobby.profile, Lobby.deck() || [], w.created);
-            if (other && Lobby.waiting === w) { Lobby.clearWaiting(w); await YC.Online.cancelWaiting(id); await Lobby.launch(other); }
+            if (other && Lobby.waiting === w) { Lobby.clearWaiting(w); await YC.Online.cancelWaiting(id); await Lobby.found(other); }
           } finally { w.scanning = false; }
         }, 6000);
       }
@@ -198,7 +206,51 @@
       clearInterval(w.hb); clearInterval(w.scan);
       if (w.unsub) w.unsub();
       window.removeEventListener('beforeunload', w.unload);
-      if (Lobby.waiting === w) Lobby.waiting = null;
+      if (Lobby.waiting === w) { Lobby.waiting = null; if (YC.QueueBar) YC.QueueBar.hide(); }
+    },
+
+    /** "Partida encontrada!" (ranqueada): os dois têm de aceitar em Online.ACCEPT_MS. */
+    async found(id) {
+      const O = YC.Online, uid = Lobby.profile.uid;
+      let m = await O.getMatch(id);
+      if (!m || !m.black) return Lobby.view('home');
+      if (m.status === 'playing') return Lobby.launch(id);
+      if (YC.PlayMenu) YC.PlayMenu.close();
+      const opp = m.white.uid === uid ? m.black : m.white;
+      let accepted = false, done = false, retry = 0, t1 = 0, unsub = null;
+      const finish = () => { done = true; clearTimeout(t1); clearInterval(retry); if (unsub) unsub(); ui.close(); };
+      const ui = YC.MatchFound.show({
+        opp, ms: O.ACCEPT_MS,
+        onAccept: async () => {
+          if (accepted || done) return;
+          accepted = true;
+          ui.setWaiting();
+          try { await O.accept(id, uid, !!(m.ready && m.ready[opp.uid])); }
+          catch (err) { console.warn('[online] aceitar', err); }
+        },
+        onDecline: () => { if (done) return; finish(); O.decline(id, uid); Lobby.view('home'); YC.UI.toast('Recusaste a partida.'); }
+      });
+      unsub = O.watch(id, (mm) => {
+        if (done || !mm) return;
+        m = mm;
+        if (mm.status === 'playing') { finish(); Lobby.launch(id); return; }
+        if (mm.status === 'cancelled' || mm.status === 'finished') {
+          finish();
+          if (accepted && mm.declined !== uid) { YC.UI.toast('O adversário não aceitou. De volta à fila…'); Lobby.queueRanked(); }
+          else Lobby.view('home');
+          return;
+        }
+        // aceitaram os dois ao mesmo tempo e ninguém começou: as Brancas começam
+        const r = mm.ready || {};
+        if (r[mm.white.uid] && r[mm.black.uid] && mm.white.uid === uid) O.begin(id);
+      });
+      // tempo esgotado: quem não aceitou sai da fila; quem aceitou cancela por tempo (as regras deixam aos 14 s)
+      t1 = setTimeout(() => {
+        if (done) return;
+        if (!accepted) { finish(); O.decline(id, uid); Lobby.view('home'); YC.UI.toast('Não aceitaste a tempo: saíste da fila.'); return; }
+        let n = 0;
+        retry = setInterval(() => { if (done || ++n > 6) clearInterval(retry); else O.decline(id, 'timeout'); }, 1500);
+      }, O.ACCEPT_MS + 1000);
     },
 
     async stopWaiting() {

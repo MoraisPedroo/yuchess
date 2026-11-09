@@ -1,6 +1,9 @@
 /* OnlineService.js — salas no Firestore: criar sala privada (código de 5 letras), entrar por código,
    fila ranqueada, batimento cardíaco, desistência, abandono e o transporte das ações do lockstep.
    Estrutura: matches/{código} (com o baralho de 22 de cada lugar) + matches/{código}/actions/{seq}.
+   Estados: waiting → playing (sala privada) | waiting → found → playing | cancelled (ranqueada: "Partida
+   encontrada!" com aceitar; `ready` = quem aceitou, `declined` = quem recusou ou 'timeout'). `fav` = a personagem em
+   destaque de cada jogador (para o ecrã de carregamento/VS).
    Equipas no Firestore: 'WHITE'/'BLACK' (no motor são 'w'/'b'; ver YC.TEAM_NAME). */
 (function (YC) {
   'use strict';
@@ -13,6 +16,8 @@
   const FORFEIT_MS = 150000;
   const GONE_MS = 90000;
   const VERSION = 2;             // salas do Chess-Gi-Oh! (as do protótipo antigo são ignoradas)
+  const ACCEPT_MS = 12000;       // tempo para aceitar a ranqueada (as regras deixam cancelar por tempo depois de 14 s)
+  const favIcon = () => { const e = YC.ArenaHero && YC.ArenaHero.current(); return e ? String(e.d.icon).slice(0, 24) : ''; };
 
   function randomCode(n = 5) {
     let s = '';
@@ -23,7 +28,7 @@
   }
 
   const Online = {
-    FORFEIT_MS, GONE_MS,
+    FORFEIT_MS, GONE_MS, ACCEPT_MS,
     matchRef(id) { return FB().doc('matches', id); },
     seat(profile, deck) { return { uid: profile.uid, name: profile.name, rating: profile.rating, deck: deck.slice(0, YC.Cards.RULES.DECK_SIZE) }; },
 
@@ -39,6 +44,7 @@
               code: id, v: VERSION, ranked: !!ranked, status: 'waiting', seed: Math.floor(Math.random() * 2147483647),
               white: Online.seat(profile, deck), black: null, players: [profile.uid],
               claims: {}, lastAction: {}, lastSeen: { [profile.uid]: fb.now() },
+              ready: {}, fav: { [profile.uid]: favIcon() },
               createdAt: fb.now()
             });
           });
@@ -62,9 +68,11 @@
         if (m.white.uid === profile.uid) throw new Error('Esta sala é tua: espera que alguém entre.');
         if (rankedOnly && !m.ranked) throw new Error('Não é uma sala ranqueada.');
         if (m.ranked && profile.guest) throw new Error('Partidas ranqueadas precisam de conta Google.');
+        // ranqueada: "Partida encontrada!" (os dois aceitam); sala privada: começa logo
+        const start = m.ranked ? { status: 'found', foundAt: fb.now() } : { status: 'playing', startedAt: fb.now() };
         tx.update(ref, {
-          status: 'playing', black: Online.seat(profile, deck), players: [m.white.uid, profile.uid],
-          startedAt: fb.now(), [`lastSeen.${profile.uid}`]: fb.now()
+          ...start, black: Online.seat(profile, deck), players: [m.white.uid, profile.uid],
+          [`lastSeen.${profile.uid}`]: fb.now(), [`fav.${profile.uid}`]: favIcon()
         });
       });
       return ref.id;
@@ -85,6 +93,24 @@
         try { return await Online.joinRoom(m.id, profile, deck, { rankedOnly: true }); } catch (err) { /* alguém foi mais rápido */ }
       }
       return null;
+    },
+
+    /** Aceito a partida encontrada; se o outro já aceitou, a partida começa (status playing). */
+    accept(id, uid, otherReady) {
+      const up = { [`ready.${uid}`]: true };
+      if (otherReady) Object.assign(up, { status: 'playing', startedAt: FB().now() });
+      return FB().F.updateDoc(Online.matchRef(id), up);
+    },
+
+    /** Os dois aceitaram mas ninguém mudou o estado (aceitaram ao mesmo tempo): as Brancas começam a partida. */
+    begin(id) { return FB().F.updateDoc(Online.matchRef(id), { status: 'playing', startedAt: FB().now() }).catch(() => {}); },
+
+    /** Recusar (reason = o meu uid) ou cancelar por tempo esgotado (reason = 'timeout', só depois de 14 s). */
+    decline(id, reason) { return FB().F.updateDoc(Online.matchRef(id), { status: 'cancelled', declined: reason }).catch(() => {}); },
+
+    async getMatch(id) {
+      const snap = await FB().F.getDoc(Online.matchRef(id));
+      return snap.exists() ? { id, ...snap.data() } : null;
     },
 
     watch(id, cb, onError) {

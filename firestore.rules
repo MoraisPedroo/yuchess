@@ -4,7 +4,7 @@ rules_version = '2';
 // users/{uid}                    coleção, ouro, poeira, baralhos, pity (só o próprio lê e escreve)
 // players/{uid}                  perfil + rating (leitura pública, escrita só do próprio, validada)
 // players/{uid}/history/{match}  caução da ranqueada: pending → won | draw | lost
-// matches/{code}                 sala (waiting → playing → finished)
+// matches/{code}                 sala (waiting → playing → finished; ranqueada: waiting → found → playing | cancelled)
 // matches/{code}/actions/{seq}   ações do lockstep (só os dois jogadores, só criar)
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -20,6 +20,7 @@ service cloud.firestore {
     function teamOf(m, uid) { return m.white.uid == uid ? 'WHITE' : 'BLACK'; }
     function otherTeamOf(m, uid) { return m.white.uid == uid ? 'BLACK' : 'WHITE'; }
     function oppOf(m, uid) { return m.white.uid == uid ? m.black.uid : m.white.uid; }
+    function validFav(f) { return f is string && f.size() <= 24; }
 
     // Lugar numa sala: numa ranqueada o rating tem de ser o do perfil (não dá para mentir no Elo).
     function seatOk(seat, uid, ranked) {
@@ -128,22 +129,29 @@ service cloud.firestore {
     function validCreate(matchId) {
       let d = request.resource.data;
       let me = request.auth.uid;
-      return d.keys().hasOnly(['code', 'v', 'ranked', 'status', 'seed', 'white', 'black', 'players', 'claims', 'lastAction', 'lastSeen', 'createdAt'])
+      return d.keys().hasOnly(['code', 'v', 'ranked', 'status', 'seed', 'white', 'black', 'players', 'claims', 'lastAction', 'lastSeen', 'createdAt', 'ready', 'fav'])
         && d.code == matchId && matchId.matches('^[A-Z0-9]{5}$') && d.v == 2
         && d.status == 'waiting' && d.ranked is bool && d.seed is int
         && d.black == null && d.players == [me]
         && d.claims.size() == 0 && d.lastAction.size() == 0 && d.lastSeen.keys().hasOnly([me])
+        && d.get('ready', {}).size() == 0
+        && d.get('fav', {}).keys().hasOnly([me]) && (!(me in d.get('fav', {})) || validFav(d.fav[me]))
         && seatOk(d.white, me, d.ranked)
         && (!d.ranked || isGoogle());
     }
 
+    // Entrar: sala privada começa logo (playing); ranqueada passa a "Partida encontrada!" (found) — as versões antigas
+    // do cliente ainda entram em ranqueadas direto com playing.
     function validJoin() {
       let d = request.resource.data;
       let o = resource.data;
       let me = request.auth.uid;
       return o.status == 'waiting' && o.white.uid != me
-        && changed().hasOnly(['status', 'black', 'players', 'startedAt', 'lastSeen'])
-        && d.status == 'playing' && d.players == [o.white.uid, me]
+        && changed().hasOnly(['status', 'black', 'players', 'startedAt', 'foundAt', 'lastSeen', 'fav'])
+        && (d.status == 'playing' || (d.status == 'found' && o.ranked == true && d.foundAt == request.time))
+        && d.players == [o.white.uid, me]
+        && d.get('fav', {}).diff(o.get('fav', {})).affectedKeys().hasOnly([me])
+        && (!(me in d.get('fav', {})) || validFav(d.fav[me]))
         && d.lastSeen.diff(o.lastSeen).affectedKeys().hasOnly([me])
         && seatOk(d.black, me, o.ranked)
         && (!o.ranked || isGoogle());
@@ -167,6 +175,26 @@ service cloud.firestore {
           || request.time > seen + duration.value(90, 's'));
     }
 
+    // "Partida encontrada!" (ranqueada): cada um marca só o seu "aceito"; a partida começa (playing) quando os dois
+    // aceitaram; cancela-se quando alguém recusa (declined = o próprio) ou por tempo (declined = 'timeout', 14 s depois).
+    function validReady() {
+      let d = request.resource.data;
+      let o = resource.data;
+      let me = request.auth.uid;
+      let ch = changed();
+      return me in o.players && o.status == 'found'
+        && ch.hasOnly(['ready', 'status', 'startedAt', 'lastSeen', 'declined'])
+        && (!('ready' in ch) || (d.ready.diff(o.get('ready', {})).affectedKeys().hasOnly([me]) && d.ready[me] == true))
+        && (!('lastSeen' in ch) || d.lastSeen.diff(o.lastSeen).affectedKeys().hasOnly([me]))
+        && (!('startedAt' in ch) || (d.status == 'playing' && d.startedAt == request.time))
+        && (!('declined' in ch) || d.status == 'cancelled')
+        && (!('status' in ch)
+          || (d.status == 'playing' && 'startedAt' in ch
+              && d.ready.get(o.white.uid, false) == true && d.ready.get(o.black.uid, false) == true)
+          || (d.status == 'cancelled' && 'declined' in ch
+              && (d.declined == me || (d.declined == 'timeout' && request.time > o.foundAt + duration.value(14, 's')))));
+    }
+
     function validPlayerUpdate() {
       let d = request.resource.data;
       let o = resource.data;
@@ -174,7 +202,7 @@ service cloud.firestore {
       let ch = changed();
       return me in o.players
         && ch.hasOnly(['lastAction', 'lastSeen', 'claims', 'forfeit', 'resign', 'status', 'finishedAt'])
-        && (o.status != 'waiting' || ch.hasOnly(['lastSeen']))
+        && (!(o.status in ['waiting', 'found', 'cancelled']) || ch.hasOnly(['lastSeen']))
         && (!('lastAction' in ch) || d.lastAction.diff(o.lastAction).affectedKeys().hasOnly([me]))
         && (!('lastSeen' in ch) || d.lastSeen.diff(o.lastSeen).affectedKeys().hasOnly([me]))
         && (!('claims' in ch) || (d.claims.diff(o.claims).affectedKeys().hasOnly([me])
@@ -196,8 +224,9 @@ service cloud.firestore {
     match /matches/{matchId} {
       allow read: if signedIn();
       allow create: if signedIn() && validCreate(matchId);
-      allow update: if signedIn() && (validJoin() || validPlayerUpdate());
-      allow delete: if signedIn() && resource.data.status == 'waiting' && resource.data.white.uid == request.auth.uid;
+      allow update: if signedIn() && (validJoin() || validReady() || validPlayerUpdate());
+      allow delete: if signedIn() && ((resource.data.status == 'waiting' && resource.data.white.uid == request.auth.uid)
+        || (resource.data.status == 'cancelled' && request.auth.uid in resource.data.players));
 
       match /actions/{seq} {
         allow read: if signedIn() && request.auth.uid in get(matchPath(matchId)).data.players;
